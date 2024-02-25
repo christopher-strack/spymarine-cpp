@@ -90,4 +90,58 @@ parseResponse(const std::span<const uint8_t> rawResponse) {
       std::span{rawResponse.begin() + headerLength, rawResponse.end() - 2}};
 }
 
+namespace {
+int32_t bytesToNumber(std::span<const uint8_t, 4> bytes) {
+  return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
+}
+
+std::span<const uint8_t> parseValue(const std::span<const uint8_t> bytes,
+                                    ValueMap &dict) {
+  if (bytes.size() < 2) {
+    // raise ParsingError("Couldn't parse property")
+    return {};
+  }
+
+  const auto propertyId = bytes[0];
+  const auto propertyType = bytes[1];
+  if (propertyType == 1) {
+    // TODO check for range
+    dict.numbers.insert(
+        std::pair{propertyId, bytesToNumber(bytes.subspan<2, 4>())});
+    return bytes.subspan(7);
+  } else if (propertyType == 3) {
+    // TODO check for range
+    dict.numbers.insert(
+        std::pair{propertyId, bytesToNumber(bytes.subspan<7, 4>())});
+    return bytes.subspan(12);
+  } else if (propertyType == 4) {
+    const auto data = bytes.subspan(7);
+    const auto it = std::find(data.begin(), data.end(), 0);
+    if (it != data.end()) {
+      const auto pos = std::distance(data.begin(), it);
+
+      // It looks like a custom encoding is used for strings. Special
+      // characters will unfortunately not works as expected.
+      dict.strings.insert(
+          std::pair{propertyId, std::string{data.begin(), data.begin() + pos}});
+
+      return bytes.subspan(7 + pos + 2);
+    }
+  }
+
+  // raise ParsingError(f"Unknown property type {property_type}")
+  return {};
+}
+} // namespace
+
+ValueMap parseValueMap(std::span<const uint8_t> bytes) {
+  ValueMap dict;
+
+  while (!bytes.empty()) {
+    bytes = parseValue(bytes, dict);
+  }
+
+  return dict;
+}
+
 } // namespace spymarine

@@ -1,3 +1,5 @@
+#include "rawData.hpp"
+
 #include "spymarine/parsing.hpp"
 
 #include <catch2/catch_all.hpp>
@@ -75,6 +77,15 @@ TEST_CASE("crc") {
                                    0x04, 0x8C, 0x55, 0x4B, 0x00, 0x03, 0xFF};
   const auto span = std::span{message.begin() + 1, message.size() - 2};
   CHECK(crc(span) == 43200);
+}
+
+TEST_CASE("parseValueMap") {
+  const auto message = parseResponse(deviceInfoResponse);
+  REQUIRE(message);
+
+  const auto valueMap = parseValueMap(message->data);
+  CHECK(valueMap.numbers.size() == 28);
+  CHECK(valueMap.strings.size() == 2);
 }
 
 } // namespace spymarine

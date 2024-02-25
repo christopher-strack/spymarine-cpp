@@ -1,6 +1,7 @@
 #include <iosfwd>
 #include <optional>
 #include <span>
+#include <string>
 
 namespace spymarine {
 
@@ -60,5 +61,16 @@ uint16_t crc(const std::span<const uint8_t> bytes);
  */
 std::optional<Message>
 parseResponse(const std::span<const uint8_t> rawResponse);
+
+struct ValueMap {
+  std::unordered_map<uint8_t, std::string> strings;
+  std::unordered_map<uint8_t, int32_t> numbers;
+};
+
+/* Converts bytes received by a Simarine devices to a PropertyDict.
+   Raises ParsingError in case the given bytes do not contain a valid
+   PropertyDict.
+*/
+ValueMap parseValueMap(std::span<const uint8_t> bytes);
 
 } // namespace spymarine
