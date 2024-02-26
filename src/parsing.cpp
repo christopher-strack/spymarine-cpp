@@ -1,5 +1,7 @@
 #include "spymarine/parsing.hpp"
 
+#include <ostream>
+
 namespace spymarine {
 
 bool operator==(const Header &lhs, const Header &rhs) {
@@ -20,8 +22,8 @@ bool operator!=(const Message &lhs, const Message &rhs) {
 
 namespace {
 
-int16_t toInt16(const std::span<const uint8_t, 2> data) {
-  return int16_t((data[0] << 8) | data[1]);
+uint16_t toUInt16(const std::span<const uint8_t, 2> data) {
+  return uint16_t((data[0] << 8) | data[1]);
 }
 
 } // namespace
@@ -44,7 +46,7 @@ std::optional<Header> parseHeader(const std::span<const uint8_t> data) {
   }
 
   const auto type = data.data()[6];
-  const auto length = toInt16(data.subspan<11, 2>());
+  const auto length = toUInt16(data.subspan<11, 2>());
 
   return Header{type, length};
 }
@@ -79,7 +81,7 @@ parseResponse(const std::span<const uint8_t> rawResponse) {
   const auto calculatedCrc =
       crc(std::span{rawResponse.begin() + 1, rawResponse.end() - 3});
   const auto receivedCrc =
-      toInt16(std::span<const uint8_t, 2>{rawResponse.end() - 2, 2});
+      toUInt16(std::span<const uint8_t, 2>{rawResponse.end() - 2, 2});
 
   if (calculatedCrc != receivedCrc) {
     return std::nullopt;
@@ -142,6 +144,53 @@ ValueMap parseValueMap(std::span<const uint8_t> bytes) {
   }
 
   return dict;
+}
+
+bool operator==(const Device &lhs, const Device &rhs) {
+  const auto result = lhs.name == rhs.name && lhs.type == rhs.type;
+  return result;
+}
+
+bool operator!=(const Device &lhs, const Device &rhs) { return !(lhs == rhs); }
+
+std::ostream &operator<<(std::ostream &stream, const Device &device) {
+  stream << "Device<type=" << int(device.type) << ",name=" << device.name
+         << ">";
+  return stream;
+}
+
+Device deviceFromValueMap(const ValueMap &map) {
+  Device device;
+  if (map.strings.count(3)) {
+    device.name = map.strings.at(3);
+  }
+  const auto deviceType = map.numbers.at(1);
+
+  if (deviceType == 0) {
+    device.type = DeviceType::null;
+  } else if (deviceType == 1) {
+    if (device.name == "PICO INTERNAL") {
+      device.type = DeviceType::picoInternal;
+    } else {
+      device.type = DeviceType::voltage;
+    }
+  } else if (deviceType == 2) {
+    device.type = DeviceType::current;
+  } else if (deviceType == 3) {
+    device.type = DeviceType::temperature;
+  } else if (deviceType == 5) {
+    device.type = DeviceType::barometer;
+  } else if (deviceType == 6) {
+    device.type = DeviceType::resistive;
+  } else if (deviceType == 8) {
+    device.type = DeviceType::tank;
+  } else if (deviceType == 9) {
+    device.type = DeviceType::battery;
+  } else {
+    device.type = DeviceType::unknown;
+  }
+
+  return device;
 }
 
 } // namespace spymarine

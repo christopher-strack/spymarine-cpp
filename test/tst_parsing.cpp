@@ -80,12 +80,60 @@ TEST_CASE("crc") {
 }
 
 TEST_CASE("parseValueMap") {
-  const auto message = parseResponse(deviceInfoResponse);
+  const auto message = parseResponse(deviceInfoResponses[0]);
   REQUIRE(message);
 
   const auto valueMap = parseValueMap(message->data);
   CHECK(valueMap.numbers.size() == 28);
   CHECK(valueMap.strings.size() == 2);
+}
+
+TEST_CASE("deviceFromValueMap") {
+  std::vector<Device> devices;
+  for (const auto &response : deviceInfoResponses) {
+    const auto message = parseResponse(response);
+    REQUIRE(message);
+
+    const auto valueMap = parseValueMap(message->data);
+    const auto device = deviceFromValueMap(valueMap);
+
+    devices.push_back(device);
+  }
+
+  CHECK(devices == std::vector<Device>{
+                       Device{DeviceType::unknown, ""},
+                       Device{DeviceType::unknown, ""},
+                       Device{DeviceType::unknown, "Sensor 1"},
+                       Device{DeviceType::null, ""},
+                       Device{DeviceType::null, ""},
+                       Device{DeviceType::barometer, "Barometer"},
+                       Device{DeviceType::picoInternal, "PICO INTERNAL"},
+                       Device{DeviceType::null, ""},
+                       Device{DeviceType::null, ""},
+                       Device{DeviceType::null, ""},
+                       Device{DeviceType::voltage, "ST107 [5596] 1"},
+                       Device{DeviceType::voltage, "ST107 [5596] 2"},
+                       Device{DeviceType::voltage, "ST107 [5596] 3"},
+                       Device{DeviceType::resistive, "ST107 [5596] 1"},
+                       Device{DeviceType::resistive, "ST107 [5596] 2"},
+                       Device{DeviceType::resistive, "ST107 [5596] 3"},
+                       Device{DeviceType::resistive, "ST107 [5596] 4"},
+                       Device{DeviceType::unknown, "ST107 [5596]"},
+                       Device{DeviceType::current, "SC303 [5499]"},
+                       Device{DeviceType::voltage, "SC303 [5499] 1"},
+                       Device{DeviceType::voltage, "SC303 [5499] 2"},
+                       Device{DeviceType::resistive, "SC303 [5499] 1"},
+                       Device{DeviceType::resistive, "SC303 [5499] 2"},
+                       Device{DeviceType::resistive, "SC303 [5499] 3"},
+                       Device{DeviceType::battery, "Bulltron"},
+                       Device{DeviceType::temperature, "Batterie"},
+                       Device{DeviceType::tank, "Frischwasser"},
+                       Device{DeviceType::battery, "Starterbatterie"},
+                       Device{DeviceType::tank, "Abwasser"},
+                       Device{DeviceType::temperature, "Innen"},
+                       Device{DeviceType::temperature, "Au\xa3\x65n "},
+                       Device{DeviceType::temperature, "Boiler"},
+                   });
 }
 
 } // namespace spymarine

@@ -11,7 +11,7 @@ constexpr auto headerLength = 14;
  */
 struct Header {
   uint8_t type;
-  int16_t length;
+  uint16_t length;
 };
 
 bool operator==(const Header &lhs, const Header &rhs);
@@ -67,10 +67,34 @@ struct ValueMap {
   std::unordered_map<uint8_t, int32_t> numbers;
 };
 
-/* Converts bytes received by a Simarine devices to a PropertyDict.
+/* Converts bytes received by a Simarine devices to a ValueMap.
    Raises ParsingError in case the given bytes do not contain a valid
-   PropertyDict.
+   ValueMap.
 */
 ValueMap parseValueMap(std::span<const uint8_t> bytes);
+
+enum class DeviceType {
+  null,
+  picoInternal,
+  voltage,
+  current,
+  temperature,
+  barometer,
+  resistive,
+  tank,
+  battery,
+  unknown,
+};
+
+struct Device {
+  DeviceType type;
+  std::string name;
+};
+
+bool operator==(const Device &lhs, const Device &rhs);
+bool operator!=(const Device &lhs, const Device &rhs);
+std::ostream &operator<<(std::ostream &stream, const Device &device);
+
+Device deviceFromValueMap(const ValueMap &map);
 
 } // namespace spymarine
