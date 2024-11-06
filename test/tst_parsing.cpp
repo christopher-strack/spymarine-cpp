@@ -94,23 +94,24 @@ TEST_CASE("device_from_property_dict") {
     const auto message = parse_response(response);
     REQUIRE(message);
 
-    const auto property_dict = parse_property_dict(message->data);
-    const auto device = device_from_property_dict(property_dict);
+    const auto dict = parse_property_dict(message->data);
+    const auto device = device_from_property_dict(dict);
 
     devices.push_back(device);
   }
 
   CHECK(devices == std::vector<device>{
-                       device{device_type::unknown, ""},
-                       device{device_type::unknown, ""},
+                       device{device_type::unknown},
+                       device{device_type::unknown},
                        device{device_type::unknown, "Sensor 1"},
-                       device{device_type::null, ""},
-                       device{device_type::null, ""},
+                       device{device_type::null},
+                       device{device_type::null},
                        device{device_type::barometer, "Barometer"},
-                       device{device_type::pico_internal, "PICO INTERNAL"},
-                       device{device_type::null, ""},
-                       device{device_type::null, ""},
-                       device{device_type::null, ""},
+                       device{device_type::pico_internal, "PICO INTERNAL",
+                              device_properties{}},
+                       device{device_type::null},
+                       device{device_type::null},
+                       device{device_type::null},
                        device{device_type::voltage, "ST107 [5596] 1"},
                        device{device_type::voltage, "ST107 [5596] 2"},
                        device{device_type::voltage, "ST107 [5596] 3"},
@@ -125,11 +126,33 @@ TEST_CASE("device_from_property_dict") {
                        device{device_type::resistive, "SC303 [5499] 1"},
                        device{device_type::resistive, "SC303 [5499] 2"},
                        device{device_type::resistive, "SC303 [5499] 3"},
-                       device{device_type::battery, "Bulltron"},
+                       device{device_type::battery,
+                              "Bulltron",
+                              {
+                                  {"battery_type", "lifepo4"},
+                                  {"capacity", 300.0},
+                              }},
                        device{device_type::temperature, "Batterie"},
-                       device{device_type::tank, "Frischwasser"},
-                       device{device_type::battery, "Starterbatterie"},
-                       device{device_type::tank, "Abwasser"},
+                       device{device_type::tank,
+                              "Frischwasser",
+                              {
+                                  {"fluid_type", "fresh_water"},
+                                  {"capacity", 100.0},
+                              }},
+                       device{device_type::battery,
+                              "Starterbatterie",
+                              {
+                                  {"battery_type", "agm"},
+                                  {"capacity", 100.0},
+                              }},
+                       device{
+                           device_type::tank,
+                           "Abwasser",
+                           {
+                               {"fluid_type", "waste_water"},
+                               {"capacity", 70.0},
+                           },
+                       },
                        device{device_type::temperature, "Innen"},
                        device{device_type::temperature, "Au\xa3\x65n "},
                        device{device_type::temperature, "Boiler"},

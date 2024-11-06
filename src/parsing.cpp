@@ -157,8 +157,22 @@ property_dict parse_property_dict(std::span<const uint8_t> bytes) {
   return dict;
 }
 
+std::ostream& operator<<(std::ostream& stream,
+                         const device_properties& properties) {
+  stream << "{";
+  for (const auto& item : properties) {
+    stream << item.first << "=";
+    std::visit([&](const auto& value) { stream << value; }, item.second);
+    // TODO remove , for last item
+    stream << ",";
+  }
+  stream << "}";
+  return stream;
+}
+
 bool operator==(const device& lhs, const device& rhs) {
-  const auto result = lhs.name == rhs.name && lhs.type == rhs.type;
+  const auto result = lhs.name == rhs.name && lhs.type == rhs.type &&
+                      lhs.properties == rhs.properties;
   return result;
 }
 
@@ -166,16 +180,48 @@ bool operator!=(const device& lhs, const device& rhs) { return !(lhs == rhs); }
 
 std::ostream& operator<<(std::ostream& stream, const device& device) {
   stream << "device<type=" << int(device.type) << ",name=" << device.name
-         << ">";
+         << ",properties=" << device.properties << ">";
   return stream;
 }
 
-device device_from_property_dict(const property_dict& map) {
-  device device;
-  if (map.strings.count(3)) {
-    device.name = map.strings.at(3);
+namespace {
+std::string fluid_type_string(uint16_t fluid_type) {
+  switch (fluid_type) {
+  case 1:
+    return "fresh_water";
+  case 2:
+    return "fuel";
+  case 3:
+    return "waste_water";
   }
-  const auto type = map.numbers.at(1).second();
+  return "unknown";
+}
+
+std::string battery_type_string(uint16_t battery_type) {
+  switch (battery_type) {
+  case 1:
+    return "wet_low_maintenance";
+  case 2:
+    return "wet_maintenance_free";
+  case 3:
+    return "agm";
+  case 4:
+    return "deep_cycle";
+  case 5:
+    return "gel";
+  case 6:
+    return "lifepo4";
+  }
+  return "unknown";
+}
+} // namespace
+
+device device_from_property_dict(const property_dict& dict) {
+  device device;
+  if (dict.strings.count(3)) {
+    device.name = dict.strings.at(3);
+  }
+  const auto type = dict.numbers.at(1).second();
 
   if (type == 0) {
     device.type = device_type::null;
@@ -195,8 +241,14 @@ device device_from_property_dict(const property_dict& map) {
     device.type = device_type::resistive;
   } else if (type == 8) {
     device.type = device_type::tank;
+    device.properties["fluid_type"] =
+        fluid_type_string(dict.numbers.at(6).second());
+    device.properties["capacity"] = dict.numbers.at(7).second() / 10.0;
   } else if (type == 9) {
     device.type = device_type::battery;
+    device.properties["battery_type"] =
+        battery_type_string(dict.numbers.at(8).second());
+    device.properties["capacity"] = dict.numbers.at(5).second() / 100.0;
   } else {
     device.type = device_type::unknown;
   }

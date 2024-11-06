@@ -2,6 +2,7 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <unordered_map>
 
 namespace spymarine {
 
@@ -107,9 +108,17 @@ enum class device_type {
   unknown,
 };
 
+using device_property_value = std::variant<std::string, double>;
+using device_properties =
+    std::unordered_map<std::string, device_property_value>;
+
+std::ostream& operator<<(std::ostream& stream,
+                         const device_properties& properties);
+
 struct device {
   device_type type;
   std::string name;
+  device_properties properties;
 };
 
 bool operator==(const device& lhs, const device& rhs);
