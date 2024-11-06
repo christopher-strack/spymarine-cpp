@@ -4,19 +4,19 @@
 
 namespace spymarine {
 
-bool operator==(const Header &lhs, const Header &rhs) {
+bool operator==(const Header& lhs, const Header& rhs) {
   return lhs.type == rhs.type && lhs.length == rhs.length;
 }
 
-bool operator!=(const Header &lhs, const Header &rhs) { return !(lhs == rhs); }
+bool operator!=(const Header& lhs, const Header& rhs) { return !(lhs == rhs); }
 
-bool operator==(const Message &lhs, const Message &rhs) {
+bool operator==(const Message& lhs, const Message& rhs) {
   return lhs.type == rhs.type &&
          std::memcmp(lhs.data.data(), rhs.data.data(),
                      std::min(lhs.data.size(), rhs.data.size())) == 0;
 }
 
-bool operator!=(const Message &lhs, const Message &rhs) {
+bool operator!=(const Message& lhs, const Message& rhs) {
   return !(lhs == rhs);
 }
 
@@ -98,7 +98,7 @@ int32_t bytesToNumber(std::span<const uint8_t, 4> bytes) {
 }
 
 std::span<const uint8_t> parseValue(const std::span<const uint8_t> bytes,
-                                    ValueMap &dict) {
+                                    ValueMap& dict) {
   if (bytes.size() < 2) {
     // raise ParsingError("Couldn't parse property")
     return {};
@@ -146,20 +146,20 @@ ValueMap parseValueMap(std::span<const uint8_t> bytes) {
   return dict;
 }
 
-bool operator==(const Device &lhs, const Device &rhs) {
+bool operator==(const Device& lhs, const Device& rhs) {
   const auto result = lhs.name == rhs.name && lhs.type == rhs.type;
   return result;
 }
 
-bool operator!=(const Device &lhs, const Device &rhs) { return !(lhs == rhs); }
+bool operator!=(const Device& lhs, const Device& rhs) { return !(lhs == rhs); }
 
-std::ostream &operator<<(std::ostream &stream, const Device &device) {
+std::ostream& operator<<(std::ostream& stream, const Device& device) {
   stream << "Device<type=" << int(device.type) << ",name=" << device.name
          << ">";
   return stream;
 }
 
-Device deviceFromValueMap(const ValueMap &map) {
+Device deviceFromValueMap(const ValueMap& map) {
   Device device;
   if (map.strings.count(3)) {
     device.name = map.strings.at(3);

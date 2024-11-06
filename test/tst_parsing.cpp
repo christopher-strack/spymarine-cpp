@@ -90,7 +90,7 @@ TEST_CASE("parseValueMap") {
 
 TEST_CASE("deviceFromValueMap") {
   std::vector<Device> devices;
-  for (const auto &response : deviceInfoResponses) {
+  for (const auto& response : deviceInfoResponses) {
     const auto message = parseResponse(response);
     REQUIRE(message);
 

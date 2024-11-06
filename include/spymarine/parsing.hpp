@@ -14,8 +14,8 @@ struct Header {
   uint16_t length;
 };
 
-bool operator==(const Header &lhs, const Header &rhs);
-bool operator!=(const Header &lhs, const Header &rhs);
+bool operator==(const Header& lhs, const Header& rhs);
+bool operator!=(const Header& lhs, const Header& rhs);
 
 /* The message type described by the header.
  * enum only represents the known subset.
@@ -38,8 +38,8 @@ struct Message {
   std::span<const uint8_t> data;
 };
 
-bool operator==(const Message &lhs, const Message &rhs);
-bool operator!=(const Message &lhs, const Message &rhs);
+bool operator==(const Message& lhs, const Message& rhs);
+bool operator!=(const Message& lhs, const Message& rhs);
 
 /* Parses the given bytes. Returns a Header on success.
     Raises ParsingError if the given bytes are not a valid header.
@@ -91,10 +91,10 @@ struct Device {
   std::string name;
 };
 
-bool operator==(const Device &lhs, const Device &rhs);
-bool operator!=(const Device &lhs, const Device &rhs);
-std::ostream &operator<<(std::ostream &stream, const Device &device);
+bool operator==(const Device& lhs, const Device& rhs);
+bool operator!=(const Device& lhs, const Device& rhs);
+std::ostream& operator<<(std::ostream& stream, const Device& device);
 
-Device deviceFromValueMap(const ValueMap &map);
+Device deviceFromValueMap(const ValueMap& map);
 
 } // namespace spymarine
