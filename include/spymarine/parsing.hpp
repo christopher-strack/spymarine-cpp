@@ -62,7 +62,7 @@ uint16_t crc(const std::span<const uint8_t> bytes);
 std::optional<message>
 parse_response(const std::span<const uint8_t> rawResponse);
 
-struct value_map {
+struct property_dict {
   std::unordered_map<uint8_t, std::string> strings;
   std::unordered_map<uint8_t, int32_t> numbers;
 };
@@ -71,7 +71,7 @@ struct value_map {
    Raises ParsingError in case the given bytes do not contain a valid
    ValueMap.
 */
-value_map parse_value_map(std::span<const uint8_t> bytes);
+property_dict parse_property_dict(std::span<const uint8_t> bytes);
 
 enum class device_type {
   null,
@@ -95,6 +95,6 @@ bool operator==(const device& lhs, const device& rhs);
 bool operator!=(const device& lhs, const device& rhs);
 std::ostream& operator<<(std::ostream& stream, const device& device);
 
-device device_from_value_map(const value_map& map);
+device device_from_property_dict(const property_dict& map);
 
 } // namespace spymarine

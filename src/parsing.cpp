@@ -98,7 +98,7 @@ int32_t bytes_to_number(std::span<const uint8_t, 4> bytes) {
 }
 
 std::span<const uint8_t> parse_value(const std::span<const uint8_t> bytes,
-                                     value_map& dict) {
+                                     property_dict& dict) {
   if (bytes.size() < 2) {
     // raise ParsingError("Couldn't parse property")
     return {};
@@ -136,8 +136,8 @@ std::span<const uint8_t> parse_value(const std::span<const uint8_t> bytes,
 }
 } // namespace
 
-value_map parse_value_map(std::span<const uint8_t> bytes) {
-  value_map dict;
+property_dict parse_property_dict(std::span<const uint8_t> bytes) {
+  property_dict dict;
 
   while (!bytes.empty()) {
     bytes = parse_value(bytes, dict);
@@ -159,7 +159,7 @@ std::ostream& operator<<(std::ostream& stream, const device& device) {
   return stream;
 }
 
-device device_from_value_map(const value_map& map) {
+device device_from_property_dict(const property_dict& map) {
   device device;
   if (map.strings.count(3)) {
     device.name = map.strings.at(3);

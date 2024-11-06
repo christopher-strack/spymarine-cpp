@@ -79,23 +79,23 @@ TEST_CASE("crc") {
   CHECK(crc(span) == 43200);
 }
 
-TEST_CASE("parse_value_map") {
+TEST_CASE("parse_property_dict") {
   const auto message = parse_response(device_info_responses[0]);
   REQUIRE(message);
 
-  const auto valueMap = parse_value_map(message->data);
-  CHECK(valueMap.numbers.size() == 28);
-  CHECK(valueMap.strings.size() == 2);
+  const auto property_dict = parse_property_dict(message->data);
+  CHECK(property_dict.numbers.size() == 28);
+  CHECK(property_dict.strings.size() == 2);
 }
 
-TEST_CASE("device_from_value_map") {
+TEST_CASE("device_from_property_dict") {
   std::vector<device> devices;
   for (const auto& response : device_info_responses) {
     const auto message = parse_response(response);
     REQUIRE(message);
 
-    const auto value_map = parse_value_map(message->data);
-    const auto device = device_from_value_map(value_map);
+    const auto property_dict = parse_property_dict(message->data);
+    const auto device = device_from_property_dict(property_dict);
 
     devices.push_back(device);
   }
