@@ -62,9 +62,30 @@ uint16_t crc(const std::span<const uint8_t> bytes);
 std::optional<message>
 parse_response(const std::span<const uint8_t> raw_response);
 
+/* Value in a PropertyDict that can either represent two independent 2 byte
+ * numbers or a single 4 byte number
+ */
+struct property_value {
+  std::array<uint8_t, 4> bytes;
+
+  /* Returns the 2 first bytes as a number
+   */
+  uint16_t first() const;
+
+  /* Returns the 2 last bytes as a number
+   */
+  uint16_t second() const;
+
+  /* Returns all 4 bytes as a number
+   */
+  uint32_t number() const;
+};
+
+/* Intermediate representation of certain Simarine responses
+ */
 struct property_dict {
   std::unordered_map<uint8_t, std::string> strings;
-  std::unordered_map<uint8_t, int32_t> numbers;
+  std::unordered_map<uint8_t, property_value> numbers;
 };
 
 /* Converts bytes received by a Simarine devices to a ValueMap.

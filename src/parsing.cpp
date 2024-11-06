@@ -92,9 +92,19 @@ parse_response(const std::span<const uint8_t> raw_response) {
       std::span{raw_response.begin() + header_length, raw_response.end() - 2}};
 }
 
-namespace {
-int32_t bytes_to_number(std::span<const uint8_t, 4> bytes) {
+uint16_t property_value::first() const { return (bytes[0] << 8) | bytes[1]; }
+
+uint16_t property_value::second() const { return (bytes[2] << 8) | bytes[3]; }
+
+uint32_t property_value::number() const {
   return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
+}
+
+namespace {
+property_value make_property_value(std::span<const uint8_t, 4> bytes) {
+  property_value value;
+  std::copy(bytes.begin(), bytes.end(), value.bytes.begin());
+  return value;
 }
 
 std::span<const uint8_t> parse_value(const std::span<const uint8_t> bytes,
@@ -109,12 +119,12 @@ std::span<const uint8_t> parse_value(const std::span<const uint8_t> bytes,
   if (property_type == 1) {
     // TODO check for range
     dict.numbers.insert(
-        std::pair{property_id, bytes_to_number(bytes.subspan<2, 4>())});
+        std::pair{property_id, make_property_value(bytes.subspan<2, 4>())});
     return bytes.subspan(7);
   } else if (property_type == 3) {
     // TODO check for range
     dict.numbers.insert(
-        std::pair{property_id, bytes_to_number(bytes.subspan<7, 4>())});
+        std::pair{property_id, make_property_value(bytes.subspan<7, 4>())});
     return bytes.subspan(12);
   } else if (property_type == 4) {
     const auto data = bytes.subspan(7);
@@ -164,7 +174,7 @@ device device_from_property_dict(const property_dict& map) {
   if (map.strings.count(3)) {
     device.name = map.strings.at(3);
   }
-  const auto type = map.numbers.at(1);
+  const auto type = map.numbers.at(1).second();
 
   if (type == 0) {
     device.type = device_type::null;
