@@ -164,27 +164,27 @@ device device_from_property_dict(const property_dict& map) {
   if (map.strings.count(3)) {
     device.name = map.strings.at(3);
   }
-  const auto deviceType = map.numbers.at(1);
+  const auto type = map.numbers.at(1);
 
-  if (deviceType == 0) {
+  if (type == 0) {
     device.type = device_type::null;
-  } else if (deviceType == 1) {
+  } else if (type == 1) {
     if (device.name == "PICO INTERNAL") {
       device.type = device_type::pico_internal;
     } else {
       device.type = device_type::voltage;
     }
-  } else if (deviceType == 2) {
+  } else if (type == 2) {
     device.type = device_type::current;
-  } else if (deviceType == 3) {
+  } else if (type == 3) {
     device.type = device_type::temperature;
-  } else if (deviceType == 5) {
+  } else if (type == 5) {
     device.type = device_type::barometer;
-  } else if (deviceType == 6) {
+  } else if (type == 6) {
     device.type = device_type::resistive;
-  } else if (deviceType == 8) {
+  } else if (type == 8) {
     device.type = device_type::tank;
-  } else if (deviceType == 9) {
+  } else if (type == 9) {
     device.type = device_type::battery;
   } else {
     device.type = device_type::unknown;
