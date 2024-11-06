@@ -107,7 +107,7 @@ TEST_CASE("device_from_property_dict") {
                        device{device_type::null, ""},
                        device{device_type::null, ""},
                        device{device_type::barometer, "Barometer"},
-                       device{device_type::picoInternal, "PICO INTERNAL"},
+                       device{device_type::pico_internal, "PICO INTERNAL"},
                        device{device_type::null, ""},
                        device{device_type::null, ""},
                        device{device_type::null, ""},

@@ -60,7 +60,7 @@ uint16_t crc(const std::span<const uint8_t> bytes);
  * Message.
  */
 std::optional<message>
-parse_response(const std::span<const uint8_t> rawResponse);
+parse_response(const std::span<const uint8_t> raw_response);
 
 struct property_dict {
   std::unordered_map<uint8_t, std::string> strings;
@@ -75,7 +75,7 @@ property_dict parse_property_dict(std::span<const uint8_t> bytes);
 
 enum class device_type {
   null,
-  picoInternal,
+  pico_internal,
   voltage,
   current,
   temperature,

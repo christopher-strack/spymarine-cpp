@@ -170,7 +170,7 @@ device device_from_property_dict(const property_dict& map) {
     device.type = device_type::null;
   } else if (deviceType == 1) {
     if (device.name == "PICO INTERNAL") {
-      device.type = device_type::picoInternal;
+      device.type = device_type::pico_internal;
     } else {
       device.type = device_type::voltage;
     }
