@@ -4,32 +4,32 @@
 
 namespace spymarine {
 
-bool operator==(const Header& lhs, const Header& rhs) {
+bool operator==(const header& lhs, const header& rhs) {
   return lhs.type == rhs.type && lhs.length == rhs.length;
 }
 
-bool operator!=(const Header& lhs, const Header& rhs) { return !(lhs == rhs); }
+bool operator!=(const header& lhs, const header& rhs) { return !(lhs == rhs); }
 
-bool operator==(const Message& lhs, const Message& rhs) {
+bool operator==(const message& lhs, const message& rhs) {
   return lhs.type == rhs.type &&
          std::memcmp(lhs.data.data(), rhs.data.data(),
                      std::min(lhs.data.size(), rhs.data.size())) == 0;
 }
 
-bool operator!=(const Message& lhs, const Message& rhs) {
+bool operator!=(const message& lhs, const message& rhs) {
   return !(lhs == rhs);
 }
 
 namespace {
 
-uint16_t toUInt16(const std::span<const uint8_t, 2> data) {
+uint16_t to_uint16(const std::span<const uint8_t, 2> data) {
   return uint16_t((data[0] << 8) | data[1]);
 }
 
 } // namespace
 
-std::optional<Header> parseHeader(const std::span<const uint8_t> data) {
-  if (data.size() < headerLength) {
+std::optional<header> parse_header(const std::span<const uint8_t> data) {
+  if (data.size() < header_length) {
     return std::nullopt;
   }
 
@@ -46,9 +46,9 @@ std::optional<Header> parseHeader(const std::span<const uint8_t> data) {
   }
 
   const auto type = data.data()[6];
-  const auto length = toUInt16(data.subspan<11, 2>());
+  const auto length = to_uint16(data.subspan<11, 2>());
 
-  return Header{type, length};
+  return header{type, length};
 }
 
 uint16_t crc(const std::span<const uint8_t> bytes) {
@@ -69,54 +69,54 @@ uint16_t crc(const std::span<const uint8_t> bytes) {
   return crc;
 }
 
-std::optional<Message>
-parseResponse(const std::span<const uint8_t> rawResponse) {
-  const auto header = parseHeader(rawResponse);
-  const auto dataLength = rawResponse.size() - headerLength + 1;
+std::optional<message>
+parse_response(const std::span<const uint8_t> raw_response) {
+  const auto header = parse_header(raw_response);
+  const auto dataLength = raw_response.size() - header_length + 1;
 
   if (header->length != dataLength) {
     return std::nullopt;
   }
 
-  const auto calculatedCrc =
-      crc(std::span{rawResponse.begin() + 1, rawResponse.end() - 3});
-  const auto receivedCrc =
-      toUInt16(std::span<const uint8_t, 2>{rawResponse.end() - 2, 2});
+  const auto calculated_crc =
+      crc(std::span{raw_response.begin() + 1, raw_response.end() - 3});
+  const auto received_crc =
+      to_uint16(std::span<const uint8_t, 2>{raw_response.end() - 2, 2});
 
-  if (calculatedCrc != receivedCrc) {
+  if (calculated_crc != received_crc) {
     return std::nullopt;
   }
 
-  return Message{
-      static_cast<MessageType>(header->type),
-      std::span{rawResponse.begin() + headerLength, rawResponse.end() - 2}};
+  return message{
+      static_cast<message_type>(header->type),
+      std::span{raw_response.begin() + header_length, raw_response.end() - 2}};
 }
 
 namespace {
-int32_t bytesToNumber(std::span<const uint8_t, 4> bytes) {
+int32_t bytes_to_number(std::span<const uint8_t, 4> bytes) {
   return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
 }
 
-std::span<const uint8_t> parseValue(const std::span<const uint8_t> bytes,
-                                    ValueMap& dict) {
+std::span<const uint8_t> parse_value(const std::span<const uint8_t> bytes,
+                                     value_map& dict) {
   if (bytes.size() < 2) {
     // raise ParsingError("Couldn't parse property")
     return {};
   }
 
-  const auto propertyId = bytes[0];
-  const auto propertyType = bytes[1];
-  if (propertyType == 1) {
+  const auto property_id = bytes[0];
+  const auto property_type = bytes[1];
+  if (property_type == 1) {
     // TODO check for range
     dict.numbers.insert(
-        std::pair{propertyId, bytesToNumber(bytes.subspan<2, 4>())});
+        std::pair{property_id, bytes_to_number(bytes.subspan<2, 4>())});
     return bytes.subspan(7);
-  } else if (propertyType == 3) {
+  } else if (property_type == 3) {
     // TODO check for range
     dict.numbers.insert(
-        std::pair{propertyId, bytesToNumber(bytes.subspan<7, 4>())});
+        std::pair{property_id, bytes_to_number(bytes.subspan<7, 4>())});
     return bytes.subspan(12);
-  } else if (propertyType == 4) {
+  } else if (property_type == 4) {
     const auto data = bytes.subspan(7);
     const auto it = std::find(data.begin(), data.end(), 0);
     if (it != data.end()) {
@@ -124,8 +124,8 @@ std::span<const uint8_t> parseValue(const std::span<const uint8_t> bytes,
 
       // It looks like a custom encoding is used for strings. Special
       // characters will unfortunately not works as expected.
-      dict.strings.insert(
-          std::pair{propertyId, std::string{data.begin(), data.begin() + pos}});
+      dict.strings.insert(std::pair{
+          property_id, std::string{data.begin(), data.begin() + pos}});
 
       return bytes.subspan(7 + pos + 2);
     }
@@ -136,58 +136,58 @@ std::span<const uint8_t> parseValue(const std::span<const uint8_t> bytes,
 }
 } // namespace
 
-ValueMap parseValueMap(std::span<const uint8_t> bytes) {
-  ValueMap dict;
+value_map parse_value_map(std::span<const uint8_t> bytes) {
+  value_map dict;
 
   while (!bytes.empty()) {
-    bytes = parseValue(bytes, dict);
+    bytes = parse_value(bytes, dict);
   }
 
   return dict;
 }
 
-bool operator==(const Device& lhs, const Device& rhs) {
+bool operator==(const device& lhs, const device& rhs) {
   const auto result = lhs.name == rhs.name && lhs.type == rhs.type;
   return result;
 }
 
-bool operator!=(const Device& lhs, const Device& rhs) { return !(lhs == rhs); }
+bool operator!=(const device& lhs, const device& rhs) { return !(lhs == rhs); }
 
-std::ostream& operator<<(std::ostream& stream, const Device& device) {
-  stream << "Device<type=" << int(device.type) << ",name=" << device.name
+std::ostream& operator<<(std::ostream& stream, const device& device) {
+  stream << "device<type=" << int(device.type) << ",name=" << device.name
          << ">";
   return stream;
 }
 
-Device deviceFromValueMap(const ValueMap& map) {
-  Device device;
+device device_from_value_map(const value_map& map) {
+  device device;
   if (map.strings.count(3)) {
     device.name = map.strings.at(3);
   }
   const auto deviceType = map.numbers.at(1);
 
   if (deviceType == 0) {
-    device.type = DeviceType::null;
+    device.type = device_type::null;
   } else if (deviceType == 1) {
     if (device.name == "PICO INTERNAL") {
-      device.type = DeviceType::picoInternal;
+      device.type = device_type::picoInternal;
     } else {
-      device.type = DeviceType::voltage;
+      device.type = device_type::voltage;
     }
   } else if (deviceType == 2) {
-    device.type = DeviceType::current;
+    device.type = device_type::current;
   } else if (deviceType == 3) {
-    device.type = DeviceType::temperature;
+    device.type = device_type::temperature;
   } else if (deviceType == 5) {
-    device.type = DeviceType::barometer;
+    device.type = device_type::barometer;
   } else if (deviceType == 6) {
-    device.type = DeviceType::resistive;
+    device.type = device_type::resistive;
   } else if (deviceType == 8) {
-    device.type = DeviceType::tank;
+    device.type = device_type::tank;
   } else if (deviceType == 9) {
-    device.type = DeviceType::battery;
+    device.type = device_type::battery;
   } else {
-    device.type = DeviceType::unknown;
+    device.type = device_type::unknown;
   }
 
   return device;

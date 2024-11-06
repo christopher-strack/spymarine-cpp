@@ -5,48 +5,48 @@
 
 namespace spymarine {
 
-constexpr auto headerLength = 14;
+constexpr auto header_length = 14;
 
 /* Describes the header of a message
  */
-struct Header {
+struct header {
   uint8_t type;
   uint16_t length;
 };
 
-bool operator==(const Header& lhs, const Header& rhs);
-bool operator!=(const Header& lhs, const Header& rhs);
+bool operator==(const header& lhs, const header& rhs);
+bool operator!=(const header& lhs, const header& rhs);
 
 /* The message type described by the header.
  * enum only represents the known subset.
  */
-enum class MessageType {
+enum class message_type {
   // Request the number of connected devices
-  deviceCount = 0x02,
+  device_count = 0x02,
 
   // Request information about a device
-  deviceInfo = 0x41,
+  device_info = 0x41,
 
   // Sensor update message (UDP)
-  sensorState = 0xb0,
+  sensor_state = 0xb0,
 };
 
 /* A message as received by a Simarine device
  */
-struct Message {
-  MessageType type;
+struct message {
+  message_type type;
   std::span<const uint8_t> data;
 };
 
-bool operator==(const Message& lhs, const Message& rhs);
-bool operator!=(const Message& lhs, const Message& rhs);
+bool operator==(const message& lhs, const message& rhs);
+bool operator!=(const message& lhs, const message& rhs);
 
 /* Parses the given bytes. Returns a Header on success.
     Raises ParsingError if the given bytes are not a valid header.
     Note: The header is not fully understood and might not work on
     all Simarine devices.
  */
-std::optional<Header> parseHeader(const std::span<const uint8_t> data);
+std::optional<header> parse_header(const std::span<const uint8_t> data);
 
 /* Calculate a CRC as accepted by Simarine devices.
 
@@ -59,10 +59,10 @@ uint16_t crc(const std::span<const uint8_t> bytes);
  * Raises ParsingError if the given data is not a valid or known Simarine
  * Message.
  */
-std::optional<Message>
-parseResponse(const std::span<const uint8_t> rawResponse);
+std::optional<message>
+parse_response(const std::span<const uint8_t> rawResponse);
 
-struct ValueMap {
+struct value_map {
   std::unordered_map<uint8_t, std::string> strings;
   std::unordered_map<uint8_t, int32_t> numbers;
 };
@@ -71,9 +71,9 @@ struct ValueMap {
    Raises ParsingError in case the given bytes do not contain a valid
    ValueMap.
 */
-ValueMap parseValueMap(std::span<const uint8_t> bytes);
+value_map parse_value_map(std::span<const uint8_t> bytes);
 
-enum class DeviceType {
+enum class device_type {
   null,
   picoInternal,
   voltage,
@@ -86,15 +86,15 @@ enum class DeviceType {
   unknown,
 };
 
-struct Device {
-  DeviceType type;
+struct device {
+  device_type type;
   std::string name;
 };
 
-bool operator==(const Device& lhs, const Device& rhs);
-bool operator!=(const Device& lhs, const Device& rhs);
-std::ostream& operator<<(std::ostream& stream, const Device& device);
+bool operator==(const device& lhs, const device& rhs);
+bool operator!=(const device& lhs, const device& rhs);
+std::ostream& operator<<(std::ostream& stream, const device& device);
 
-Device deviceFromValueMap(const ValueMap& map);
+device device_from_value_map(const value_map& map);
 
 } // namespace spymarine
