@@ -130,14 +130,15 @@ std::span<const uint8_t> parse_value(const std::span<const uint8_t> bytes,
     const auto data = bytes.subspan(7);
     const auto it = std::find(data.begin(), data.end(), 0);
     if (it != data.end()) {
-      const auto pos = std::distance(data.begin(), it);
+      const auto size = static_cast<size_t>(std::distance(data.begin(), it));
 
       // It looks like a custom encoding is used for strings. Special
       // characters will unfortunately not works as expected.
       dict.strings.insert(std::pair{
-          property_id, std::string{data.begin(), data.begin() + pos}});
+          property_id,
+          std::string_view{reinterpret_cast<const char*>(data.data()), size}});
 
-      return bytes.subspan(7 + pos + 2);
+      return bytes.subspan(7 + size + 2);
     }
   }
 

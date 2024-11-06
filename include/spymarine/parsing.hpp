@@ -84,7 +84,7 @@ struct property_value {
 /* Intermediate representation of certain Simarine responses
  */
 struct property_dict {
-  std::unordered_map<uint8_t, std::string> strings;
+  std::unordered_map<uint8_t, std::string_view> strings;
   std::unordered_map<uint8_t, property_value> numbers;
 };
 
