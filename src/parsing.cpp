@@ -68,9 +68,9 @@ uint16_t crc(const std::span<const uint8_t> bytes) {
 std::optional<message>
 parse_response(const std::span<const uint8_t> raw_response) {
   const auto header = parse_header(raw_response);
-  const auto dataLength = raw_response.size() - header_length + 1;
+  const auto data_length = raw_response.size() - header_length + 1;
 
-  if (header->length != dataLength) {
+  if (header->length != data_length) {
     return std::nullopt;
   }
 
