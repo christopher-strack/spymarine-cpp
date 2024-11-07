@@ -37,10 +37,6 @@ std::optional<header> parse_header(const std::span<const uint8_t> data) {
     return std::nullopt;
   }
 
-  if (std::memcmp(data.data() + 7, "\x85\xde\xc3\x46", 4) != 0) {
-    return std::nullopt;
-  }
-
   if (data[13] != 0xff) {
     return std::nullopt;
   }
