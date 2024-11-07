@@ -4,11 +4,14 @@
 
 #include <catch2/catch_all.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <cstdint>
+#include <initializer_list>
 
 namespace spymarine {
 namespace {
 
-using header_bytes = std::array<uint8_t, header_length>;
+using header_bytes = std::array<uint8_t, header_size>;
 
 } // namespace
 
@@ -80,6 +83,15 @@ TEST_CASE("crc") {
                                     0x04, 0x8C, 0x55, 0x4B, 0x00, 0x03, 0xFF};
   const auto span = std::span{message.begin() + 1, message.size() - 2};
   CHECK(crc(span) == 43200);
+}
+
+TEST_CASE("make_request") {
+  std::vector<uint8_t> buffer(1024u);
+  const auto expected_message = std::initializer_list<uint8_t>{
+      0x0,  0x0,  0x0,  0x0, 0x0, 0xff, 0x2,  0x4,
+      0x8c, 0x55, 0x4b, 0x0, 0x3, 0xff, 0xa8, 0xc0};
+  CHECK_THAT(make_request(message_type::device_count, {}, buffer),
+             Catch::Matchers::RangeEquals(expected_message));
 }
 
 TEST_CASE("parse_property_dict") {

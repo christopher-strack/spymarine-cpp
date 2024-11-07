@@ -1,6 +1,7 @@
 #include "spymarine/parsing.hpp"
 
 #include <ostream>
+#include <ranges>
 
 namespace spymarine {
 
@@ -29,7 +30,7 @@ uint16_t to_uint16(const std::span<const uint8_t, 2> data) {
 } // namespace
 
 std::optional<header> parse_header(const std::span<const uint8_t> data) {
-  if (data.size() < header_length) {
+  if (data.size() < header_size) {
     return std::nullopt;
   }
 
@@ -68,7 +69,7 @@ uint16_t crc(const std::span<const uint8_t> bytes) {
 std::optional<message>
 parse_response(const std::span<const uint8_t> raw_response) {
   const auto header = parse_header(raw_response);
-  const auto data_length = raw_response.size() - header_length + 1;
+  const auto data_length = raw_response.size() - header_size + 1;
 
   if (header->length != data_length) {
     return std::nullopt;
@@ -85,7 +86,38 @@ parse_response(const std::span<const uint8_t> raw_response) {
 
   return message{
       static_cast<message_type>(header->type),
-      std::span{raw_response.begin() + header_length, raw_response.end() - 2}};
+      std::span{raw_response.begin() + header_size, raw_response.end() - 2}};
+}
+
+namespace {
+std::array<uint8_t, 2> to_bytes(uint16_t value) {
+  return {uint8_t((value >> 8) & 0xff), uint8_t(value & 0xff)};
+}
+} // namespace
+
+std::span<uint8_t> make_request(message_type type,
+                                const std::span<uint8_t> data,
+                                std::span<uint8_t> buffer) {
+  const auto payload_size = header_size + data.size();
+  const auto total_size = payload_size + 2;
+
+  if (buffer.size() < total_size) {
+    throw std::out_of_range("Buffer is too small for request");
+  }
+
+  const auto length = to_bytes(3 + data.size());
+  const auto header = std::array<uint8_t, header_size>{
+      0x00, 0x00, 0x00, 0x00, 0x00,      0xff,      uint8_t(type),
+      0x04, 0x8c, 0x55, 0x4b, length[0], length[1], 0xff};
+
+  auto it = std::ranges::copy(header, buffer.begin()).out;
+  it = std::ranges::copy(data, it).out;
+
+  const auto calculated_crc =
+      to_bytes(crc(std::span{buffer.begin() + 1, payload_size - 2}));
+  std::ranges::copy(calculated_crc, it);
+
+  return std::span{buffer.begin(), total_size};
 }
 
 uint16_t property_value::first() const { return (bytes[0] << 8) | bytes[1]; }

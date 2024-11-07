@@ -1,3 +1,6 @@
+#pragma once
+
+#include <cstdint>
 #include <iosfwd>
 #include <optional>
 #include <span>
@@ -6,7 +9,7 @@
 
 namespace spymarine {
 
-constexpr auto header_length = 14;
+constexpr auto header_size = 14;
 
 /* Describes the header of a message
  */
@@ -62,6 +65,12 @@ uint16_t crc(const std::span<const uint8_t> bytes);
  */
 std::optional<message>
 parse_response(const std::span<const uint8_t> raw_response);
+
+/* Returns a valid Simarine request for the given Message.
+ */
+std::span<uint8_t> make_request(message_type type,
+                                const std::span<uint8_t> data,
+                                std::span<uint8_t> buffer);
 
 /* Value in a PropertyDict that can either represent two independent 2 byte
  * numbers or a single 4 byte number
