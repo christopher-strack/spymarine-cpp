@@ -160,11 +160,14 @@ property_dict parse_property_dict(std::span<const uint8_t> bytes) {
 std::ostream& operator<<(std::ostream& stream,
                          const device_properties& properties) {
   stream << "{";
-  for (const auto& item : properties) {
-    stream << item.first << "=";
-    std::visit([&](const auto& value) { stream << value; }, item.second);
-    // TODO remove , for last item
-    stream << ",";
+  for (auto it = properties.begin(); it != properties.end(); ++it) {
+    stream << it->first << "=";
+    std::visit(
+        [&](const auto& value) -> std::ostream& { return stream << value; },
+        it->second);
+    if (std::next(it) != properties.end()) {
+      stream << ",";
+    }
   }
   stream << "}";
   return stream;
