@@ -96,7 +96,7 @@ std::array<uint8_t, 2> to_bytes(uint16_t value) {
 } // namespace
 
 std::span<uint8_t> make_request(message_type type,
-                                const std::span<uint8_t> data,
+                                const std::span<const uint8_t> data,
                                 std::span<uint8_t> buffer) {
   const auto payload_size = header_size + data.size();
   const auto total_size = payload_size + 2;
@@ -118,6 +118,14 @@ std::span<uint8_t> make_request(message_type type,
   std::ranges::copy(calculated_crc, it);
 
   return std::span{buffer.begin(), total_size};
+}
+
+std::span<uint8_t> make_device_request(uint8_t device_id,
+                                       std::span<uint8_t> buffer) {
+  const std::array<uint8_t, 19> data{
+      0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00,
+      0x00, 0x00, 0x00, 0xff, 0x00, 0x00,      0x00, 0x00, 0xff};
+  return make_request(message_type::device_info, data, buffer);
 }
 
 uint16_t property_value::first() const { return (bytes[0] << 8) | bytes[1]; }

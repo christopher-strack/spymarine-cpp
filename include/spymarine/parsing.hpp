@@ -69,8 +69,15 @@ parse_response(const std::span<const uint8_t> raw_response);
 /* Returns a valid Simarine request for the given Message.
  */
 std::span<uint8_t> make_request(message_type type,
-                                const std::span<uint8_t> data,
+                                const std::span<const uint8_t> data,
                                 std::span<uint8_t> buffer);
+
+/* Returns a device request for the given Device ID. The Simarine device
+ * will reply with a device response that contains the description of the
+ * device.
+ */
+std::span<uint8_t> make_device_request(uint8_t device_id,
+                                       std::span<uint8_t> buffer);
 
 /* Value in a PropertyDict that can either represent two independent 2 byte
  * numbers or a single 4 byte number
