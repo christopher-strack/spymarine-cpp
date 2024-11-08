@@ -101,38 +101,52 @@ private:
 using value = std::variant<numeric_value, std::string_view>;
 
 struct null_device {
+  static constexpr auto sensor_state_offset = 0;
+
   auto operator<=>(const null_device&) const = default;
 };
 
 struct pico_internal_device {
+  static constexpr auto sensor_state_offset = 6;
+
   auto operator<=>(const pico_internal_device&) const = default;
 };
 
 struct voltage_device {
+  static constexpr auto sensor_state_offset = 1;
+
   std::string name;
 
   auto operator<=>(const voltage_device&) const = default;
 };
 
 struct current_device {
+  static constexpr auto sensor_state_offset = 2;
+
   std::string name;
 
   auto operator<=>(const current_device&) const = default;
 };
 
 struct temperature_device {
+  static constexpr auto sensor_state_offset = 1;
+
   std::string name;
 
   auto operator<=>(const temperature_device&) const = default;
 };
 
 struct barometer_device {
+  static constexpr auto sensor_state_offset = 2;
+
   std::string name;
 
   auto operator<=>(const barometer_device&) const = default;
 };
 
 struct resistive_device {
+  static constexpr auto sensor_state_offset = 1;
+
   std::string name;
 
   auto operator<=>(const resistive_device&) const = default;
@@ -146,6 +160,8 @@ enum class fluid_type {
 };
 
 struct tank_device {
+  static constexpr auto sensor_state_offset = 1;
+
   std::string name;
   fluid_type type;
   float capacity;
@@ -164,6 +180,8 @@ enum class battery_type {
 };
 
 struct battery_device {
+  static constexpr auto sensor_state_offset = 5;
+
   std::string name;
   battery_type type;
   float capacity;
@@ -172,6 +190,8 @@ struct battery_device {
 };
 
 struct unknown_device {
+  static constexpr auto sensor_state_offset = 1;
+
   auto operator<=>(const unknown_device&) const = default;
 };
 
@@ -181,5 +201,7 @@ using device =
                  resistive_device, tank_device, battery_device, unknown_device>;
 
 std::optional<device> make_device(const std::span<const uint8_t> bytes);
+
+size_t sensor_state_offset(const device& device);
 
 } // namespace spymarine
