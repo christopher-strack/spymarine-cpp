@@ -82,9 +82,9 @@ std::span<uint8_t> make_device_request(uint8_t device_id,
 /* Value in a PropertyDict that can either represent two independent 2 byte
  * numbers or a single 4 byte number
  */
-class numeric {
+class numeric_value {
 public:
-  explicit numeric(std::span<const uint8_t, 4> bytes);
+  explicit numeric_value(std::span<const uint8_t, 4> bytes);
 
   /* Returns the 2 first bytes as a number
    */
@@ -102,7 +102,7 @@ private:
   std::array<uint8_t, 4> _bytes;
 };
 
-using value = std::variant<numeric, std::string_view>;
+using value = std::variant<numeric_value, std::string_view>;
 
 enum class device_type {
   null,

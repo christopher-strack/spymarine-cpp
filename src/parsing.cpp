@@ -1,7 +1,6 @@
 #include "spymarine/parsing.hpp"
 
 #include <ostream>
-#include <ranges>
 
 namespace spymarine {
 
@@ -110,12 +109,12 @@ std::span<uint8_t> make_request(message_type type,
       0x00, 0x00, 0x00, 0x00, 0x00,      0xff,      uint8_t(type),
       0x04, 0x8c, 0x55, 0x4b, length[0], length[1], 0xff};
 
-  auto it = std::ranges::copy(header, buffer.begin()).out;
-  it = std::ranges::copy(data, it).out;
+  auto it = std::copy(header.begin(), header.end(), buffer.begin());
+  it = std::copy(data.begin(), data.end(), it);
 
   const auto calculated_crc =
       to_bytes(crc(std::span{buffer.begin() + 1, payload_size - 2}));
-  std::ranges::copy(calculated_crc, it);
+  std::copy(calculated_crc.begin(), calculated_crc.end(), it);
 
   return std::span{buffer.begin(), total_size};
 }
@@ -128,15 +127,15 @@ std::span<uint8_t> make_device_request(uint8_t device_id,
   return make_request(message_type::device_info, data, buffer);
 }
 
-numeric::numeric(std::span<const uint8_t, 4> bytes) {
+numeric_value::numeric_value(std::span<const uint8_t, 4> bytes) {
   std::copy(bytes.begin(), bytes.end(), _bytes.begin());
 }
 
-uint16_t numeric::first() const { return (_bytes[0] << 8) | _bytes[1]; }
+uint16_t numeric_value::first() const { return (_bytes[0] << 8) | _bytes[1]; }
 
-uint16_t numeric::second() const { return (_bytes[2] << 8) | _bytes[3]; }
+uint16_t numeric_value::second() const { return (_bytes[2] << 8) | _bytes[3]; }
 
-uint32_t numeric::number() const {
+uint32_t numeric_value::number() const {
   return (_bytes[0] << 24) | (_bytes[1] << 16) | (_bytes[2] << 8) | _bytes[3];
 }
 
@@ -150,13 +149,13 @@ std::optional<value> find_value(const uint8_t id,
     if (value_type == 1) {
       if (value_id == id) {
         // TODO check for range
-        return value{numeric{bytes.subspan<2, 4>()}};
+        return value{numeric_value{bytes.subspan<2, 4>()}};
       }
       bytes = bytes.subspan(7);
     } else if (value_type == 3) {
       if (value_id == id) {
         // TODO check for range
-        return value{numeric{bytes.subspan<7, 4>()}};
+        return value{numeric_value{bytes.subspan<7, 4>()}};
       }
       bytes = bytes.subspan(12);
     } else if (value_type == 4) {
@@ -176,10 +175,10 @@ std::optional<value> find_value(const uint8_t id,
   return std::nullopt;
 }
 
-std::optional<numeric> find_numeric(const uint8_t id,
-                                    std::span<const uint8_t> bytes) {
+std::optional<numeric_value>
+find_numeric_value(const uint8_t id, std::span<const uint8_t> bytes) {
   if (const auto value = find_value(id, bytes)) {
-    if (const auto n = std::get_if<numeric>(&*value)) {
+    if (const auto n = std::get_if<numeric_value>(&*value)) {
       return *n;
     }
   }
@@ -265,7 +264,7 @@ device make_device(const std::span<const uint8_t> bytes) {
   if (const auto name = find_string(3, bytes)) {
     device.name = *name;
   }
-  const auto type = find_numeric(1, bytes).value().second();
+  const auto type = find_numeric_value(1, bytes).value().second();
 
   if (type == 0) {
     device.type = device_type::null;
@@ -286,15 +285,15 @@ device make_device(const std::span<const uint8_t> bytes) {
   } else if (type == 8) {
     device.type = device_type::tank;
     device.properties["fluid_type"] =
-        fluid_type_string(find_numeric(6, bytes).value().second());
+        fluid_type_string(find_numeric_value(6, bytes).value().second());
     device.properties["capacity"] =
-        find_numeric(7, bytes).value().second() / 10.0;
+        find_numeric_value(7, bytes).value().second() / 10.0;
   } else if (type == 9) {
     device.type = device_type::battery;
     device.properties["battery_type"] =
-        battery_type_string(find_numeric(8, bytes).value().second());
+        battery_type_string(find_numeric_value(8, bytes).value().second());
     device.properties["capacity"] =
-        find_numeric(5, bytes).value().second() / 100.0;
+        find_numeric_value(5, bytes).value().second() / 100.0;
   } else {
     device.type = device_type::unknown;
   }
