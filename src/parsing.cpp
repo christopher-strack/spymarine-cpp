@@ -141,34 +141,62 @@ uint32_t numeric_value::number() const {
 
 namespace {
 
+std::optional<value> read_value1(std::span<const uint8_t> bytes) {
+  if (bytes.size() >= 4) {
+    return value{numeric_value{bytes.subspan<0, 4>()}};
+  }
+  return std::nullopt;
+}
+
+std::optional<value> read_value3(std::span<const uint8_t> bytes) {
+  if (bytes.size() >= 9) {
+    return value{numeric_value{bytes.subspan<5, 4>()}};
+  }
+  return std::nullopt;
+}
+
+std::optional<std::string_view> read_string(std::span<const uint8_t> bytes) {
+  if (bytes.size() >= 5) {
+    const auto data = bytes.subspan(5);
+    const auto it = std::find(data.begin(), data.end(), 0);
+    if (it != data.end()) {
+      const auto size = static_cast<size_t>(std::distance(data.begin(), it));
+      return std::string_view{reinterpret_cast<const char*>(data.data()), size};
+    }
+  }
+  return std::nullopt;
+}
+
+std::span<const uint8_t> advance_bytes(std::span<const uint8_t> bytes,
+                                       size_t n) {
+  return bytes.size() >= n ? bytes.subspan(n) : std::span<const uint8_t>{};
+}
+
 std::optional<value> find_value(const uint8_t id,
                                 std::span<const uint8_t> bytes) {
   while (bytes.size() >= 2) {
     const auto value_id = bytes[0];
     const auto value_type = bytes[1];
+    bytes = bytes.subspan(2);
+
     if (value_type == 1) {
       if (value_id == id) {
-        // TODO check for range
-        return value{numeric_value{bytes.subspan<2, 4>()}};
+        return read_value1(bytes);
       }
-      bytes = bytes.subspan(7);
+      bytes = advance_bytes(bytes, 5);
     } else if (value_type == 3) {
       if (value_id == id) {
-        // TODO check for range
-        return value{numeric_value{bytes.subspan<7, 4>()}};
+        return read_value3(bytes);
       }
-      bytes = bytes.subspan(12);
+      bytes = advance_bytes(bytes, 10);
     } else if (value_type == 4) {
-      const auto data = bytes.subspan(7);
-      const auto it = std::find(data.begin(), data.end(), 0);
-      if (it != data.end()) {
-        const auto size = static_cast<size_t>(std::distance(data.begin(), it));
-        if (value_id == id) {
-          return value{std::string_view{
-              reinterpret_cast<const char*>(data.data()), size}};
-        }
-        bytes = bytes.subspan(9 + size);
+      const auto string = read_string(bytes);
+      if (value_id == id) {
+        return string;
+      } else if (!string) {
+        return std::nullopt;
       }
+      bytes = advance_bytes(bytes, string->size() + 7);
     }
   }
 
