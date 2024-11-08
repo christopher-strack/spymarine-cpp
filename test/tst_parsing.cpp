@@ -104,23 +104,13 @@ TEST_CASE("make_device_request") {
              Catch::Matchers::RangeEquals(expected_message));
 }
 
-TEST_CASE("parse_property_dict") {
-  const auto message = parse_response(device_info_responses[0]);
-  REQUIRE(message);
-
-  const auto property_dict = parse_property_dict(message->data);
-  CHECK(property_dict.numbers.size() == 28);
-  CHECK(property_dict.strings.size() == 2);
-}
-
-TEST_CASE("device_from_property_dict") {
+TEST_CASE("make_device") {
   std::vector<device> devices;
   for (const auto& response : device_info_responses) {
     const auto message = parse_response(response);
     REQUIRE(message);
 
-    const auto dict = parse_property_dict(message->data);
-    const auto device = device_from_property_dict(dict);
+    const auto device = make_device(message->data);
 
     devices.push_back(device);
   }

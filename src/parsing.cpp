@@ -128,70 +128,75 @@ std::span<uint8_t> make_device_request(uint8_t device_id,
   return make_request(message_type::device_info, data, buffer);
 }
 
-uint16_t property_value::first() const { return (bytes[0] << 8) | bytes[1]; }
+numeric::numeric(std::span<const uint8_t, 4> bytes) {
+  std::copy(bytes.begin(), bytes.end(), _bytes.begin());
+}
 
-uint16_t property_value::second() const { return (bytes[2] << 8) | bytes[3]; }
+uint16_t numeric::first() const { return (_bytes[0] << 8) | _bytes[1]; }
 
-uint32_t property_value::number() const {
-  return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
+uint16_t numeric::second() const { return (_bytes[2] << 8) | _bytes[3]; }
+
+uint32_t numeric::number() const {
+  return (_bytes[0] << 24) | (_bytes[1] << 16) | (_bytes[2] << 8) | _bytes[3];
 }
 
 namespace {
-property_value make_property_value(std::span<const uint8_t, 4> bytes) {
-  property_value value;
-  std::copy(bytes.begin(), bytes.end(), value.bytes.begin());
-  return value;
-}
 
-std::span<const uint8_t> parse_value(const std::span<const uint8_t> bytes,
-                                     property_dict& dict) {
-  if (bytes.size() < 2) {
-    // raise ParsingError("Couldn't parse property")
-    return {};
-  }
-
-  const auto property_id = bytes[0];
-  const auto property_type = bytes[1];
-  if (property_type == 1) {
-    // TODO check for range
-    dict.numbers.insert(
-        std::pair{property_id, make_property_value(bytes.subspan<2, 4>())});
-    return bytes.subspan(7);
-  } else if (property_type == 3) {
-    // TODO check for range
-    dict.numbers.insert(
-        std::pair{property_id, make_property_value(bytes.subspan<7, 4>())});
-    return bytes.subspan(12);
-  } else if (property_type == 4) {
-    const auto data = bytes.subspan(7);
-    const auto it = std::find(data.begin(), data.end(), 0);
-    if (it != data.end()) {
-      const auto size = static_cast<size_t>(std::distance(data.begin(), it));
-
-      // It looks like a custom encoding is used for strings. Special
-      // characters will unfortunately not works as expected.
-      dict.strings.insert(std::pair{
-          property_id,
-          std::string_view{reinterpret_cast<const char*>(data.data()), size}});
-
-      return bytes.subspan(7 + size + 2);
+std::optional<value> find_value(const uint8_t id,
+                                std::span<const uint8_t> bytes) {
+  while (bytes.size() >= 2) {
+    const auto value_id = bytes[0];
+    const auto value_type = bytes[1];
+    if (value_type == 1) {
+      if (value_id == id) {
+        // TODO check for range
+        return value{numeric{bytes.subspan<2, 4>()}};
+      }
+      bytes = bytes.subspan(7);
+    } else if (value_type == 3) {
+      if (value_id == id) {
+        // TODO check for range
+        return value{numeric{bytes.subspan<7, 4>()}};
+      }
+      bytes = bytes.subspan(12);
+    } else if (value_type == 4) {
+      const auto data = bytes.subspan(7);
+      const auto it = std::find(data.begin(), data.end(), 0);
+      if (it != data.end()) {
+        const auto size = static_cast<size_t>(std::distance(data.begin(), it));
+        if (value_id == id) {
+          return value{std::string_view{
+              reinterpret_cast<const char*>(data.data()), size}};
+        }
+        bytes = bytes.subspan(9 + size);
+      }
     }
   }
 
-  // raise ParsingError(f"Unknown property type {property_type}")
-  return {};
+  return std::nullopt;
 }
-} // namespace
 
-property_dict parse_property_dict(std::span<const uint8_t> bytes) {
-  property_dict dict;
-
-  while (!bytes.empty()) {
-    bytes = parse_value(bytes, dict);
+std::optional<numeric> find_numeric(const uint8_t id,
+                                    std::span<const uint8_t> bytes) {
+  if (const auto value = find_value(id, bytes)) {
+    if (const auto n = std::get_if<numeric>(&*value)) {
+      return *n;
+    }
   }
-
-  return dict;
+  return std::nullopt;
 }
+
+std::optional<std::string_view> find_string(const uint8_t id,
+                                            std::span<const uint8_t> bytes) {
+  if (const auto value = find_value(id, bytes)) {
+    if (const auto str = std::get_if<std::string_view>(&*value)) {
+      return *str;
+    }
+  }
+  return std::nullopt;
+}
+
+} // namespace
 
 std::ostream& operator<<(std::ostream& stream,
                          const device_properties& properties) {
@@ -255,12 +260,12 @@ std::string battery_type_string(uint16_t battery_type) {
 }
 } // namespace
 
-device device_from_property_dict(const property_dict& dict) {
+device make_device(const std::span<const uint8_t> bytes) {
   device device;
-  if (dict.strings.count(3)) {
-    device.name = dict.strings.at(3);
+  if (const auto name = find_string(3, bytes)) {
+    device.name = *name;
   }
-  const auto type = dict.numbers.at(1).second();
+  const auto type = find_numeric(1, bytes).value().second();
 
   if (type == 0) {
     device.type = device_type::null;
@@ -281,13 +286,15 @@ device device_from_property_dict(const property_dict& dict) {
   } else if (type == 8) {
     device.type = device_type::tank;
     device.properties["fluid_type"] =
-        fluid_type_string(dict.numbers.at(6).second());
-    device.properties["capacity"] = dict.numbers.at(7).second() / 10.0;
+        fluid_type_string(find_numeric(6, bytes).value().second());
+    device.properties["capacity"] =
+        find_numeric(7, bytes).value().second() / 10.0;
   } else if (type == 9) {
     device.type = device_type::battery;
     device.properties["battery_type"] =
-        battery_type_string(dict.numbers.at(8).second());
-    device.properties["capacity"] = dict.numbers.at(5).second() / 100.0;
+        battery_type_string(find_numeric(8, bytes).value().second());
+    device.properties["capacity"] =
+        find_numeric(5, bytes).value().second() / 100.0;
   } else {
     device.type = device_type::unknown;
   }

@@ -82,8 +82,9 @@ std::span<uint8_t> make_device_request(uint8_t device_id,
 /* Value in a PropertyDict that can either represent two independent 2 byte
  * numbers or a single 4 byte number
  */
-struct property_value {
-  std::array<uint8_t, 4> bytes;
+class numeric {
+public:
+  explicit numeric(std::span<const uint8_t, 4> bytes);
 
   /* Returns the 2 first bytes as a number
    */
@@ -96,20 +97,12 @@ struct property_value {
   /* Returns all 4 bytes as a number
    */
   uint32_t number() const;
+
+private:
+  std::array<uint8_t, 4> _bytes;
 };
 
-/* Intermediate representation of certain Simarine responses
- */
-struct property_dict {
-  std::unordered_map<uint8_t, std::string_view> strings;
-  std::unordered_map<uint8_t, property_value> numbers;
-};
-
-/* Converts bytes received by a Simarine devices to a ValueMap.
-   Raises ParsingError in case the given bytes do not contain a valid
-   ValueMap.
-*/
-property_dict parse_property_dict(std::span<const uint8_t> bytes);
+using value = std::variant<numeric, std::string_view>;
 
 enum class device_type {
   null,
@@ -141,6 +134,6 @@ bool operator==(const device& lhs, const device& rhs);
 bool operator!=(const device& lhs, const device& rhs);
 std::ostream& operator<<(std::ostream& stream, const device& device);
 
-device device_from_property_dict(const property_dict& map);
+device make_device(const std::span<const uint8_t> bytes);
 
 } // namespace spymarine
