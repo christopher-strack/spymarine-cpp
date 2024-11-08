@@ -1,14 +1,6 @@
 #include "spymarine/parsing.hpp"
 
-#include <ostream>
-
 namespace spymarine {
-
-bool operator==(const header& lhs, const header& rhs) {
-  return lhs.type == rhs.type && lhs.length == rhs.length;
-}
-
-bool operator!=(const header& lhs, const header& rhs) { return !(lhs == rhs); }
 
 bool operator==(const message& lhs, const message& rhs) {
   return lhs.type == rhs.type &&
@@ -225,108 +217,90 @@ std::optional<std::string_view> find_string(const uint8_t id,
 
 } // namespace
 
-std::ostream& operator<<(std::ostream& stream,
-                         const device_properties& properties) {
-  stream << "{";
-  for (auto it = properties.begin(); it != properties.end(); ++it) {
-    stream << it->first << "=";
-    std::visit(
-        [&](const auto& value) -> std::ostream& { return stream << value; },
-        it->second);
-    if (std::next(it) != properties.end()) {
-      stream << ",";
-    }
-  }
-  stream << "}";
-  return stream;
-}
-
-bool operator==(const device& lhs, const device& rhs) {
-  const auto result = lhs.name == rhs.name && lhs.type == rhs.type &&
-                      lhs.properties == rhs.properties;
-  return result;
-}
-
-bool operator!=(const device& lhs, const device& rhs) { return !(lhs == rhs); }
-
-std::ostream& operator<<(std::ostream& stream, const device& device) {
-  stream << "device<type=" << int(device.type) << ",name=" << device.name
-         << ",properties=" << device.properties << ">";
-  return stream;
-}
-
 namespace {
-std::string fluid_type_string(uint16_t fluid_type) {
-  switch (fluid_type) {
+fluid_type to_fluid_type(const uint16_t type) {
+  switch (type) {
   case 1:
-    return "fresh_water";
+    return fluid_type::fresh_water;
   case 2:
-    return "fuel";
+    return fluid_type::fuel;
   case 3:
-    return "waste_water";
+    return fluid_type::waste_water;
   }
-  return "unknown";
+  return fluid_type::unknown;
 }
 
-std::string battery_type_string(uint16_t battery_type) {
+battery_type to_battery_type(const uint16_t battery_type) {
   switch (battery_type) {
   case 1:
-    return "wet_low_maintenance";
+    return battery_type::wet_low_maintenance;
   case 2:
-    return "wet_maintenance_free";
+    return battery_type::wet_maintenance_free;
   case 3:
-    return "agm";
+    return battery_type::agm;
   case 4:
-    return "deep_cycle";
+    return battery_type::deep_cycle;
   case 5:
-    return "gel";
+    return battery_type::gel;
   case 6:
-    return "lifepo4";
+    return battery_type::lifepo4;
   }
-  return "unknown";
+  return battery_type::unknown;
 }
 } // namespace
 
-device make_device(const std::span<const uint8_t> bytes) {
-  device device;
-  if (const auto name = find_string(3, bytes)) {
-    device.name = *name;
+std::optional<device> make_device(const std::span<const uint8_t> bytes) {
+  const auto type_value = find_numeric_value(1, bytes);
+  if (!type_value) {
+    return std::nullopt;
   }
-  const auto type = find_numeric_value(1, bytes).value().second();
+
+  const auto type = type_value->second();
+  const auto name = find_string(3, bytes);
 
   if (type == 0) {
-    device.type = device_type::null;
+    return null_device{};
   } else if (type == 1) {
-    if (device.name == "PICO INTERNAL") {
-      device.type = device_type::pico_internal;
-    } else {
-      device.type = device_type::voltage;
+    if (name == "PICO INTERNAL") {
+      return pico_internal_device{};
+    } else if (name) {
+      return device{voltage_device{std::string{*name}}};
     }
   } else if (type == 2) {
-    device.type = device_type::current;
+    if (name) {
+      return device{current_device{std::string{*name}}};
+    }
   } else if (type == 3) {
-    device.type = device_type::temperature;
+    if (name) {
+      return device{temperature_device{std::string{*name}}};
+    }
   } else if (type == 5) {
-    device.type = device_type::barometer;
+    if (name) {
+      return device{barometer_device{std::string{*name}}};
+    }
   } else if (type == 6) {
-    device.type = device_type::resistive;
+    if (name) {
+      return device{resistive_device{std::string{*name}}};
+    }
   } else if (type == 8) {
-    device.type = device_type::tank;
-    device.properties["fluid_type"] =
-        fluid_type_string(find_numeric_value(6, bytes).value().second());
-    device.properties["capacity"] =
-        find_numeric_value(7, bytes).value().second() / 10.0;
+    const auto fluid_type = find_numeric_value(6, bytes);
+    const auto capacity = find_numeric_value(7, bytes);
+    if (name && fluid_type && capacity) {
+      return device{tank_device{std::string{*name},
+                                to_fluid_type(fluid_type->second()),
+                                capacity->second() / 10.0f}};
+    }
   } else if (type == 9) {
-    device.type = device_type::battery;
-    device.properties["battery_type"] =
-        battery_type_string(find_numeric_value(8, bytes).value().second());
-    device.properties["capacity"] =
-        find_numeric_value(5, bytes).value().second() / 100.0;
-  } else {
-    device.type = device_type::unknown;
+    const auto battery_type = find_numeric_value(8, bytes);
+    const auto capacity = find_numeric_value(5, bytes);
+    if (name && battery_type && capacity) {
+      return device{battery_device{std::string{*name},
+                                   to_battery_type(battery_type->second()),
+                                   capacity->second() / 100.0f}};
+    }
   }
 
-  return device;
+  return unknown_device{};
 }
 
 } // namespace spymarine

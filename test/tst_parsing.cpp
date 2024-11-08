@@ -6,7 +6,6 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <cstdint>
-#include <initializer_list>
 
 namespace spymarine {
 namespace {
@@ -111,67 +110,45 @@ TEST_CASE("make_device") {
     REQUIRE(message);
 
     const auto device = make_device(message->data);
-
-    devices.push_back(device);
+    REQUIRE(device);
+    devices.push_back(*device);
   }
 
-  CHECK(devices == std::vector<device>{
-                       device{device_type::unknown},
-                       device{device_type::unknown},
-                       device{device_type::unknown, "Sensor 1"},
-                       device{device_type::null},
-                       device{device_type::null},
-                       device{device_type::barometer, "Barometer"},
-                       device{device_type::pico_internal, "PICO INTERNAL",
-                              device_properties{}},
-                       device{device_type::null},
-                       device{device_type::null},
-                       device{device_type::null},
-                       device{device_type::voltage, "ST107 [5596] 1"},
-                       device{device_type::voltage, "ST107 [5596] 2"},
-                       device{device_type::voltage, "ST107 [5596] 3"},
-                       device{device_type::resistive, "ST107 [5596] 1"},
-                       device{device_type::resistive, "ST107 [5596] 2"},
-                       device{device_type::resistive, "ST107 [5596] 3"},
-                       device{device_type::resistive, "ST107 [5596] 4"},
-                       device{device_type::unknown, "ST107 [5596]"},
-                       device{device_type::current, "SC303 [5499]"},
-                       device{device_type::voltage, "SC303 [5499] 1"},
-                       device{device_type::voltage, "SC303 [5499] 2"},
-                       device{device_type::resistive, "SC303 [5499] 1"},
-                       device{device_type::resistive, "SC303 [5499] 2"},
-                       device{device_type::resistive, "SC303 [5499] 3"},
-                       device{device_type::battery,
-                              "Bulltron",
-                              {
-                                  {"battery_type", "lifepo4"},
-                                  {"capacity", 300.0},
-                              }},
-                       device{device_type::temperature, "Batterie"},
-                       device{device_type::tank,
-                              "Frischwasser",
-                              {
-                                  {"fluid_type", "fresh_water"},
-                                  {"capacity", 100.0},
-                              }},
-                       device{device_type::battery,
-                              "Starterbatterie",
-                              {
-                                  {"battery_type", "agm"},
-                                  {"capacity", 100.0},
-                              }},
-                       device{
-                           device_type::tank,
-                           "Abwasser",
-                           {
-                               {"fluid_type", "waste_water"},
-                               {"capacity", 70.0},
-                           },
-                       },
-                       device{device_type::temperature, "Innen"},
-                       device{device_type::temperature, "Au\xa3\x65n "},
-                       device{device_type::temperature, "Boiler"},
-                   });
+  const auto expected_devices = std::vector<device>{
+      unknown_device{},
+      unknown_device{},
+      unknown_device{},
+      null_device{},
+      null_device{},
+      barometer_device{"Barometer"},
+      pico_internal_device{},
+      null_device{},
+      null_device{},
+      null_device{},
+      voltage_device{"ST107 [5596] 1"},
+      voltage_device{"ST107 [5596] 2"},
+      voltage_device{"ST107 [5596] 3"},
+      resistive_device{"ST107 [5596] 1"},
+      resistive_device{"ST107 [5596] 2"},
+      resistive_device{"ST107 [5596] 3"},
+      resistive_device{"ST107 [5596] 4"},
+      unknown_device{},
+      current_device{"SC303 [5499]"},
+      voltage_device{"SC303 [5499] 1"},
+      voltage_device{"SC303 [5499] 2"},
+      resistive_device{"SC303 [5499] 1"},
+      resistive_device{"SC303 [5499] 2"},
+      resistive_device{"SC303 [5499] 3"},
+      battery_device{"Bulltron", battery_type::lifepo4, 300.0f},
+      temperature_device{"Batterie"},
+      tank_device{"Frischwasser", fluid_type::fresh_water, 100.0f},
+      battery_device{"Starterbatterie", battery_type::agm, 100.0f},
+      tank_device{"Abwasser", fluid_type::waste_water, 70.0f},
+      temperature_device{"Innen"},
+      temperature_device{"Au\xa3\x65n "},
+      temperature_device{"Boiler"},
+  };
+  CHECK(devices == expected_devices);
 }
 
 } // namespace spymarine

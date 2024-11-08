@@ -1,11 +1,8 @@
 #pragma once
 
-#include <cstdint>
-#include <iosfwd>
 #include <optional>
 #include <span>
 #include <string>
-#include <unordered_map>
 
 namespace spymarine {
 
@@ -16,10 +13,9 @@ constexpr auto header_size = 14;
 struct header {
   uint8_t type;
   uint16_t length;
-};
 
-bool operator==(const header& lhs, const header& rhs);
-bool operator!=(const header& lhs, const header& rhs);
+  auto operator<=>(const header&) const = default;
+};
 
 /* The message type described by the header.
  * enum only represents the known subset.
@@ -104,36 +100,86 @@ private:
 
 using value = std::variant<numeric_value, std::string_view>;
 
-enum class device_type {
-  null,
-  pico_internal,
-  voltage,
-  current,
-  temperature,
-  barometer,
-  resistive,
-  tank,
-  battery,
+struct null_device {
+  auto operator<=>(const null_device&) const = default;
+};
+
+struct pico_internal_device {
+  auto operator<=>(const pico_internal_device&) const = default;
+};
+
+struct voltage_device {
+  std::string name;
+
+  auto operator<=>(const voltage_device&) const = default;
+};
+
+struct current_device {
+  std::string name;
+
+  auto operator<=>(const current_device&) const = default;
+};
+
+struct temperature_device {
+  std::string name;
+
+  auto operator<=>(const temperature_device&) const = default;
+};
+
+struct barometer_device {
+  std::string name;
+
+  auto operator<=>(const barometer_device&) const = default;
+};
+
+struct resistive_device {
+  std::string name;
+
+  auto operator<=>(const resistive_device&) const = default;
+};
+
+enum class fluid_type {
+  fresh_water,
+  fuel,
+  waste_water,
   unknown,
 };
 
-using device_property_value = std::variant<std::string, double>;
-using device_properties =
-    std::unordered_map<std::string, device_property_value>;
-
-std::ostream& operator<<(std::ostream& stream,
-                         const device_properties& properties);
-
-struct device {
-  device_type type;
+struct tank_device {
   std::string name;
-  device_properties properties;
+  fluid_type type;
+  float capacity;
+
+  auto operator<=>(const tank_device&) const = default;
 };
 
-bool operator==(const device& lhs, const device& rhs);
-bool operator!=(const device& lhs, const device& rhs);
-std::ostream& operator<<(std::ostream& stream, const device& device);
+enum class battery_type {
+  wet_low_maintenance,
+  wet_maintenance_free,
+  agm,
+  deep_cycle,
+  gel,
+  lifepo4,
+  unknown,
+};
 
-device make_device(const std::span<const uint8_t> bytes);
+struct battery_device {
+  std::string name;
+  battery_type type;
+  float capacity;
+
+  auto operator<=>(const battery_device&) const = default;
+};
+
+struct unknown_device {
+  auto operator<=>(const unknown_device&) const = default;
+};
+
+using device =
+    std::variant<null_device, pico_internal_device, voltage_device,
+                 current_device, temperature_device, barometer_device,
+                 resistive_device, tank_device, battery_device, unknown_device>;
+
+std::optional<device> make_device(const std::span<const uint8_t> bytes);
 
 } // namespace spymarine
