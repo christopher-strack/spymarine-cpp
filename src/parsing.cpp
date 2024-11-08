@@ -249,7 +249,7 @@ battery_type to_battery_type(const uint16_t battery_type) {
 }
 } // namespace
 
-std::optional<device> make_device(const std::span<const uint8_t> bytes) {
+std::optional<device> parse_device(const std::span<const uint8_t> bytes) {
   const auto type_value = find_numeric_value(1, bytes);
   if (!type_value) {
     return std::nullopt;
@@ -301,11 +301,6 @@ std::optional<device> make_device(const std::span<const uint8_t> bytes) {
   }
 
   return unknown_device{};
-}
-
-size_t sensor_state_offset(const device& device) {
-  return std::visit([](const auto& d) { return d.sensor_state_offset; },
-                    device);
 }
 
 } // namespace spymarine

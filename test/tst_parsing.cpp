@@ -103,13 +103,14 @@ TEST_CASE("make_device_request") {
              Catch::Matchers::RangeEquals(expected_message));
 }
 
-TEST_CASE("make_device") {
+TEST_CASE("parse_device") {
   std::vector<device> devices;
+
   for (const auto& response : device_info_responses) {
     const auto message = parse_response(response);
     REQUIRE(message);
 
-    const auto device = make_device(message->data);
+    const auto device = parse_device(message->data);
     REQUIRE(device);
     devices.push_back(*device);
   }
