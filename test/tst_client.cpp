@@ -42,7 +42,7 @@ private:
 } // namespace
 
 TEST_CASE("client") {
-  client client{mock_tcp_socket{}};
+  client client{mock_tcp_socket{}, std::chrono::seconds{0}};
   std::vector<device> devices;
   REQUIRE(client.read_devices(devices));
 

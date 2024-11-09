@@ -3,8 +3,10 @@
 #include "parsing.hpp"
 
 #include <array>
+#include <chrono>
 #include <concepts>
 #include <optional>
+#include <thread>
 
 namespace spymarine {
 
@@ -27,7 +29,10 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 
 template <tcp_socket tcp_socket_type> class client {
 public:
-  client(tcp_socket_type socket) : _socket{std::move(socket)} {}
+  client(tcp_socket_type socket,
+         const std::chrono::system_clock::duration request_limit =
+             std::chrono::milliseconds{10})
+      : _socket{std::move(socket)}, _request_limit{request_limit} {}
 
   template <device_container container_type>
   bool read_devices(container_type& devices) {
@@ -83,6 +88,8 @@ private:
   }
 
   std::optional<message> request(const message& m) {
+    wait_for_request_limit();
+
     if (_socket.send(detail::write_message_data(m, _buffer))) {
       if (const auto raw_response = _socket.receive(_buffer)) {
         return parse_message(*raw_response);
@@ -91,8 +98,19 @@ private:
     return std::nullopt;
   }
 
+  void wait_for_request_limit() {
+    if (_last_request_time) {
+      const auto delta = std::chrono::system_clock::now() - *_last_request_time;
+      if (delta < _request_limit) {
+        std::this_thread::sleep_for(_request_limit - delta);
+      }
+    }
+  }
+
   tcp_socket_type _socket;
   std::array<uint8_t, 1024> _buffer;
+  std::chrono::system_clock::duration _request_limit;
+  std::optional<std::chrono::system_clock::time_point> _last_request_time;
 };
 
 } // namespace spymarine
