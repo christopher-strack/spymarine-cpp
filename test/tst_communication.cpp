@@ -10,19 +10,18 @@
 namespace spymarine {
 namespace {
 struct mock_client {
-  uint8_t device_info_response_index = 0;
+  uint8_t device_info_index = 0;
 
   std::optional<message> request(const std::span<uint8_t>& data) {
-    const auto m = parse_response(data);
+    const auto m = parse_message(data);
 
     if (m->type == message_type::device_count) {
-      device_info_response_index = 0;
-      return parse_response(device_count_response);
+      device_info_index = 0;
+      return parse_message(raw_device_count_response);
     }
     if (m->type == message_type::device_info &&
-        device_info_response_index < device_info_responses.size()) {
-      return parse_response(
-          device_info_responses[device_info_response_index++]);
+        device_info_index < raw_device_info_response.size()) {
+      return parse_message(raw_device_info_response[device_info_index++]);
     }
     return std::nullopt;
   }

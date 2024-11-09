@@ -22,10 +22,10 @@ bool read_devices(const uint8_t device_count, client& c,
   }
 
   for (auto i = 0; i < device_count; i++) {
-    if (const auto device_response =
-            c.request(make_device_request(i, request_buffer))) {
+    if (const auto response_message =
+            c.request(make_device_info_message(i, request_buffer))) {
       if (auto device =
-              parse_device(device_response->data, sensor_start_index)) {
+              parse_device(response_message->data, sensor_start_index)) {
         devices.insert(devices.end(), std::move(*device));
         sensor_start_index += sensor_state_offset(*device);
       } else {
@@ -43,11 +43,11 @@ bool read_devices(const uint8_t device_count, client& c,
 template <typename client_type, device_container container_type>
 bool read_devices(client_type& client, std::span<uint8_t> request_buffer,
                   container_type& devices) {
-  const auto device_count_request =
+  const auto device_count_message =
       make_request(message_type::device_count, {}, request_buffer);
 
-  if (const auto response = client.request(device_count_request)) {
-    if (const auto device_count = parse_device_count_response(*response)) {
+  if (const auto response = client.request(device_count_message)) {
+    if (const auto device_count = parse_device_count_message(*response)) {
       return read_devices(*device_count, client, request_buffer, devices);
     }
   }

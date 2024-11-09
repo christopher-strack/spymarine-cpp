@@ -57,30 +57,27 @@ uint16_t crc(const std::span<const uint8_t> bytes) {
   return crc;
 }
 
-std::optional<message>
-parse_response(const std::span<const uint8_t> raw_response) {
-  const auto header = parse_header(raw_response);
-  const auto data_length = raw_response.size() - header_size + 1;
+std::optional<message> parse_message(const std::span<const uint8_t> data) {
+  const auto header = parse_header(data);
+  const auto data_length = data.size() - header_size + 1;
 
   if (header->length != data_length) {
     return std::nullopt;
   }
 
-  const auto calculated_crc =
-      crc(std::span{raw_response.begin() + 1, raw_response.end() - 3});
+  const auto calculated_crc = crc(std::span{data.begin() + 1, data.end() - 3});
   const auto received_crc =
-      to_uint16(std::span<const uint8_t, 2>{raw_response.end() - 2, 2});
+      to_uint16(std::span<const uint8_t, 2>{data.end() - 2, 2});
 
   if (calculated_crc != received_crc) {
     return std::nullopt;
   }
 
-  return message{
-      static_cast<message_type>(header->type),
-      std::span{raw_response.begin() + header_size, raw_response.end() - 2}};
+  return message{static_cast<message_type>(header->type),
+                 std::span{data.begin() + header_size, data.end() - 2}};
 }
 
-std::optional<uint8_t> parse_device_count_response(const message& m) {
+std::optional<uint8_t> parse_device_count_message(const message& m) {
   if (m.type == message_type::device_count && m.data.size() >= 6) {
     return m.data[5] + 1;
   }
@@ -118,8 +115,8 @@ std::span<uint8_t> make_request(message_type type,
   return std::span{buffer.begin(), total_size};
 }
 
-std::span<uint8_t> make_device_request(uint8_t device_id,
-                                       std::span<uint8_t> buffer) {
+std::span<uint8_t> make_device_info_message(uint8_t device_id,
+                                            std::span<uint8_t> buffer) {
   const std::array<uint8_t, 19> data{
       0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00,
       0x00, 0x00, 0x00, 0xff, 0x00, 0x00,      0x00, 0x00, 0xff};
