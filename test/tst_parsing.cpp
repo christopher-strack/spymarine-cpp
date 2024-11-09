@@ -86,22 +86,22 @@ TEST_CASE("crc") {
   CHECK(crc(span) == 43200);
 }
 
-TEST_CASE("make_message") {
+TEST_CASE("write_message_data") {
   std::array<uint8_t, 1024> buffer;
   const auto expected_data =
       std::array{0x0,  0x0,  0x0,  0x0, 0x0, 0xff, 0x2,  0x4,
                  0x8c, 0x55, 0x4b, 0x0, 0x3, 0xff, 0xa8, 0xc0};
-  CHECK_THAT(make_message(message_type::device_count, {}, buffer),
+  CHECK_THAT(write_message_data(message_type::device_count, {}, buffer),
              Catch::Matchers::RangeEquals(expected_data));
 }
 
-TEST_CASE("make_device_info_message") {
+TEST_CASE("write_device_info_data") {
   std::array<uint8_t, 1024> buffer;
   const auto expected_message = std::array{
       0x0,  0x0,  0x0, 0x0,  0x0, 0xff, 0x41, 0x4,  0x8c, 0x55, 0x4b, 0x0,
       0x16, 0xff, 0x0, 0x1,  0x0, 0x0,  0x0,  0x2a, 0xff, 0x1,  0x3,  0x0,
       0x0,  0x0,  0x0, 0xff, 0x0, 0x0,  0x0,  0x0,  0xff, 0xb6, 0xa1};
-  CHECK_THAT(make_device_info_message(42, buffer),
+  CHECK_THAT(write_device_info_data(42, buffer),
              Catch::Matchers::RangeEquals(expected_message));
 }
 

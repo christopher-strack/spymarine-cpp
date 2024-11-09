@@ -23,7 +23,7 @@ bool read_devices(const uint8_t device_count, client& c,
 
   for (auto i = 0; i < device_count; i++) {
     if (const auto response_message =
-            c.request(make_device_info_message(i, request_buffer))) {
+            c.request(write_device_info_data(i, request_buffer))) {
       if (auto device =
               parse_device(response_message->data, sensor_start_index)) {
         devices.insert(devices.end(), std::move(*device));
@@ -43,10 +43,10 @@ bool read_devices(const uint8_t device_count, client& c,
 template <typename client_type, device_container container_type>
 bool read_devices(client_type& client, std::span<uint8_t> request_buffer,
                   container_type& devices) {
-  const auto device_count_message =
-      make_message(message_type::device_count, {}, request_buffer);
+  const auto data =
+      write_message_data(message_type::device_count, {}, request_buffer);
 
-  if (const auto response = client.request(device_count_message)) {
+  if (const auto response = client.request(data)) {
     if (const auto device_count = parse_device_count_message(*response)) {
       return detail::read_devices(*device_count, client, request_buffer,
                                   devices);

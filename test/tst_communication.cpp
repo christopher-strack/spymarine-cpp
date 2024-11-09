@@ -1,5 +1,6 @@
 #include "raw_data.hpp"
 
+#include "spymarine/client.hpp"
 #include "spymarine/communication.hpp"
 #include "spymarine/device.hpp"
 #include "spymarine/device_ostream.hpp"
@@ -9,27 +10,45 @@
 
 namespace spymarine {
 namespace {
-struct mock_client {
-  uint8_t device_info_index = 0;
+class mock_tcp_socket {
+public:
+  bool send(std::span<uint8_t> data) {
+    _last_sent_message = parse_message(data);
+    return true;
+  }
 
-  std::optional<message> request(const std::span<uint8_t>& data) {
-    const auto m = parse_message(data);
+  std::optional<std::span<uint8_t>> receive(std::span<uint8_t> buffer) {
+    if (!_last_sent_message) {
+      return std::nullopt;
+    }
 
-    if (m->type == message_type::device_count) {
-      device_info_index = 0;
-      return parse_message(raw_device_count_response);
+    if (_last_sent_message->type == message_type::device_count) {
+      _device_info_index = 0;
+      const auto m = parse_message(raw_device_count_response);
+      return write_message_data(m->type, m->data, buffer);
+    } else if (_last_sent_message->type == message_type::device_info &&
+               _device_info_index &&
+               *_device_info_index < raw_device_info_response.size()) {
+      const auto m =
+          parse_message(raw_device_info_response[*_device_info_index]);
+      _device_info_index =
+          *_device_info_index == raw_device_info_response.size() - 1
+              ? std::nullopt
+              : std::optional{*_device_info_index + 1};
+      return write_message_data(m->type, m->data, buffer);
     }
-    if (m->type == message_type::device_info &&
-        device_info_index < raw_device_info_response.size()) {
-      return parse_message(raw_device_info_response[device_info_index++]);
-    }
+
     return std::nullopt;
   }
+
+private:
+  std::optional<uint8_t> _device_info_index = 0;
+  std::optional<message> _last_sent_message;
 };
 } // namespace
 
 TEST_CASE("read_devices") {
-  mock_client client;
+  client client{mock_tcp_socket{}};
   std::array<uint8_t, 1024> buffer;
   std::vector<device> devices;
   REQUIRE(read_devices(client, buffer, devices));
