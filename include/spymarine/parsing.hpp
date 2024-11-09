@@ -73,8 +73,7 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
  * will reply with a device response that contains the description of the
  * device.
  */
-std::span<uint8_t> write_device_info_data(uint8_t device_id,
-                                          std::span<uint8_t> buffer);
+message make_device_info_message(uint8_t device_id, std::span<uint8_t> buffer);
 
 /* Value in a PropertyDict that can either represent two independent 2 byte
  * numbers or a single 4 byte number

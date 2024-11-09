@@ -18,9 +18,9 @@ template <tcp_socket tcp_socket_type> class client {
 public:
   client(tcp_socket_type socket) : _socket{std::move(socket)} {}
 
-  std::optional<message> request(const std::span<uint8_t>& data) {
-    if (_socket.send(data)) {
-      if (const auto raw_response = _socket.receive(_receive_buffer)) {
+  std::optional<message> request(const message& m) {
+    if (_socket.send(write_message_data(m, _buffer))) {
+      if (const auto raw_response = _socket.receive(_buffer)) {
         return parse_message(*raw_response);
       }
     }
@@ -29,7 +29,7 @@ public:
 
 private:
   tcp_socket_type _socket;
-  std::array<uint8_t, 1024> _receive_buffer;
+  std::array<uint8_t, 1024> _buffer;
 };
 
 } // namespace spymarine

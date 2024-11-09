@@ -16,14 +16,15 @@ template <typename client, device_container container_type>
 bool read_devices(const uint8_t device_count, client& c,
                   std::span<uint8_t> request_buffer, container_type& devices) {
   uint8_t sensor_start_index = 0;
+  std::array<uint8_t, 19> message_buffer;
 
   if constexpr (requires(container_type c) { c.reserve(device_count); }) {
     devices.reserve(device_count);
   }
 
   for (auto i = 0; i < device_count; i++) {
-    if (const auto response_message =
-            c.request(write_device_info_data(i, request_buffer))) {
+    const auto info_message = make_device_info_message(i, message_buffer);
+    if (const auto response_message = c.request(info_message)) {
       if (auto device =
               parse_device(response_message->data, sensor_start_index)) {
         devices.insert(devices.end(), std::move(*device));
@@ -43,10 +44,7 @@ bool read_devices(const uint8_t device_count, client& c,
 template <typename client_type, device_container container_type>
 bool read_devices(client_type& client, std::span<uint8_t> request_buffer,
                   container_type& devices) {
-  const auto data =
-      write_message_data({message_type::device_count}, request_buffer);
-
-  if (const auto response = client.request(data)) {
+  if (const auto response = client.request({message_type::device_count})) {
     if (const auto device_count = parse_device_count_message(*response)) {
       return detail::read_devices(*device_count, client, request_buffer,
                                   devices);

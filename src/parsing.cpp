@@ -95,7 +95,7 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
   const auto total_size = payload_size + 2;
 
   if (buffer.size() < total_size) {
-    throw std::out_of_range("Buffer is too small for request");
+    throw std::out_of_range("Buffer is too small for message");
   }
 
   const auto length = to_bytes(3 + m.data.size());
@@ -113,12 +113,16 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
   return std::span{buffer.begin(), total_size};
 }
 
-std::span<uint8_t> write_device_info_data(uint8_t device_id,
-                                          std::span<uint8_t> buffer) {
+message make_device_info_message(const uint8_t device_id,
+                                 std::span<uint8_t> buffer) {
   const std::array<uint8_t, 19> data{
       0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00,
       0x00, 0x00, 0x00, 0xff, 0x00, 0x00,      0x00, 0x00, 0xff};
-  return write_message_data({message_type::device_info, data}, buffer);
+  if (buffer.size() < data.size()) {
+    throw std::out_of_range("Buffer is too small for message");
+  }
+  std::copy(data.begin(), data.end(), buffer.begin());
+  return message{message_type::device_info, buffer.subspan(0, data.size())};
 }
 
 numeric_value::numeric_value(std::span<const uint8_t, 4> bytes) {
