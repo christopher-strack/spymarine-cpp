@@ -2,6 +2,7 @@
 
 #include "parsing.hpp"
 
+#include <array>
 #include <concepts>
 #include <optional>
 
