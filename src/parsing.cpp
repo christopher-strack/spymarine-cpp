@@ -1,11 +1,12 @@
 #include "spymarine/parsing.hpp"
 
+#include <algorithm>
+#include <ranges>
+
 namespace spymarine {
 
 bool operator==(const message& lhs, const message& rhs) {
-  return lhs.type == rhs.type &&
-         std::memcmp(lhs.data.data(), rhs.data.data(),
-                     std::min(lhs.data.size(), rhs.data.size())) == 0;
+  return lhs.type == rhs.type && std::ranges::equal(lhs.data, rhs.data);
 }
 
 bool operator!=(const message& lhs, const message& rhs) {
@@ -25,7 +26,8 @@ std::optional<header> parse_header(const std::span<const uint8_t> data) {
     return std::nullopt;
   }
 
-  if (std::memcmp(data.data(), "\x00\x00\x00\x00\x00\xff", 6) != 0) {
+  const std::array<uint8_t, 6> prefix = {0x00, 0x00, 0x00, 0x00, 0x00, 0xff};
+  if (!std::ranges::equal(data.subspan(0, prefix.size()), prefix)) {
     return std::nullopt;
   }
 

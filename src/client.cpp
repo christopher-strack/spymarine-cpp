@@ -13,7 +13,8 @@ std::span<uint8_t> write_data(message m, std::span<uint8_t> buffer) {
   const auto total_size = payload_size + 2;
 
   if (buffer.size() < total_size) {
-    throw std::out_of_range("Buffer is too small for message");
+    // buffer is too small for message
+    std::abort();
   }
 
   const auto length = to_bytes(3 + m.data.size());
@@ -33,7 +34,7 @@ std::span<uint8_t> write_data(message m, std::span<uint8_t> buffer) {
 
 std::span<uint8_t>
 device_count_request::write_message_data(std::span<uint8_t> buffer) const {
-  return write_data(message{message_type::device_count}, buffer);
+  return write_data(message{message_type::device_count, {}}, buffer);
 }
 
 std::span<uint8_t>
