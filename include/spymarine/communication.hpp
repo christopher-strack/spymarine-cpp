@@ -44,7 +44,7 @@ template <typename client_type, device_container container_type>
 bool read_devices(client_type& client, std::span<uint8_t> request_buffer,
                   container_type& devices) {
   const auto device_count_message =
-      make_request(message_type::device_count, {}, request_buffer);
+      make_message(message_type::device_count, {}, request_buffer);
 
   if (const auto response = client.request(device_count_message)) {
     if (const auto device_count = parse_device_count_message(*response)) {

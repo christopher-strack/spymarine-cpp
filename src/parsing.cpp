@@ -90,7 +90,7 @@ std::array<uint8_t, 2> to_bytes(uint16_t value) {
 }
 } // namespace
 
-std::span<uint8_t> make_request(message_type type,
+std::span<uint8_t> make_message(message_type type,
                                 const std::span<const uint8_t> data,
                                 std::span<uint8_t> buffer) {
   const auto payload_size = header_size + data.size();
@@ -120,7 +120,7 @@ std::span<uint8_t> make_device_info_message(uint8_t device_id,
   const std::array<uint8_t, 19> data{
       0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00,
       0x00, 0x00, 0x00, 0xff, 0x00, 0x00,      0x00, 0x00, 0xff};
-  return make_request(message_type::device_info, data, buffer);
+  return make_message(message_type::device_info, data, buffer);
 }
 
 numeric_value::numeric_value(std::span<const uint8_t, 4> bytes) {

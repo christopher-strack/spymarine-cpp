@@ -80,22 +80,22 @@ TEST_CASE("parse_message") {
 }
 
 TEST_CASE("crc") {
-  const auto message = header_bytes{0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x02,
-                                    0x04, 0x8C, 0x55, 0x4B, 0x00, 0x03, 0xFF};
-  const auto span = std::span{message.begin() + 1, message.size() - 2};
+  const auto data = header_bytes{0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x02,
+                                 0x04, 0x8C, 0x55, 0x4B, 0x00, 0x03, 0xFF};
+  const auto span = std::span{data.begin() + 1, data.size() - 2};
   CHECK(crc(span) == 43200);
 }
 
-TEST_CASE("make_request") {
+TEST_CASE("make_message") {
   std::array<uint8_t, 1024> buffer;
-  const auto expected_message =
+  const auto expected_data =
       std::array{0x0,  0x0,  0x0,  0x0, 0x0, 0xff, 0x2,  0x4,
                  0x8c, 0x55, 0x4b, 0x0, 0x3, 0xff, 0xa8, 0xc0};
-  CHECK_THAT(make_request(message_type::device_count, {}, buffer),
-             Catch::Matchers::RangeEquals(expected_message));
+  CHECK_THAT(make_message(message_type::device_count, {}, buffer),
+             Catch::Matchers::RangeEquals(expected_data));
 }
 
-TEST_CASE("make_device_request") {
+TEST_CASE("make_device_info_message") {
   std::array<uint8_t, 1024> buffer;
   const auto expected_message = std::array{
       0x0,  0x0,  0x0, 0x0,  0x0, 0xff, 0x41, 0x4,  0x8c, 0x55, 0x4b, 0x0,

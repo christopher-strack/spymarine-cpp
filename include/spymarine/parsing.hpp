@@ -67,7 +67,7 @@ std::optional<uint8_t> parse_device_count_message(const message& m);
 
 /* Returns a valid Simarine request for the given Message.
  */
-std::span<uint8_t> make_request(message_type type,
+std::span<uint8_t> make_message(message_type type,
                                 const std::span<const uint8_t> data,
                                 std::span<uint8_t> buffer);
 
