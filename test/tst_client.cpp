@@ -1,7 +1,6 @@
 #include "raw_data.hpp"
 
 #include "spymarine/client.hpp"
-#include "spymarine/communication.hpp"
 #include "spymarine/device.hpp"
 #include "spymarine/device_ostream.hpp"
 #include "spymarine/parsing.hpp"
@@ -23,19 +22,12 @@ public:
     }
 
     if (_last_sent_message->type == message_type::device_count) {
-      _device_info_index = 0;
       if (const auto m = parse_message(raw_device_count_response)) {
         return write_data(*m, buffer);
       }
-    } else if (_last_sent_message->type == message_type::device_info &&
-               _device_info_index &&
-               *_device_info_index < raw_device_info_response.size()) {
-      if (const auto m =
-              parse_message(raw_device_info_response[*_device_info_index])) {
-        _device_info_index =
-            *_device_info_index == raw_device_info_response.size() - 1
-                ? std::nullopt
-                : std::optional{*_device_info_index + 1};
+    } else if (_last_sent_message->type == message_type::device_info) {
+      const auto device_id = _last_sent_message->data[5];
+      if (const auto m = parse_message(raw_device_info_response[device_id])) {
         return write_data(*m, buffer);
       }
     }
@@ -44,15 +36,14 @@ public:
   }
 
 private:
-  std::optional<uint8_t> _device_info_index = 0;
   std::optional<message> _last_sent_message;
 };
 } // namespace
 
-TEST_CASE("read_devices") {
+TEST_CASE("client") {
   client client{mock_tcp_socket{}};
   std::vector<device> devices;
-  REQUIRE(read_devices(client, devices));
+  REQUIRE(client.read_devices(devices));
 
   const auto expected_devices = std::vector<device>{
       unknown_device{},

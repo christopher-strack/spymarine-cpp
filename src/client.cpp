@@ -32,16 +32,4 @@ std::span<uint8_t> write_data(message m, std::span<uint8_t> buffer) {
   return std::span{buffer.begin(), total_size};
 }
 
-std::span<uint8_t>
-device_count_request::write_message_data(std::span<uint8_t> buffer) const {
-  return write_data(message{message_type::device_count, {}}, buffer);
-}
-
-std::span<uint8_t>
-device_info_request::write_message_data(std::span<uint8_t> buffer) const {
-  const std::array<uint8_t, 19> data{
-      0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00,
-      0x00, 0x00, 0x00, 0xff, 0x00, 0x00,      0x00, 0x00, 0xff};
-  return write_data(message{message_type::device_info, data}, buffer);
-}
 } // namespace spymarine
