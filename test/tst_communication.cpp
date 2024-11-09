@@ -51,9 +51,8 @@ private:
 
 TEST_CASE("read_devices") {
   client client{mock_tcp_socket{}};
-  std::array<uint8_t, 1024> buffer;
   std::vector<device> devices;
-  REQUIRE(read_devices(client, buffer, devices));
+  REQUIRE(read_devices(client, devices));
 
   const auto expected_devices = std::vector<device>{
       unknown_device{},

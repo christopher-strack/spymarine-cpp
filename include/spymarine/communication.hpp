@@ -15,7 +15,7 @@ namespace detail {
 
 template <typename tcp_socket_type, device_container container_type>
 bool read_devices(const uint8_t device_count, client<tcp_socket_type>& client,
-                  std::span<uint8_t> request_buffer, container_type& devices) {
+                  container_type& devices) {
   uint8_t sensor_start_index = 0;
   std::array<uint8_t, 19> message_buffer;
 
@@ -42,12 +42,10 @@ bool read_devices(const uint8_t device_count, client<tcp_socket_type>& client,
 } // namespace detail
 
 template <typename tcp_socket_type, device_container container_type>
-bool read_devices(client<tcp_socket_type>& client,
-                  std::span<uint8_t> request_buffer, container_type& devices) {
+bool read_devices(client<tcp_socket_type>& client, container_type& devices) {
   if (const auto response = client.request(device_count_request{})) {
     if (const auto device_count = parse_device_count_message(*response)) {
-      return detail::read_devices(*device_count, client, request_buffer,
-                                  devices);
+      return detail::read_devices(*device_count, client, devices);
     }
   }
 
