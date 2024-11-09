@@ -64,8 +64,6 @@ uint16_t crc(const std::span<const uint8_t> bytes);
  */
 std::optional<message> parse_message(const std::span<const uint8_t> data);
 
-std::optional<uint8_t> parse_device_count_message(const message& m);
-
 /* Value in a PropertyDict that can either represent two independent 2 byte
  * numbers or a single 4 byte number
  */

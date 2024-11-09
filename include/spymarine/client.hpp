@@ -21,7 +21,9 @@ concept device_container = requires(container_type container) {
   container.insert(container.end(), device{});
 };
 
-std::span<uint8_t> write_data(message m, std::span<uint8_t> buffer);
+namespace detail {
+std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
+}
 
 template <tcp_socket tcp_socket_type> class client {
 public:
@@ -71,6 +73,7 @@ private:
     const std::array<uint8_t, 19> data{
         0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00,
         0x00, 0x00, 0x00, 0xff, 0x00, 0x00,      0x00, 0x00, 0xff};
+
     if (const auto m = request({message_type::device_info, data})) {
       if (auto device = parse_device(m->data, sensor_start_index)) {
         return std::move(*device);
@@ -80,7 +83,7 @@ private:
   }
 
   std::optional<message> request(const message& m) {
-    if (_socket.send(write_data(m, _buffer))) {
+    if (_socket.send(detail::write_message_data(m, _buffer))) {
       if (const auto raw_response = _socket.receive(_buffer)) {
         return parse_message(*raw_response);
       }

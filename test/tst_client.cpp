@@ -7,6 +7,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include <ranges>
+
 namespace spymarine {
 namespace {
 class mock_tcp_socket {
@@ -22,14 +24,13 @@ public:
     }
 
     if (_last_sent_message->type == message_type::device_count) {
-      if (const auto m = parse_message(raw_device_count_response)) {
-        return write_data(*m, buffer);
-      }
+      std::ranges::copy(raw_device_count_response, buffer.begin());
+      return buffer.subspan(0, raw_device_count_response.size());
     } else if (_last_sent_message->type == message_type::device_info) {
       const auto device_id = _last_sent_message->data[5];
-      if (const auto m = parse_message(raw_device_info_response[device_id])) {
-        return write_data(*m, buffer);
-      }
+      const auto& data = raw_device_info_response[device_id];
+      std::ranges::copy(data, buffer.begin());
+      return buffer.subspan(0, data.size());
     }
 
     return std::nullopt;

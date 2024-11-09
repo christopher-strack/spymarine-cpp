@@ -1,6 +1,6 @@
 #include "spymarine/client.hpp"
 
-namespace spymarine {
+namespace spymarine::detail {
 
 namespace {
 std::array<uint8_t, 2> to_bytes(uint16_t value) {
@@ -8,7 +8,7 @@ std::array<uint8_t, 2> to_bytes(uint16_t value) {
 }
 } // namespace
 
-std::span<uint8_t> write_data(message m, std::span<uint8_t> buffer) {
+std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
   const auto payload_size = header_size + m.data.size();
   const auto total_size = payload_size + 2;
 
@@ -32,4 +32,4 @@ std::span<uint8_t> write_data(message m, std::span<uint8_t> buffer) {
   return std::span{buffer.begin(), total_size};
 }
 
-} // namespace spymarine
+} // namespace spymarine::detail

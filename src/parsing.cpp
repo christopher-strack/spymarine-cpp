@@ -79,13 +79,6 @@ std::optional<message> parse_message(const std::span<const uint8_t> data) {
                  std::span{data.begin() + header_size, data.end() - 2}};
 }
 
-std::optional<uint8_t> parse_device_count_message(const message& m) {
-  if (m.type == message_type::device_count && m.data.size() >= 6) {
-    return m.data[5] + 1;
-  }
-  return std::nullopt;
-}
-
 numeric_value::numeric_value(std::span<const uint8_t, 4> bytes) {
   std::copy(bytes.begin(), bytes.end(), _bytes.begin());
 }
