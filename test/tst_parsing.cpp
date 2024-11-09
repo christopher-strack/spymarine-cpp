@@ -86,25 +86,4 @@ TEST_CASE("crc") {
   CHECK(crc(span) == 43200);
 }
 
-TEST_CASE("write_message_data") {
-  std::array<uint8_t, 1024> buffer;
-  const auto expected_data =
-      std::array{0x0,  0x0,  0x0,  0x0, 0x0, 0xff, 0x2,  0x4,
-                 0x8c, 0x55, 0x4b, 0x0, 0x3, 0xff, 0xa8, 0xc0};
-  CHECK_THAT(write_message_data({message_type::device_count}, buffer),
-             Catch::Matchers::RangeEquals(expected_data));
-}
-
-TEST_CASE("write_device_info_data") {
-  std::array<uint8_t, 19> buffer;
-
-  const auto expected_message =
-      message{message_type::device_info,
-              std::array<uint8_t, 19>{0x00, 0x01, 0x00, 0x00, 0x00, 0x2a, 0xff,
-                                      0x01, 0x03, 0x00, 0x00, 0x00, 0x00, 0xff,
-                                      0x00, 0x00, 0x00, 0x00, 0xff}};
-
-  CHECK(make_device_info_message(42, buffer) == expected_message);
-}
-
 } // namespace spymarine

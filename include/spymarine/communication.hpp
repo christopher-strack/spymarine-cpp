@@ -1,5 +1,6 @@
 #pragma once
 
+#include "client.hpp"
 #include "device.hpp"
 #include "parsing.hpp"
 
@@ -12,8 +13,8 @@ concept device_container = requires(container_type container) {
 
 namespace detail {
 
-template <typename client, device_container container_type>
-bool read_devices(const uint8_t device_count, client& c,
+template <typename tcp_socket_type, device_container container_type>
+bool read_devices(const uint8_t device_count, client<tcp_socket_type>& client,
                   std::span<uint8_t> request_buffer, container_type& devices) {
   uint8_t sensor_start_index = 0;
   std::array<uint8_t, 19> message_buffer;
@@ -22,9 +23,8 @@ bool read_devices(const uint8_t device_count, client& c,
     devices.reserve(device_count);
   }
 
-  for (auto i = 0; i < device_count; i++) {
-    const auto info_message = make_device_info_message(i, message_buffer);
-    if (const auto response_message = c.request(info_message)) {
+  for (uint8_t i = 0; i < device_count; i++) {
+    if (const auto response_message = client.request(device_info_request{i})) {
       if (auto device =
               parse_device(response_message->data, sensor_start_index)) {
         devices.insert(devices.end(), std::move(*device));
@@ -41,10 +41,10 @@ bool read_devices(const uint8_t device_count, client& c,
 }
 } // namespace detail
 
-template <typename client_type, device_container container_type>
-bool read_devices(client_type& client, std::span<uint8_t> request_buffer,
-                  container_type& devices) {
-  if (const auto response = client.request({message_type::device_count})) {
+template <typename tcp_socket_type, device_container container_type>
+bool read_devices(client<tcp_socket_type>& client,
+                  std::span<uint8_t> request_buffer, container_type& devices) {
+  if (const auto response = client.request(device_count_request{})) {
     if (const auto device_count = parse_device_count_message(*response)) {
       return detail::read_devices(*device_count, client, request_buffer,
                                   devices);

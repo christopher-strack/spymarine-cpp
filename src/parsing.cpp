@@ -84,47 +84,6 @@ std::optional<uint8_t> parse_device_count_message(const message& m) {
   return std::nullopt;
 }
 
-namespace {
-std::array<uint8_t, 2> to_bytes(uint16_t value) {
-  return {uint8_t((value >> 8) & 0xff), uint8_t(value & 0xff)};
-}
-} // namespace
-
-std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
-  const auto payload_size = header_size + m.data.size();
-  const auto total_size = payload_size + 2;
-
-  if (buffer.size() < total_size) {
-    throw std::out_of_range("Buffer is too small for message");
-  }
-
-  const auto length = to_bytes(3 + m.data.size());
-  const auto header = std::array<uint8_t, header_size>{
-      0x00, 0x00, 0x00, 0x00, 0x00,      0xff,      uint8_t(m.type),
-      0x04, 0x8c, 0x55, 0x4b, length[0], length[1], 0xff};
-
-  auto it = std::copy(header.begin(), header.end(), buffer.begin());
-  it = std::copy(m.data.begin(), m.data.end(), it);
-
-  const auto calculated_crc =
-      to_bytes(crc(std::span{buffer.begin() + 1, payload_size - 2}));
-  std::copy(calculated_crc.begin(), calculated_crc.end(), it);
-
-  return std::span{buffer.begin(), total_size};
-}
-
-message make_device_info_message(const uint8_t device_id,
-                                 std::span<uint8_t> buffer) {
-  const std::array<uint8_t, 19> data{
-      0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00,
-      0x00, 0x00, 0x00, 0xff, 0x00, 0x00,      0x00, 0x00, 0xff};
-  if (buffer.size() < data.size()) {
-    throw std::out_of_range("Buffer is too small for message");
-  }
-  std::copy(data.begin(), data.end(), buffer.begin());
-  return message{message_type::device_info, buffer.subspan(0, data.size())};
-}
-
 numeric_value::numeric_value(std::span<const uint8_t, 4> bytes) {
   std::copy(bytes.begin(), bytes.end(), _bytes.begin());
 }
