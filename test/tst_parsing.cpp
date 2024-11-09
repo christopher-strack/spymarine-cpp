@@ -91,7 +91,7 @@ TEST_CASE("write_message_data") {
   const auto expected_data =
       std::array{0x0,  0x0,  0x0,  0x0, 0x0, 0xff, 0x2,  0x4,
                  0x8c, 0x55, 0x4b, 0x0, 0x3, 0xff, 0xa8, 0xc0};
-  CHECK_THAT(write_message_data(message_type::device_count, {}, buffer),
+  CHECK_THAT(write_message_data({message_type::device_count}, buffer),
              Catch::Matchers::RangeEquals(expected_data));
 }
 

@@ -67,9 +67,7 @@ std::optional<uint8_t> parse_device_count_message(const message& m);
 
 /* Returns a valid Simarine request for the given Message.
  */
-std::span<uint8_t> write_message_data(message_type type,
-                                      const std::span<const uint8_t> data,
-                                      std::span<uint8_t> buffer);
+std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 
 /* Returns a device request for the given Device ID. The Simarine device
  * will reply with a device response that contains the description of the

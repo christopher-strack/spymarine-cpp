@@ -24,18 +24,20 @@ public:
 
     if (_last_sent_message->type == message_type::device_count) {
       _device_info_index = 0;
-      const auto m = parse_message(raw_device_count_response);
-      return write_message_data(m->type, m->data, buffer);
+      if (const auto m = parse_message(raw_device_count_response)) {
+        return write_message_data(*m, buffer);
+      }
     } else if (_last_sent_message->type == message_type::device_info &&
                _device_info_index &&
                *_device_info_index < raw_device_info_response.size()) {
-      const auto m =
-          parse_message(raw_device_info_response[*_device_info_index]);
-      _device_info_index =
-          *_device_info_index == raw_device_info_response.size() - 1
-              ? std::nullopt
-              : std::optional{*_device_info_index + 1};
-      return write_message_data(m->type, m->data, buffer);
+      if (const auto m =
+              parse_message(raw_device_info_response[*_device_info_index])) {
+        _device_info_index =
+            *_device_info_index == raw_device_info_response.size() - 1
+                ? std::nullopt
+                : std::optional{*_device_info_index + 1};
+        return write_message_data(*m, buffer);
+      }
     }
 
     return std::nullopt;
