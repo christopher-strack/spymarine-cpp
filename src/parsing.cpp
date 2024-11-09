@@ -80,6 +80,13 @@ parse_response(const std::span<const uint8_t> raw_response) {
       std::span{raw_response.begin() + header_size, raw_response.end() - 2}};
 }
 
+std::optional<uint8_t> parse_device_count_response(const message& m) {
+  if (m.type == message_type::device_count && m.data.size() >= 6) {
+    return m.data[5] + 1;
+  }
+  return std::nullopt;
+}
+
 namespace {
 std::array<uint8_t, 2> to_bytes(uint16_t value) {
   return {uint8_t((value >> 8) & 0xff), uint8_t(value & 0xff)};

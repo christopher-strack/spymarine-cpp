@@ -10,7 +10,7 @@ target_include_directories(spymarine PUBLIC include)
 
 find_package(Catch2 CONFIG REQUIRED)
 
-add_executable(spymarine_tests test/tst_parsing.cpp)
+add_executable(spymarine_tests test/tst_communication.cpp test/tst_parsing.cpp)
 
 target_link_libraries(spymarine_tests PRIVATE Catch2::Catch2WithMain spymarine)
 
