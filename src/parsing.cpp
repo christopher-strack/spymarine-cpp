@@ -162,21 +162,12 @@ std::optional<value> find_value(const uint8_t id,
   return std::nullopt;
 }
 
-std::optional<numeric_value>
-find_numeric_value(const uint8_t id, std::span<const uint8_t> bytes) {
+template <typename T>
+std::optional<T> find_value_for_type(const uint8_t id,
+                                     std::span<const uint8_t> bytes) {
   if (const auto value = find_value(id, bytes)) {
-    if (const auto n = std::get_if<numeric_value>(&*value)) {
+    if (const auto n = std::get_if<T>(&*value)) {
       return *n;
-    }
-  }
-  return std::nullopt;
-}
-
-std::optional<std::string_view> find_string(const uint8_t id,
-                                            std::span<const uint8_t> bytes) {
-  if (const auto value = find_value(id, bytes)) {
-    if (const auto str = std::get_if<std::string_view>(&*value)) {
-      return *str;
     }
   }
   return std::nullopt;
@@ -218,13 +209,13 @@ battery_type to_battery_type(const uint16_t battery_type) {
 
 std::optional<device> parse_device(const std::span<const uint8_t> bytes,
                                    const uint8_t sensor_start_index) {
-  const auto type_value = find_numeric_value(1, bytes);
+  const auto type_value = find_value_for_type<numeric_value>(1, bytes);
   if (!type_value) {
     return std::nullopt;
   }
 
   const auto type = type_value->second();
-  const auto name = find_string(3, bytes);
+  const auto name = find_value_for_type<std::string_view>(3, bytes);
 
   if (type == 0) {
     return null_device{};
@@ -251,8 +242,8 @@ std::optional<device> parse_device(const std::span<const uint8_t> bytes,
       return device{resistive_device{std::string{*name}, sensor_start_index}};
     }
   } else if (type == 8) {
-    const auto fluid_type = find_numeric_value(6, bytes);
-    const auto capacity = find_numeric_value(7, bytes);
+    const auto fluid_type = find_value_for_type<numeric_value>(6, bytes);
+    const auto capacity = find_value_for_type<numeric_value>(7, bytes);
     if (name && fluid_type && capacity) {
       return device{tank_device{
           std::string{*name},
@@ -262,8 +253,8 @@ std::optional<device> parse_device(const std::span<const uint8_t> bytes,
       }};
     }
   } else if (type == 9) {
-    const auto battery_type = find_numeric_value(8, bytes);
-    const auto capacity = find_numeric_value(5, bytes);
+    const auto battery_type = find_value_for_type<numeric_value>(8, bytes);
+    const auto capacity = find_value_for_type<numeric_value>(5, bytes);
     if (name && battery_type && capacity) {
       return device{battery_device{
           std::string{*name},
