@@ -5,12 +5,12 @@
 
 namespace spymarine {
 
-namespace {
-
 template <typename container_type>
 concept device_container = requires(container_type container) {
   container.insert(container.end(), device{});
 };
+
+namespace detail {
 
 template <typename client, device_container container_type>
 bool read_devices(const uint8_t device_count, client& c,
@@ -38,7 +38,7 @@ bool read_devices(const uint8_t device_count, client& c,
 
   return true;
 }
-} // namespace
+} // namespace detail
 
 template <typename client_type, device_container container_type>
 bool read_devices(client_type& client, std::span<uint8_t> request_buffer,
@@ -48,7 +48,8 @@ bool read_devices(client_type& client, std::span<uint8_t> request_buffer,
 
   if (const auto response = client.request(device_count_message)) {
     if (const auto device_count = parse_device_count_message(*response)) {
-      return read_devices(*device_count, client, request_buffer, devices);
+      return detail::read_devices(*device_count, client, request_buffer,
+                                  devices);
     }
   }
 
