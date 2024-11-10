@@ -5,18 +5,21 @@
 #include <array>
 #include <chrono>
 #include <concepts>
+#include <cstdint>
 #include <optional>
 #include <thread>
 
 namespace spymarine {
 
 template <typename tcp_socket_type>
-concept tcp_socket = requires(tcp_socket_type socket) {
-  { socket.send(std::span<uint8_t>{}) } -> std::same_as<bool>;
-  {
-    socket.receive(std::span<uint8_t>{})
-  } -> std::same_as<std::optional<std::span<uint8_t>>>;
-};
+concept tcp_socket =
+    requires(tcp_socket_type socket, uint32_t ip, uint16_t port) {
+      { tcp_socket_type(ip, port) };
+      { socket.send(std::span<uint8_t>{}) } -> std::same_as<bool>;
+      {
+        socket.receive(std::span<uint8_t>{})
+      } -> std::same_as<std::optional<std::span<uint8_t>>>;
+    };
 
 template <typename container_type>
 concept device_container = requires(container_type container) {
@@ -29,10 +32,12 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 
 template <tcp_socket tcp_socket_type> class client {
 public:
-  client(tcp_socket_type socket,
+  // TODO we cannot pass a socket here, we need to create a new connection
+  // for every request
+  client(uint32_t address, uint16_t port,
          const std::chrono::system_clock::duration request_limit =
              std::chrono::milliseconds{10})
-      : _socket{std::move(socket)}, _request_limit{request_limit} {}
+      : _ip_address{address}, _port{port}, _request_limit{request_limit} {}
 
   template <device_container container_type>
   bool read_devices(container_type& devices) {
@@ -90,8 +95,9 @@ private:
   std::optional<message> request(const message& m) {
     wait_for_request_limit();
 
-    if (_socket.send(detail::write_message_data(m, _buffer))) {
-      if (const auto raw_response = _socket.receive(_buffer)) {
+    tcp_socket_type socket{_ip_address, _port};
+    if (socket.send(detail::write_message_data(m, _buffer))) {
+      if (const auto raw_response = socket.receive(_buffer)) {
         return parse_message(*raw_response);
       }
     }
@@ -107,7 +113,8 @@ private:
     }
   }
 
-  tcp_socket_type _socket;
+  uint32_t _ip_address;
+  uint16_t _port;
   std::array<uint8_t, 1024> _buffer;
   std::chrono::system_clock::duration _request_limit;
   std::optional<std::chrono::system_clock::time_point> _last_request_time;

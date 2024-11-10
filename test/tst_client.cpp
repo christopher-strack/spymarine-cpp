@@ -13,6 +13,8 @@ namespace spymarine {
 namespace {
 class mock_tcp_socket {
 public:
+  mock_tcp_socket(uint32_t, uint16_t) {}
+
   bool send(std::span<uint8_t> data) {
     _last_sent_message = parse_message(data);
     return true;
@@ -42,7 +44,7 @@ private:
 } // namespace
 
 TEST_CASE("client") {
-  client client{mock_tcp_socket{}, std::chrono::seconds{0}};
+  client<mock_tcp_socket> client{0, 0, std::chrono::seconds{0}};
   std::vector<device> devices;
   REQUIRE(client.read_devices(devices));
 
