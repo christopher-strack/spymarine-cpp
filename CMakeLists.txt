@@ -8,12 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_library(spymarine src/device.cpp src/client.cpp src/device_ostream.cpp src/parsing.cpp)
 target_include_directories(spymarine PUBLIC include)
 
-find_package(Catch2 CONFIG REQUIRED)
+option(BUILD_TESTS "Build tests" OFF)
 
-add_executable(spymarine_tests test/tst_client.cpp test/tst_parsing.cpp)
+if(BUILD_TESTS)
+    find_package(Catch2 CONFIG REQUIRED)
 
-target_link_libraries(spymarine_tests PRIVATE Catch2::Catch2WithMain spymarine)
+    add_executable(spymarine_tests test/tst_client.cpp test/tst_parsing.cpp)
 
-include(CTest)
-include(Catch)
-catch_discover_tests(spymarine_tests)
+    target_link_libraries(spymarine_tests PRIVATE Catch2::Catch2WithMain spymarine)
+endif()
