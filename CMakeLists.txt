@@ -9,12 +9,15 @@ add_library(spymarine
     src/client.cpp
     src/device_ostream.cpp
     src/device.cpp
+    src/file_descriptor.cpp
     src/parsing.cpp
+    src/tcp_socket.cpp
 )
 
 target_include_directories(spymarine PUBLIC include)
 
 option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_EXAMPLES "Build examples" OFF)
 
 if(BUILD_TESTS)
     find_package(Catch2 CONFIG REQUIRED)
@@ -22,4 +25,11 @@ if(BUILD_TESTS)
     add_executable(spymarine_tests test/tst_client.cpp test/tst_parsing.cpp)
 
     target_link_libraries(spymarine_tests PRIVATE Catch2::Catch2WithMain spymarine)
+endif()
+
+
+if(BUILD_EXAMPLES)
+    add_executable(read_devices_example examples/read_devices.cpp)
+
+    target_link_libraries(read_devices_example PRIVATE spymarine)
 endif()
