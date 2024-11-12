@@ -5,7 +5,13 @@ project(spymarine_cpp VERSION 0.1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_library(spymarine src/device.cpp src/client.cpp src/device_ostream.cpp src/parsing.cpp)
+add_library(spymarine
+    src/client.cpp
+    src/device_ostream.cpp
+    src/device.cpp
+    src/parsing.cpp
+)
+
 target_include_directories(spymarine PUBLIC include)
 
 option(BUILD_TESTS "Build tests" OFF)
