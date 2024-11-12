@@ -1,6 +1,7 @@
 #pragma once
 
 #include "parsing.hpp"
+#include "spymarine/device.hpp"
 
 #include <array>
 #include <chrono>
@@ -8,6 +9,7 @@
 #include <cstdint>
 #include <optional>
 #include <thread>
+#include <variant>
 
 namespace spymarine {
 
@@ -60,7 +62,11 @@ private:
     for (uint8_t i = 0; i < device_count; i++) {
       if (auto device = request_device_info(i, sensor_start_index)) {
         sensor_start_index += sensor_state_offset(*device);
-        devices.insert(devices.end(), std::move(*device));
+
+        if (!std::holds_alternative<null_device>(*device) &&
+            !std::holds_alternative<unknown_device>(*device)) {
+          devices.insert(devices.end(), std::move(*device));
+        }
       } else {
         return false;
       }

@@ -49,16 +49,8 @@ TEST_CASE("client") {
   REQUIRE(client.read_devices(devices));
 
   const auto expected_devices = std::vector<device>{
-      unknown_device{},
-      unknown_device{},
-      unknown_device{},
-      null_device{},
-      null_device{},
       barometer_device{"Barometer", 3},
       pico_internal_device{5},
-      null_device{},
-      null_device{},
-      null_device{},
       voltage_device{"ST107 [5596] 1", 11},
       voltage_device{"ST107 [5596] 2", 12},
       voltage_device{"ST107 [5596] 3", 13},
@@ -66,7 +58,6 @@ TEST_CASE("client") {
       resistive_device{"ST107 [5596] 2", 15},
       resistive_device{"ST107 [5596] 3", 16},
       resistive_device{"ST107 [5596] 4", 17},
-      unknown_device{},
       current_device{"SC303 [5499]", 19},
       voltage_device{"SC303 [5499] 1", 21},
       voltage_device{"SC303 [5499] 2", 22},
