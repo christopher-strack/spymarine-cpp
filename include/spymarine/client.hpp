@@ -34,8 +34,6 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 
 template <tcp_socket tcp_socket_type> class client {
 public:
-  // TODO we cannot pass a socket here, we need to create a new connection
-  // for every request
   client(uint32_t address, uint16_t port,
          const std::chrono::system_clock::duration request_limit =
              std::chrono::milliseconds{10})
