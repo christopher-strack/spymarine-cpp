@@ -1,7 +1,7 @@
 #pragma once
 
+#include "device.hpp"
 #include "parsing.hpp"
-#include "spymarine/device.hpp"
 
 #include <array>
 #include <chrono>
@@ -14,7 +14,7 @@
 namespace spymarine {
 
 template <typename tcp_socket_type>
-concept tcp_socket =
+concept tcp_socket_concept =
     requires(tcp_socket_type socket, uint32_t ip, uint16_t port) {
       { tcp_socket_type(ip, port) };
       { socket.send(std::span<uint8_t>{}) } -> std::same_as<bool>;
@@ -24,7 +24,7 @@ concept tcp_socket =
     };
 
 template <typename container_type>
-concept device_container = requires(container_type container) {
+concept device_container_concept = requires(container_type container) {
   container.insert(container.end(), device{});
 };
 
@@ -32,14 +32,14 @@ namespace detail {
 std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 }
 
-template <tcp_socket tcp_socket_type> class client {
+template <tcp_socket_concept tcp_socket_type> class client {
 public:
   client(uint32_t address, uint16_t port,
          const std::chrono::system_clock::duration request_limit =
              std::chrono::milliseconds{10})
       : _ip_address{address}, _port{port}, _request_limit{request_limit} {}
 
-  template <device_container container_type>
+  template <device_container_concept container_type>
   bool read_devices(container_type& devices) {
     if (const auto device_count = request_device_count()) {
       return read_devices(*device_count, devices);
@@ -49,7 +49,7 @@ public:
   }
 
 private:
-  template <device_container container_type>
+  template <device_container_concept container_type>
   bool read_devices(const uint8_t device_count, container_type& devices) {
     if constexpr (requires(container_type c) { c.reserve(device_count); }) {
       devices.reserve(device_count);
