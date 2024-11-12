@@ -1,7 +1,7 @@
 #pragma once
 
-#include "device.hpp"
-#include "parsing.hpp"
+#include "spymarine/device.hpp"
+#include "spymarine/parsing.hpp"
 
 #include <array>
 #include <chrono>
