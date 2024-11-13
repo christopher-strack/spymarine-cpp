@@ -7,22 +7,31 @@
 
 #include <catch2/catch_all.hpp>
 
+#include <expected>
 #include <ranges>
+#include <system_error>
 
 namespace spymarine {
 namespace {
 class mock_tcp_socket {
 public:
-  mock_tcp_socket(uint32_t, uint16_t) {}
-
-  bool send(std::span<uint8_t> data) {
-    _last_sent_message = parse_message(data);
-    return true;
+  static std::expected<mock_tcp_socket, std::error_code> open() {
+    return mock_tcp_socket{};
   }
 
-  std::optional<std::span<uint8_t>> receive(std::span<uint8_t> buffer) {
+  std::expected<void, std::error_code> connect(uint32_t, uint16_t) {
+    return {};
+  }
+
+  std::expected<void, std::error_code> send(std::span<uint8_t> data) {
+    _last_sent_message = parse_message(data);
+    return {};
+  }
+
+  std::expected<std::span<uint8_t>, std::error_code>
+  receive(std::span<uint8_t> buffer) {
     if (!_last_sent_message) {
-      return std::nullopt;
+      return std::unexpected{std::make_error_code(std::errc::io_error)};
     }
 
     if (_last_sent_message->type == message_type::device_count) {
@@ -35,11 +44,11 @@ public:
       return buffer.subspan(0, data.size());
     }
 
-    return std::nullopt;
+    return std::unexpected{std::make_error_code(std::errc::io_error)};
   }
 
 private:
-  std::optional<message> _last_sent_message;
+  std::expected<message, error> _last_sent_message;
 };
 } // namespace
 

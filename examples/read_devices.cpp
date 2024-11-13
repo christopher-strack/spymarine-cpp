@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   }
 
   constexpr auto simarine_default_tcp_port = 5001;
-  spymarine::client<spymarine::tcp_socket> client{ip,
+  spymarine::client<spymarine::tcp_socket> client{ntohl(ip),
                                                   simarine_default_tcp_port};
 
   std::cout << "Reading devices" << std::endl;

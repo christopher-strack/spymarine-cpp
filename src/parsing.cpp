@@ -1,6 +1,7 @@
 #include "spymarine/parsing.hpp"
 
 #include <algorithm>
+#include <expected>
 #include <ranges>
 
 namespace spymarine {
@@ -21,18 +22,18 @@ uint16_t to_uint16(const std::span<const uint8_t, 2> data) {
 
 } // namespace
 
-std::optional<header> parse_header(const std::span<const uint8_t> data) {
+std::expected<header, error> parse_header(const std::span<const uint8_t> data) {
   if (data.size() < header_size) {
-    return std::nullopt;
+    return std::unexpected{error::invalid_data_length};
   }
 
   const std::array<uint8_t, 6> prefix = {0x00, 0x00, 0x00, 0x00, 0x00, 0xff};
   if (!std::ranges::equal(data.subspan(0, prefix.size()), prefix)) {
-    return std::nullopt;
+    return std::unexpected{error::invalid_header};
   }
 
   if (data[13] != 0xff) {
-    return std::nullopt;
+    return std::unexpected{error::invalid_header};
   }
 
   const auto type = data.data()[6];
@@ -59,24 +60,28 @@ uint16_t crc(const std::span<const uint8_t> bytes) {
   return crc;
 }
 
-std::optional<message> parse_message(const std::span<const uint8_t> data) {
-  const auto header = parse_header(data);
-  const auto data_length = data.size() - header_size + 1;
+std::expected<message, error>
+parse_message(const std::span<const uint8_t> data) {
+  return parse_header(data).and_then(
+      [&](const auto header) -> std::expected<message, error> {
+        const auto data_length = data.size() - header_size + 1;
 
-  if (header->length != data_length) {
-    return std::nullopt;
-  }
+        if (header.length != data_length) {
+          return std::unexpected{error::invalid_data_length};
+        }
 
-  const auto calculated_crc = crc(std::span{data.begin() + 1, data.end() - 3});
-  const auto received_crc =
-      to_uint16(std::span<const uint8_t, 2>{data.end() - 2, 2});
+        const auto calculated_crc =
+            crc(std::span{data.begin() + 1, data.end() - 3});
+        const auto received_crc =
+            to_uint16(std::span<const uint8_t, 2>{data.end() - 2, 2});
 
-  if (calculated_crc != received_crc) {
-    return std::nullopt;
-  }
+        if (calculated_crc != received_crc) {
+          return std::unexpected{error::invalid_crc};
+        }
 
-  return message{static_cast<message_type>(header->type),
-                 std::span{data.begin() + header_size, data.end() - 2}};
+        return message{static_cast<message_type>(header.type),
+                       std::span{data.begin() + header_size, data.end() - 2}};
+      });
 }
 
 numeric_value::numeric_value(std::span<const uint8_t, 4> bytes) {
@@ -200,11 +205,11 @@ battery_type to_battery_type(const uint16_t battery_type) {
 }
 } // namespace
 
-std::optional<device> parse_device(const std::span<const uint8_t> bytes,
-                                   const uint8_t sensor_start_index) {
+std::expected<device, error> parse_device(const std::span<const uint8_t> bytes,
+                                          const uint8_t sensor_start_index) {
   const auto type_value = find_value_for_type<numeric_value>(1, bytes);
   if (!type_value) {
-    return std::nullopt;
+    return std::unexpected{error::invalid_device_message};
   }
 
   const auto type = type_value->second();

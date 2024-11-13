@@ -5,14 +5,22 @@
 #include <sys/socket.h>
 
 #include <cstdint>
-#include <optional>
+#include <expected>
 #include <span>
+#include <system_error>
 
 namespace spymarine {
 
 class tcp_socket {
 public:
-  tcp_socket(uint32_t ip, uint16_t port);
+  static std::expected<tcp_socket, std::error_code> open();
+
+  std::expected<void, std::error_code> connect(uint32_t ip, uint16_t port);
+
+  std::expected<void, std::error_code> send(std::span<uint8_t>);
+
+  std::expected<std::span<uint8_t>, std::error_code>
+  receive(std::span<uint8_t> buffer);
 
   tcp_socket(const tcp_socket& rhs) = delete;
   tcp_socket(tcp_socket&& rhs) = default;
@@ -20,12 +28,10 @@ public:
   tcp_socket& operator=(const tcp_socket& rhs) = delete;
   tcp_socket& operator=(tcp_socket&& rhs) = default;
 
-  bool send(std::span<uint8_t>);
-
-  std::optional<std::span<uint8_t>> receive(std::span<uint8_t> buffer);
-
 private:
-  file_descriptor _socket;
+  tcp_socket(file_descriptor fd);
+
+  file_descriptor _fd;
 };
 
 } // namespace spymarine

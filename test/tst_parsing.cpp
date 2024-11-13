@@ -35,17 +35,18 @@ TEST_CASE("parse_header") {
     CHECK(parse_header(bytes) == expected_header);
   }
 
-  SECTION("returns nullopt if not enough bytes were provided") {
+  SECTION("returns error if not enough bytes were provided") {
     constexpr auto valid_bytes =
         header_bytes{0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x41,
                      0x85, 0xde, 0xc3, 0x46, 0x01, 0x61, 0xff};
-    CHECK(parse_header(std::span{valid_bytes}.subspan(0, 13)) == std::nullopt);
+    CHECK(parse_header(std::span{valid_bytes}.subspan(0, 13)).error() ==
+          error::invalid_data_length);
   }
 
-  SECTION("returns nullopt if header doesn't match pattern") {
+  SECTION("returns error if header doesn't match pattern") {
     auto bytes = header_bytes{0x01, 0x00, 0x00, 0x00, 0x00, 0xff, 0x41,
                               0x85, 0xde, 0xc3, 0x46, 0x01, 0x61, 0xff};
-    CHECK(parse_header(bytes) == std::nullopt);
+    CHECK(parse_header(bytes).error() == error::invalid_header);
   }
 }
 
@@ -66,16 +67,16 @@ TEST_CASE("parse_message") {
     CHECK(parse_message(valid_message) == expected_message);
   }
 
-  SECTION("returns nullopt if length is invalid") {
+  SECTION("returns error if length is invalid") {
     auto invalid_message = valid_message;
     invalid_message[12] += 1;
-    CHECK(parse_message(invalid_message) == std::nullopt);
+    CHECK(parse_message(invalid_message).error() == error::invalid_data_length);
   }
 
-  SECTION("returns nullopt if crc is invalid") {
+  SECTION("returns error if crc is invalid") {
     auto invalid_message = valid_message;
     invalid_message[invalid_message.size() - 1] += 1;
-    CHECK(parse_message(invalid_message) == std::nullopt);
+    CHECK(parse_message(invalid_message).error() == error::invalid_crc);
   }
 }
 
