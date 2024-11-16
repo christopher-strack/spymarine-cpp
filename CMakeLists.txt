@@ -12,6 +12,7 @@ add_library(spymarine
     src/file_descriptor.cpp
     src/parsing.cpp
     src/tcp_socket.cpp
+    src/udp_socket.cpp
 )
 
 target_include_directories(spymarine PUBLIC include)
