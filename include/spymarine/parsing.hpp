@@ -89,7 +89,9 @@ private:
   std::array<uint8_t, 4> _bytes;
 };
 
-using value = std::variant<numeric_value, std::string_view>;
+struct invalid_value {};
+
+using value = std::variant<numeric_value, std::string_view, invalid_value>;
 
 std::expected<parsed_device, error>
 parse_device(const std::span<const uint8_t> bytes, uint8_t state_start_index);
