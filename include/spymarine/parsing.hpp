@@ -1,12 +1,9 @@
 #pragma once
 
-#include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 
 #include <expected>
 #include <span>
-#include <string_view>
-#include <variant>
 
 namespace spymarine {
 
@@ -65,8 +62,5 @@ uint16_t crc(const std::span<const uint8_t> bytes);
  */
 std::expected<message, error>
 parse_message(const std::span<const uint8_t> data);
-
-std::expected<parsed_device, error>
-parse_device(const std::span<const uint8_t> bytes, uint8_t state_start_index);
 
 } // namespace spymarine

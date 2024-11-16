@@ -3,6 +3,7 @@
 #include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/overloaded.hpp"
+#include "spymarine/parse_device.hpp"
 #include "spymarine/parsing.hpp"
 
 #include <array>

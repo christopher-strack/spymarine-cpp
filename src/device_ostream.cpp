@@ -32,10 +32,6 @@ std::ostream& operator<<(std::ostream& os, const sensor_info& info) {
             << ",state_index=" << int(info.state_index) << "}";
 }
 
-std::ostream& operator<<(std::ostream& os, const null_device& device) {
-  return os << "null_device{}";
-}
-
 std::ostream& operator<<(std::ostream& os, const pico_internal_device& device) {
   return os << "pico_internal_device{voltage_sensor=" << device.voltage_sensor
             << "}";
@@ -116,10 +112,6 @@ std::ostream& operator<<(std::ostream& os, const battery_device& device) {
             << ",remaining_capacity_sensor=" << device.remaining_capacity_sensor
             << ",current_sensor=" << device.current_sensor
             << ",voltage=" << device.voltage_sensor << "}";
-}
-
-std::ostream& operator<<(std::ostream& os, const unknown_device& device) {
-  return os << "unknown_device{}";
 }
 
 std::ostream& operator<<(std::ostream& os, const device& device) {

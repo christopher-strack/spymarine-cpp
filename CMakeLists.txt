@@ -11,6 +11,7 @@ add_library(spymarine
     src/device.cpp
     src/file_descriptor.cpp
     src/parsing.cpp
+    src/parse_device.cpp
     src/tcp_socket.cpp
     src/udp_socket.cpp
     src/value_iterator.cpp
