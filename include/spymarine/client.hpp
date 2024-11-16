@@ -2,6 +2,7 @@
 
 #include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
+#include "spymarine/overloaded.hpp"
 #include "spymarine/parsing.hpp"
 
 #include <array>
@@ -34,7 +35,7 @@ concept tcp_socket_concept =
 
 template <typename container_type>
 concept device_container_concept = requires(container_type container) {
-  container.insert(container.end(), device{});
+  container.insert(container.end(), device{voltage_device{"", 0}});
 };
 
 namespace detail {
@@ -73,15 +74,19 @@ private:
     uint8_t sensor_start_index = 0;
 
     for (uint8_t i = 0; i < device_count; i++) {
-      if (auto device = request_device_info(i, sensor_start_index)) {
-        sensor_start_index += sensor_state_offset(*device);
+      if (auto parsed_device = request_device_info(i, sensor_start_index)) {
+        sensor_start_index += sensor_state_offset(*parsed_device);
 
-        if (!std::holds_alternative<null_device>(*device) &&
-            !std::holds_alternative<unknown_device>(*device)) {
-          devices.insert(devices.end(), std::move(*device));
-        }
+        std::visit(overloaded{
+                       [](null_device) {},
+                       [](unknown_device) {},
+                       [&devices](auto device) {
+                         devices.insert(devices.end(), std::move(device));
+                       },
+                   },
+                   std::move(*parsed_device));
       } else {
-        return std::unexpected{device.error()};
+        return std::unexpected{parsed_device.error()};
       }
     }
 
@@ -100,7 +105,7 @@ private:
             });
   }
 
-  std::expected<device, client_error>
+  std::expected<parsed_device, client_error>
   request_device_info(uint8_t device_id, uint8_t sensor_start_index) {
     const std::array<uint8_t, 19> data{
         0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00,

@@ -137,11 +137,16 @@ struct unknown_device {
   auto operator<=>(const unknown_device&) const = default;
 };
 
-using device =
+using parsed_device =
     std::variant<null_device, pico_internal_device, voltage_device,
                  current_device, temperature_device, barometer_device,
                  resistive_device, tank_device, battery_device, unknown_device>;
 
-uint8_t sensor_state_offset(const device& device);
+using device =
+    std::variant<pico_internal_device, voltage_device, current_device,
+                 temperature_device, barometer_device, resistive_device,
+                 tank_device, battery_device>;
+
+uint8_t sensor_state_offset(const parsed_device& device);
 
 } // namespace spymarine

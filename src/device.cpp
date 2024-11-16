@@ -45,7 +45,7 @@ battery_device::battery_device(std::string name, battery_type type,
       current_sensor{sensor_type::current, uint8_t(sensor_start_index + 1)},
       voltage_sensor{sensor_type::voltage, uint8_t(sensor_start_index + 2)} {}
 
-uint8_t sensor_state_offset(const device& device) {
+uint8_t sensor_state_offset(const parsed_device& device) {
   return std::visit(overloaded{
                         [](const null_device&) { return 0; },
                         [](const pico_internal_device&) { return 6; },

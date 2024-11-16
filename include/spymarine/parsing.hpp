@@ -91,7 +91,7 @@ private:
 
 using value = std::variant<numeric_value, std::string_view>;
 
-std::expected<device, error> parse_device(const std::span<const uint8_t> bytes,
-                                          uint8_t sensor_start_index);
+std::expected<parsed_device, error>
+parse_device(const std::span<const uint8_t> bytes, uint8_t sensor_start_index);
 
 } // namespace spymarine

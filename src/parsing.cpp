@@ -206,8 +206,9 @@ battery_type to_battery_type(const uint16_t battery_type) {
 }
 } // namespace
 
-std::expected<device, error> parse_device(const std::span<const uint8_t> bytes,
-                                          const uint8_t sensor_start_index) {
+std::expected<parsed_device, error>
+parse_device(const std::span<const uint8_t> bytes,
+             const uint8_t sensor_start_index) {
   const auto type_value = find_value_for_type<numeric_value>(1, bytes);
   if (!type_value) {
     return std::unexpected{error::invalid_device_message};
@@ -221,9 +222,9 @@ std::expected<device, error> parse_device(const std::span<const uint8_t> bytes,
     return null_device{};
   case 1:
     return name_value == "PICO INTERNAL"
-               ? device{pico_internal_device{sensor_start_index}}
-               : device{voltage_device{std::string{*name_value},
-                                       sensor_start_index}};
+               ? parsed_device{pico_internal_device{sensor_start_index}}
+               : parsed_device{voltage_device{std::string{*name_value},
+                                              sensor_start_index}};
   case 2:
     if (name_value) {
       return current_device{std::string{*name_value}, sensor_start_index};
