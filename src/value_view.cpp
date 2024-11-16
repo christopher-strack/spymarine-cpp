@@ -38,25 +38,20 @@ std::span<const uint8_t> advance_bytes(std::span<const uint8_t> bytes,
 
 } // namespace
 
+value_iterator::value_iterator() : _id_and_value{0, invalid_value{}} {}
+
 value_iterator::value_iterator(std::span<const uint8_t> buffer)
-    : _remaining(buffer) {}
+    : _id_and_value{0, invalid_value{}}, _remaining{buffer} {
+  update_id_and_value();
+}
 
 value_iterator::value_type value_iterator::operator*() const {
-  const auto value_id = _remaining[0];
-  const auto value_type = _remaining[1];
-  const auto bytes = _remaining.subspan(2);
+  return _id_and_value;
+}
 
-  if (value_type == 1 && bytes.size() >= 4) {
-    return {value_id, numeric_value{bytes.subspan<0, 4>()}};
-  } else if (value_type == 3 && bytes.size() >= 9) {
-    return {value_id, numeric_value{bytes.subspan<5, 4>()}};
-  } else if (value_type == 4) {
-    if (const auto string = read_string(bytes)) {
-      return {value_id, *string};
-    }
-  }
-
-  return {value_id, invalid_value{}};
+std::add_pointer_t<value_iterator::value_type const>
+value_iterator::operator->() const {
+  return std::addressof(_id_and_value);
 }
 
 value_iterator& value_iterator::operator++() {
@@ -73,12 +68,14 @@ value_iterator& value_iterator::operator++() {
   } else if (value_type == 3) {
     _remaining = advance_bytes(bytes, 10);
   } else if (value_type == 4) {
-    const auto string = read_string(bytes);
-    _remaining = string ? advance_bytes(bytes, string->size() + 7)
-                        : std::span<const uint8_t>{};
+    const auto string = std::get<std::string_view>(_id_and_value.value);
+    _remaining = advance_bytes(bytes, string.size() + 7);
   } else {
     _remaining = {};
   }
+
+  update_id_and_value();
+
   return *this;
 }
 
@@ -86,6 +83,28 @@ value_iterator value_iterator::operator++(int) {
   value_iterator tmp = *this;
   ++(*this);
   return tmp;
+}
+
+void value_iterator::update_id_and_value() {
+  if (_remaining.size() < 2) {
+    return;
+  }
+
+  _id_and_value.id = _remaining[0];
+
+  const auto value_type = _remaining[1];
+  const auto bytes = _remaining.subspan(2);
+
+  if (value_type == 1 && bytes.size() >= 4) {
+    _id_and_value.value = numeric_value{bytes.subspan<0, 4>()};
+  } else if (value_type == 3 && bytes.size() >= 9) {
+    _id_and_value.value = numeric_value{bytes.subspan<5, 4>()};
+  } else if (value_type == 4) {
+    const auto string = read_string(bytes);
+    _id_and_value.value = string ? value{*string} : invalid_value{};
+  } else {
+    _id_and_value.value = invalid_value{};
+  }
 }
 
 bool operator==(const value_iterator& lhs, const value_iterator& rhs) {
@@ -103,14 +122,9 @@ value_iterator value_view::end() const {
   return value_iterator(std::span<const uint8_t>{});
 }
 
-std::optional<value> find_value(const uint8_t id, const value_view& values) {
-  if (const auto it = std::ranges::find_if(
-          values, [&](const auto value) { return value.id == id; });
-      it != values.end()) {
-    return (*it).value;
-  }
-
-  return std::nullopt;
+value_iterator find_value(const uint8_t id, const value_view& values) {
+  return std::ranges::find_if(
+      values, [id](const auto value) { return value.id == id; });
 }
 
 } // namespace spymarine

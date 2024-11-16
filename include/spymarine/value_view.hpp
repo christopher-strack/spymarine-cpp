@@ -4,6 +4,7 @@
 #include <optional>
 #include <span>
 #include <string_view>
+#include <type_traits>
 #include <variant>
 
 namespace spymarine {
@@ -36,10 +37,12 @@ public:
   using difference_type = std::ptrdiff_t;
 
 public:
-  value_iterator() = default;
+  value_iterator();
   explicit value_iterator(std::span<const uint8_t> buffer);
 
   value_type operator*() const;
+
+  std::add_pointer_t<value_type const> operator->() const;
 
   value_iterator& operator++();
 
@@ -50,6 +53,9 @@ public:
   friend bool operator!=(const value_iterator& lhs, const value_iterator& rhs);
 
 private:
+  void update_id_and_value();
+
+  id_and_value _id_and_value;
   std::span<const uint8_t> _remaining;
 };
 
@@ -65,16 +71,17 @@ private:
   std::span<const uint8_t> _buffer;
 };
 
-std::optional<value> find_value(const uint8_t expected_id,
-                                const value_view& values);
+value_iterator find_value(const uint8_t id, const value_view& values);
 
 template <typename T>
 std::optional<T> find_value_for_type(const uint8_t id,
                                      const value_view& values) {
-  return find_value(id, values).and_then([](const auto& value) {
-    const auto result = std::get_if<T>(&value);
-    return result ? std::optional{*result} : std::nullopt;
-  });
+  if (const auto it = find_value(id, values); it != values.end()) {
+    if (const auto* value = std::get_if<T>(&it->value); value) {
+      return *value;
+    }
+  }
+  return std::nullopt;
 }
 
 } // namespace spymarine
