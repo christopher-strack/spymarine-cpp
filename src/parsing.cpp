@@ -155,6 +155,8 @@ std::optional<value> find_value(const uint8_t id,
         return std::nullopt;
       }
       bytes = advance_bytes(bytes, string->size() + 7);
+    } else {
+      return std::nullopt;
     }
   }
 
