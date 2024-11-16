@@ -1,4 +1,5 @@
 #include "spymarine/client.hpp"
+#include "spymarine/overloaded.hpp"
 
 namespace spymarine::detail {
 
@@ -36,12 +37,6 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
 } // namespace spymarine::detail
 
 namespace spymarine {
-namespace {
-
-template <class... Ts> struct overloaded : Ts... {
-  using Ts::operator()...;
-};
-} // namespace
 
 std::string error_message(client_error err) {
   return std::visit(overloaded{
