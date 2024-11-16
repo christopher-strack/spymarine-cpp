@@ -1,9 +1,9 @@
 #pragma once
 
 #include "spymarine/device.hpp"
+#include "spymarine/error.hpp"
 #include "spymarine/parsing.hpp"
 
-#include <__expected/unexpected.h>
 #include <array>
 #include <chrono>
 #include <concepts>
@@ -44,6 +44,8 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 using client_error = std::variant<error, std::error_code>;
 
 inline client_error to_client_error(const error& err) { return err; }
+
+std::string error_message(client_error error);
 
 template <tcp_socket_concept tcp_socket_type> class client {
 public:

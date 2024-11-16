@@ -6,6 +6,7 @@ namespace {
 std::array<uint8_t, 2> to_bytes(uint16_t value) {
   return {uint8_t((value >> 8) & 0xff), uint8_t(value & 0xff)};
 }
+
 } // namespace
 
 std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
@@ -33,3 +34,21 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
 }
 
 } // namespace spymarine::detail
+
+namespace spymarine {
+namespace {
+
+template <class... Ts> struct overloaded : Ts... {
+  using Ts::operator()...;
+};
+} // namespace
+
+std::string error_message(client_error err) {
+  return std::visit(overloaded{
+                        [](error e) { return std::to_string(int(e)); },
+                        [](std::error_code ec) { return ec.message(); },
+                    },
+                    err);
+}
+
+} // namespace spymarine

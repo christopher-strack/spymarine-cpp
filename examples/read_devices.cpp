@@ -34,6 +34,9 @@ int main(int argc, char** argv) {
         std::cout << "Device: " << str.str() << std::endl;
       }
     }
+  } else {
+    std::cerr << "Couldn't find Simarine device: "
+              << spymarine::error_message(discovered_ip.error()) << std::endl;
   }
 
   return 0;
