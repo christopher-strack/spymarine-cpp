@@ -142,10 +142,15 @@ struct unknown_device {
   auto operator<=>(const unknown_device&) const = default;
 };
 
+template <typename T, typename... Args> struct variant_extender;
+
+template <typename... Args0, typename... Args1>
+struct variant_extender<std::variant<Args0...>, Args1...> {
+  using type = std::variant<Args0..., Args1...>;
+};
+
 using parsed_device =
-    std::variant<pico_internal_device, voltage_device, current_device,
-                 temperature_device, barometer_device, resistive_device,
-                 tank_device, battery_device, null_device, unknown_device>;
+    variant_extender<device, null_device, unknown_device>::type;
 
 uint8_t sensor_state_offset(const parsed_device& device);
 
