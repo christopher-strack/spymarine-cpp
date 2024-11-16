@@ -2,8 +2,6 @@
 
 #include "spymarine/file_descriptor.hpp"
 
-#include <sys/socket.h>
-
 #include <cstdint>
 #include <expected>
 #include <span>

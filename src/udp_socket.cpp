@@ -1,9 +1,8 @@
 #include "spymarine/udp_socket.hpp"
 #include "spymarine/file_descriptor.hpp"
 
-#include <cstdint>
-#include <cstdio>
 #include <netinet/in.h>
+#include <sys/socket.h>
 
 #include <cstring>
 #include <expected>
