@@ -1,6 +1,7 @@
 #pragma once
 
 #include "spymarine/error.hpp"
+#include "spymarine/message.hpp"
 
 #include <expected>
 #include <span>
@@ -17,30 +18,6 @@ struct header {
 
   auto operator<=>(const header&) const = default;
 };
-
-/* The message type described by the header.
- * enum only represents the known subset.
- */
-enum class message_type {
-  // Request the number of connected devices
-  device_count = 0x02,
-
-  // Request information about a device
-  device_info = 0x41,
-
-  // Sensor update message (UDP)
-  sensor_state = 0xb0,
-};
-
-/* A message as received by a Simarine device
- */
-struct message {
-  message_type type;
-  std::span<const uint8_t> data;
-};
-
-bool operator==(const message& lhs, const message& rhs);
-bool operator!=(const message& lhs, const message& rhs);
 
 /* Parses the given bytes. Returns a Header on success.
     Raises ParsingError if the given bytes are not a valid header.

@@ -1,13 +1,8 @@
 #include "raw_data.hpp"
 
-#include "spymarine/device.hpp"
-#include "spymarine/device_ostream.hpp"
-#include "spymarine/parsing.hpp"
+#include "spymarine/parse_message.hpp"
 
 #include <catch2/catch_all.hpp>
-#include <catch2/generators/catch_generators.hpp>
-#include <catch2/matchers/catch_matchers_range_equals.hpp>
-#include <cstdint>
 
 namespace spymarine {
 namespace {

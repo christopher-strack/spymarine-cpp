@@ -4,7 +4,7 @@
 #include "spymarine/error.hpp"
 #include "spymarine/overloaded.hpp"
 #include "spymarine/parse_device.hpp"
-#include "spymarine/parsing.hpp"
+#include "spymarine/parse_message.hpp"
 
 #include <array>
 #include <chrono>

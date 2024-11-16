@@ -10,8 +10,9 @@ add_library(spymarine
     src/device_ostream.cpp
     src/device.cpp
     src/file_descriptor.cpp
-    src/parsing.cpp
+    src/message.cpp
     src/parse_device.cpp
+    src/parse_message.cpp
     src/tcp_socket.cpp
     src/udp_socket.cpp
     src/value_iterator.cpp
@@ -27,7 +28,7 @@ option(BUILD_EXAMPLES "Build examples" OFF)
 if(BUILD_TESTS)
     find_package(Catch2 CONFIG REQUIRED)
 
-    add_executable(spymarine_tests test/tst_client.cpp test/tst_parsing.cpp)
+    add_executable(spymarine_tests test/tst_client.cpp test/tst_parse_message.cpp)
 
     target_link_libraries(spymarine_tests PRIVATE Catch2::Catch2WithMain spymarine)
 endif()

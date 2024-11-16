@@ -3,7 +3,6 @@
 #include "spymarine/client.hpp"
 #include "spymarine/device.hpp"
 #include "spymarine/device_ostream.hpp"
-#include "spymarine/parsing.hpp"
 
 #include <catch2/catch_all.hpp>
 
