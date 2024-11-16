@@ -40,7 +40,7 @@ private:
   void update_id_and_value();
 
   id_and_value _id_and_value;
-  std::span<const uint8_t> _remaining;
+  std::span<const uint8_t> _bytes;
 };
 
 } // namespace spymarine

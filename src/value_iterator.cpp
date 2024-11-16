@@ -28,7 +28,7 @@ std::span<const uint8_t> advance_bytes(std::span<const uint8_t> bytes,
 value_iterator::value_iterator() : _id_and_value{0, invalid_value{}} {}
 
 value_iterator::value_iterator(std::span<const uint8_t> buffer)
-    : _id_and_value{0, invalid_value{}}, _remaining{buffer} {
+    : _id_and_value{0, invalid_value{}}, _bytes{buffer} {
   update_id_and_value();
 }
 
@@ -42,23 +42,22 @@ value_iterator::operator->() const {
 }
 
 value_iterator& value_iterator::operator++() {
-  if (_remaining.size() < 2) {
-    _remaining = {};
+  if (_bytes.size() < 2) {
+    _bytes = {};
     return *this;
   }
 
-  const auto value_type = _remaining[1];
-  const auto bytes = _remaining.subspan(2);
+  const auto value_type = _bytes[1];
 
   if (value_type == 1) {
-    _remaining = advance_bytes(bytes, 5);
+    _bytes = advance_bytes(_bytes, 7);
   } else if (value_type == 3) {
-    _remaining = advance_bytes(bytes, 10);
+    _bytes = advance_bytes(_bytes, 12);
   } else if (value_type == 4) {
     const auto string = std::get<std::string_view>(_id_and_value.value);
-    _remaining = advance_bytes(bytes, string.size() + 7);
+    _bytes = advance_bytes(_bytes, string.size() + 9);
   } else {
-    _remaining = {};
+    _bytes = {};
   }
 
   update_id_and_value();
@@ -73,21 +72,21 @@ value_iterator value_iterator::operator++(int) {
 }
 
 void value_iterator::update_id_and_value() {
-  if (_remaining.size() < 2) {
+  if (_bytes.size() < 2) {
     return;
   }
 
-  _id_and_value.id = _remaining[0];
+  _id_and_value.id = _bytes[0];
 
-  const auto value_type = _remaining[1];
-  const auto bytes = _remaining.subspan(2);
+  const auto value_type = _bytes[1];
+  const auto payload = _bytes.subspan(2);
 
-  if (value_type == 1 && bytes.size() >= 4) {
-    _id_and_value.value = numeric_value{bytes.subspan<0, 4>()};
-  } else if (value_type == 3 && bytes.size() >= 9) {
-    _id_and_value.value = numeric_value{bytes.subspan<5, 4>()};
+  if (value_type == 1 && payload.size() >= 4) {
+    _id_and_value.value = numeric_value{payload.subspan<0, 4>()};
+  } else if (value_type == 3 && payload.size() >= 9) {
+    _id_and_value.value = numeric_value{payload.subspan<5, 4>()};
   } else if (value_type == 4) {
-    const auto string = read_string(bytes);
+    const auto string = read_string(payload);
     _id_and_value.value = string ? value{*string} : invalid_value{};
   } else {
     _id_and_value.value = invalid_value{};
@@ -95,7 +94,7 @@ void value_iterator::update_id_and_value() {
 }
 
 bool operator==(const value_iterator& lhs, const value_iterator& rhs) {
-  return std::ranges::equal(lhs._remaining, rhs._remaining);
+  return std::ranges::equal(lhs._bytes, rhs._bytes);
 }
 
 bool operator!=(const value_iterator& lhs, const value_iterator& rhs) {
