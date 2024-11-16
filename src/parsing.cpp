@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <expected>
+#include <iostream>
 #include <ranges>
 
 namespace spymarine {
@@ -213,57 +214,75 @@ std::expected<device, error> parse_device(const std::span<const uint8_t> bytes,
   }
 
   const auto type = type_value->second();
-  const auto name = find_value_for_type<std::string_view>(3, bytes);
+  const auto name_value = find_value_for_type<std::string_view>(3, bytes);
 
-  if (type == 0) {
+  switch (type) {
+  case 0:
     return null_device{};
-  } else if (type == 1) {
-    if (name == "PICO INTERNAL") {
-      return pico_internal_device{sensor_start_index};
-    } else if (name) {
-      return device{voltage_device{std::string{*name}, sensor_start_index}};
+  case 1:
+    return name_value == "PICO INTERNAL"
+               ? device{pico_internal_device{sensor_start_index}}
+               : device{voltage_device{std::string{*name_value},
+                                       sensor_start_index}};
+  case 2:
+    if (name_value) {
+      return current_device{std::string{*name_value}, sensor_start_index};
     }
-  } else if (type == 2) {
-    if (name) {
-      return device{current_device{std::string{*name}, sensor_start_index}};
+    break;
+  case 3:
+    if (name_value) {
+      return temperature_device{std::string{*name_value}, sensor_start_index};
     }
-  } else if (type == 3) {
-    if (name) {
-      return device{temperature_device{std::string{*name}, sensor_start_index}};
+    break;
+  case 4:
+    return unknown_device{};
+  case 5:
+    if (name_value) {
+      return barometer_device{std::string{*name_value}, sensor_start_index};
     }
-  } else if (type == 5) {
-    if (name) {
-      return device{barometer_device{std::string{*name}, sensor_start_index}};
+    break;
+  case 6:
+    if (name_value) {
+      return resistive_device{std::string{*name_value}, sensor_start_index};
     }
-  } else if (type == 6) {
-    if (name) {
-      return device{resistive_device{std::string{*name}, sensor_start_index}};
-    }
-  } else if (type == 8) {
+    break;
+  case 7:
+    return unknown_device{};
+  case 8: {
     const auto fluid_type = find_value_for_type<numeric_value>(6, bytes);
     const auto capacity = find_value_for_type<numeric_value>(7, bytes);
-    if (name && fluid_type && capacity) {
-      return device{tank_device{
-          std::string{*name},
+    if (name_value && fluid_type && capacity) {
+      return tank_device{
+          std::string{*name_value},
           to_fluid_type(fluid_type->second()),
           capacity->second() / 10.0f,
           sensor_start_index,
-      }};
+      };
     }
-  } else if (type == 9) {
+    break;
+  }
+  case 9: {
     const auto battery_type = find_value_for_type<numeric_value>(8, bytes);
     const auto capacity = find_value_for_type<numeric_value>(5, bytes);
-    if (name && battery_type && capacity) {
-      return device{battery_device{
-          std::string{*name},
+    if (name_value && battery_type && capacity) {
+      return battery_device{
+          std::string{*name_value},
           to_battery_type(battery_type->second()),
           capacity->second() / 100.0f,
           sensor_start_index,
-      }};
+      };
     }
+    break;
+  }
+  case 10:
+    return unknown_device{};
+  case 14:
+    return unknown_device{};
+  default:
+    return std::unexpected{error::invalid_device_type};
   }
 
-  return unknown_device{};
+  return std::unexpected{error::invalid_device_message};
 }
 
 } // namespace spymarine

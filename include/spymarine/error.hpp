@@ -8,6 +8,7 @@ enum class error {
   invalid_crc,
   invalid_device_message,
   invalid_device_count_message,
+  invalid_device_type,
 };
 
 }
