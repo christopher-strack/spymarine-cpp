@@ -47,7 +47,6 @@ battery_device::battery_device(std::string name, battery_type type,
 
 uint8_t sensor_state_offset(const parsed_device& device) {
   return std::visit(overloaded{
-                        [](const null_device&) { return 0; },
                         [](const pico_internal_device&) { return 6; },
                         [](const voltage_device&) { return 1; },
                         [](const current_device&) { return 2; },
@@ -56,6 +55,7 @@ uint8_t sensor_state_offset(const parsed_device& device) {
                         [](const resistive_device&) { return 1; },
                         [](const tank_device&) { return 1; },
                         [](const battery_device&) { return 5; },
+                        [](const null_device&) { return 0; },
                         [](const unknown_device&) { return 1; },
                     },
                     device);

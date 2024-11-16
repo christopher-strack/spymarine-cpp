@@ -24,10 +24,6 @@ struct sensor_info {
   auto operator<=>(const sensor_info&) const = default;
 };
 
-struct null_device {
-  auto operator<=>(const null_device&) const = default;
-};
-
 struct pico_internal_device {
   sensor_info voltage_sensor;
 
@@ -133,19 +129,23 @@ struct battery_device {
   auto operator<=>(const battery_device&) const = default;
 };
 
+using device =
+    std::variant<pico_internal_device, voltage_device, current_device,
+                 temperature_device, barometer_device, resistive_device,
+                 tank_device, battery_device>;
+
+struct null_device {
+  auto operator<=>(const null_device&) const = default;
+};
+
 struct unknown_device {
   auto operator<=>(const unknown_device&) const = default;
 };
 
 using parsed_device =
-    std::variant<null_device, pico_internal_device, voltage_device,
-                 current_device, temperature_device, barometer_device,
-                 resistive_device, tank_device, battery_device, unknown_device>;
-
-using device =
     std::variant<pico_internal_device, voltage_device, current_device,
                  temperature_device, barometer_device, resistive_device,
-                 tank_device, battery_device>;
+                 tank_device, battery_device, null_device, unknown_device>;
 
 uint8_t sensor_state_offset(const parsed_device& device);
 
