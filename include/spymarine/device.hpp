@@ -25,14 +25,10 @@ struct sensor_info {
 };
 
 struct null_device {
-  static constexpr uint8_t sensor_state_offset = 0;
-
   auto operator<=>(const null_device&) const = default;
 };
 
 struct pico_internal_device {
-  static constexpr uint8_t sensor_state_offset = 6;
-
   sensor_info voltage_sensor;
 
   explicit pico_internal_device(uint8_t sensor_start_index);
@@ -41,8 +37,6 @@ struct pico_internal_device {
 };
 
 struct voltage_device {
-  static constexpr uint8_t sensor_state_offset = 1;
-
   std::string name;
 
   sensor_info voltage_sensor;
@@ -53,8 +47,6 @@ struct voltage_device {
 };
 
 struct current_device {
-  static constexpr uint8_t sensor_state_offset = 2;
-
   std::string name;
 
   sensor_info current_sensor;
@@ -65,8 +57,6 @@ struct current_device {
 };
 
 struct temperature_device {
-  static constexpr uint8_t sensor_state_offset = 1;
-
   std::string name;
 
   sensor_info temperature_sensor;
@@ -77,8 +67,6 @@ struct temperature_device {
 };
 
 struct barometer_device {
-  static constexpr uint8_t sensor_state_offset = 2;
-
   std::string name;
 
   sensor_info pressure_sensor;
@@ -89,8 +77,6 @@ struct barometer_device {
 };
 
 struct resistive_device {
-  static constexpr uint8_t sensor_state_offset = 1;
-
   std::string name;
 
   sensor_info resistive_sensor;
@@ -108,8 +94,6 @@ enum class fluid_type {
 };
 
 struct tank_device {
-  static constexpr uint8_t sensor_state_offset = 1;
-
   std::string name;
   fluid_type type;
   float capacity;
@@ -134,8 +118,6 @@ enum class battery_type {
 };
 
 struct battery_device {
-  static constexpr uint8_t sensor_state_offset = 5;
-
   std::string name;
   battery_type type;
   float capacity;
@@ -152,8 +134,6 @@ struct battery_device {
 };
 
 struct unknown_device {
-  static constexpr uint8_t sensor_state_offset = 1;
-
   auto operator<=>(const unknown_device&) const = default;
 };
 
@@ -162,6 +142,6 @@ using device =
                  current_device, temperature_device, barometer_device,
                  resistive_device, tank_device, battery_device, unknown_device>;
 
-size_t sensor_state_offset(const device& device);
+uint8_t sensor_state_offset(const device& device);
 
 } // namespace spymarine
