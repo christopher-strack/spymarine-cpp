@@ -208,7 +208,7 @@ battery_type to_battery_type(const uint16_t battery_type) {
 
 std::expected<parsed_device, error>
 parse_device(const std::span<const uint8_t> bytes,
-             const uint8_t sensor_start_index) {
+             const uint8_t state_start_index) {
   const auto type_value = find_value_for_type<numeric_value>(1, bytes);
   if (!type_value) {
     return std::unexpected{error::invalid_device_message};
@@ -222,29 +222,29 @@ parse_device(const std::span<const uint8_t> bytes,
     return null_device{};
   case 1:
     return name_value == "PICO INTERNAL"
-               ? parsed_device{pico_internal_device{sensor_start_index}}
+               ? parsed_device{pico_internal_device{state_start_index}}
                : parsed_device{voltage_device{std::string{*name_value},
-                                              sensor_start_index}};
+                                              state_start_index}};
   case 2:
     if (name_value) {
-      return current_device{std::string{*name_value}, sensor_start_index};
+      return current_device{std::string{*name_value}, state_start_index};
     }
     break;
   case 3:
     if (name_value) {
-      return temperature_device{std::string{*name_value}, sensor_start_index};
+      return temperature_device{std::string{*name_value}, state_start_index};
     }
     break;
   case 4:
     return unknown_device{};
   case 5:
     if (name_value) {
-      return barometer_device{std::string{*name_value}, sensor_start_index};
+      return barometer_device{std::string{*name_value}, state_start_index};
     }
     break;
   case 6:
     if (name_value) {
-      return resistive_device{std::string{*name_value}, sensor_start_index};
+      return resistive_device{std::string{*name_value}, state_start_index};
     }
     break;
   case 7:
@@ -257,7 +257,7 @@ parse_device(const std::span<const uint8_t> bytes,
           std::string{*name_value},
           to_fluid_type(fluid_type->second()),
           capacity->second() / 10.0f,
-          sensor_start_index,
+          state_start_index,
       };
     }
     break;
@@ -270,7 +270,7 @@ parse_device(const std::span<const uint8_t> bytes,
           std::string{*name_value},
           to_battery_type(battery_type->second()),
           capacity->second() / 100.0f,
-          sensor_start_index,
+          state_start_index,
       };
     }
     break;

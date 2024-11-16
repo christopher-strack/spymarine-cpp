@@ -27,7 +27,7 @@ struct sensor_info {
 struct pico_internal_device {
   sensor_info voltage_sensor;
 
-  explicit pico_internal_device(uint8_t sensor_start_index);
+  explicit pico_internal_device(uint8_t state_start_index);
 
   auto operator<=>(const pico_internal_device&) const = default;
 };
@@ -37,7 +37,7 @@ struct voltage_device {
 
   sensor_info voltage_sensor;
 
-  voltage_device(std::string name, uint8_t sensor_start_index);
+  voltage_device(std::string name, uint8_t state_start_index);
 
   auto operator<=>(const voltage_device&) const = default;
 };
@@ -47,7 +47,7 @@ struct current_device {
 
   sensor_info current_sensor;
 
-  current_device(std::string name, uint8_t sensor_start_index);
+  current_device(std::string name, uint8_t state_start_index);
 
   auto operator<=>(const current_device&) const = default;
 };
@@ -57,7 +57,7 @@ struct temperature_device {
 
   sensor_info temperature_sensor;
 
-  temperature_device(std::string name, uint8_t sensor_start_index);
+  temperature_device(std::string name, uint8_t state_start_index);
 
   auto operator<=>(const temperature_device&) const = default;
 };
@@ -67,7 +67,7 @@ struct barometer_device {
 
   sensor_info pressure_sensor;
 
-  barometer_device(std::string name, uint8_t sensor_start_index);
+  barometer_device(std::string name, uint8_t state_start_index);
 
   auto operator<=>(const barometer_device&) const = default;
 };
@@ -77,7 +77,7 @@ struct resistive_device {
 
   sensor_info resistive_sensor;
 
-  resistive_device(std::string name, uint8_t sensor_start_index);
+  resistive_device(std::string name, uint8_t state_start_index);
 
   auto operator<=>(const resistive_device&) const = default;
 };
@@ -98,7 +98,7 @@ struct tank_device {
   sensor_info level_sensor;
 
   tank_device(std::string name, fluid_type type, float capacity,
-              uint8_t sensor_start_index);
+              uint8_t state_start_index);
 
   auto operator<=>(const tank_device&) const = default;
 };
@@ -124,7 +124,7 @@ struct battery_device {
   sensor_info voltage_sensor;
 
   battery_device(std::string name, battery_type type, float capacity,
-                 uint8_t sensor_start_index);
+                 uint8_t state_start_index);
 
   auto operator<=>(const battery_device&) const = default;
 };

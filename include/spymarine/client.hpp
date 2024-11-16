@@ -71,11 +71,11 @@ private:
       devices.reserve(device_count);
     }
 
-    uint8_t sensor_start_index = 0;
+    uint8_t state_start_index = 0;
 
     for (uint8_t i = 0; i < device_count; i++) {
-      if (auto parsed_device = request_device_info(i, sensor_start_index)) {
-        sensor_start_index += sensor_state_offset(*parsed_device);
+      if (auto parsed_device = request_device_info(i, state_start_index)) {
+        state_start_index += sensor_state_offset(*parsed_device);
 
         std::visit(overloaded{
                        [](null_device) {},
@@ -106,14 +106,14 @@ private:
   }
 
   std::expected<parsed_device, client_error>
-  request_device_info(uint8_t device_id, uint8_t sensor_start_index) {
+  request_device_info(uint8_t device_id, uint8_t state_start_index) {
     const std::array<uint8_t, 19> data{
         0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00,
         0x00, 0x00, 0x00, 0xff, 0x00, 0x00,      0x00, 0x00, 0xff};
 
     return request_message({message_type::device_info, data})
-        .and_then([sensor_start_index](const auto& message) {
-          return parse_device(message.data, sensor_start_index)
+        .and_then([state_start_index](const auto& message) {
+          return parse_device(message.data, state_start_index)
               .transform_error(to_client_error);
         });
   }
