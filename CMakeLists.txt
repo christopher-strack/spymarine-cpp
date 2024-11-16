@@ -13,7 +13,9 @@ add_library(spymarine
     src/parsing.cpp
     src/tcp_socket.cpp
     src/udp_socket.cpp
+    src/value_iterator.cpp
     src/value_view.cpp
+    src/value.cpp
 )
 
 target_include_directories(spymarine PUBLIC include)
