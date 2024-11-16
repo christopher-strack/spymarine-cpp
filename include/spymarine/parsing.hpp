@@ -66,33 +66,6 @@ uint16_t crc(const std::span<const uint8_t> bytes);
 std::expected<message, error>
 parse_message(const std::span<const uint8_t> data);
 
-/* Value in a PropertyDict that can either represent two independent 2 byte
- * numbers or a single 4 byte number
- */
-class numeric_value {
-public:
-  explicit numeric_value(std::span<const uint8_t, 4> bytes);
-
-  /* Returns the 2 first bytes as a number
-   */
-  uint16_t first() const;
-
-  /* Returns the 2 last bytes as a number
-   */
-  uint16_t second() const;
-
-  /* Returns all 4 bytes as a number
-   */
-  uint32_t number() const;
-
-private:
-  std::array<uint8_t, 4> _bytes;
-};
-
-struct invalid_value {};
-
-using value = std::variant<numeric_value, std::string_view, invalid_value>;
-
 std::expected<parsed_device, error>
 parse_device(const std::span<const uint8_t> bytes, uint8_t state_start_index);
 

@@ -1,9 +1,8 @@
 #include "spymarine/parsing.hpp"
+#include "spymarine/value_view.hpp"
 
 #include <algorithm>
 #include <expected>
-#include <iostream>
-#include <ranges>
 
 namespace spymarine {
 
@@ -84,144 +83,6 @@ parse_message(const std::span<const uint8_t> data) {
                        std::span{data.begin() + header_size, data.end() - 2}};
       });
 }
-
-numeric_value::numeric_value(std::span<const uint8_t, 4> bytes) {
-  std::copy(bytes.begin(), bytes.end(), _bytes.begin());
-}
-
-uint16_t numeric_value::first() const { return (_bytes[0] << 8) | _bytes[1]; }
-
-uint16_t numeric_value::second() const { return (_bytes[2] << 8) | _bytes[3]; }
-
-uint32_t numeric_value::number() const {
-  return (_bytes[0] << 24) | (_bytes[1] << 16) | (_bytes[2] << 8) | _bytes[3];
-}
-
-namespace {
-
-std::optional<std::string_view> read_string(std::span<const uint8_t> bytes) {
-  if (bytes.size() >= 5) {
-    const auto data = bytes.subspan(5);
-    const auto it = std::ranges::find(data, 0);
-    if (it != data.end()) {
-      const auto size = static_cast<size_t>(std::distance(data.begin(), it));
-      return std::string_view{reinterpret_cast<const char*>(data.data()), size};
-    }
-  }
-  return std::nullopt;
-}
-
-std::span<const uint8_t> advance_bytes(std::span<const uint8_t> bytes,
-                                       size_t n) {
-  return bytes.size() >= n + 2 ? bytes.subspan(n) : std::span<const uint8_t>{};
-}
-
-class value_view : public std::ranges::view_interface<value_view> {
-public:
-  value_view() = default;
-  value_view(std::span<const uint8_t> buffer) : _buffer{buffer} {}
-
-  class iterator {
-  public:
-    using iterator_category = std::input_iterator_tag;
-    using value_type = std::tuple<uint8_t, value>;
-    using difference_type = std::ptrdiff_t;
-
-  public:
-    iterator() = default;
-    explicit iterator(std::span<const uint8_t> buffer) : _remaining(buffer) {}
-
-    value_type operator*() const {
-      const auto value_id = _remaining[0];
-      const auto value_type = _remaining[1];
-      const auto bytes = _remaining.subspan(2);
-
-      if (value_type == 1 && bytes.size() >= 4) {
-        return {value_id, numeric_value{bytes.subspan<0, 4>()}};
-      } else if (value_type == 3 && bytes.size() >= 9) {
-        return {value_id, numeric_value{bytes.subspan<5, 4>()}};
-      } else if (value_type == 4) {
-        if (const auto string = read_string(bytes)) {
-          return std::tuple{value_id, *string};
-        }
-      }
-
-      return std::tuple{value_id, invalid_value{}};
-    }
-
-    iterator& operator++() {
-      if (_remaining.size() < 2) {
-        _remaining = {};
-        return *this;
-      }
-
-      const auto value_type = _remaining[1];
-      const auto bytes = _remaining.subspan(2);
-
-      if (value_type == 1) {
-        _remaining = advance_bytes(bytes, 5);
-      } else if (value_type == 3) {
-        _remaining = advance_bytes(bytes, 10);
-      } else if (value_type == 4) {
-        const auto string = read_string(bytes);
-        _remaining = string ? advance_bytes(bytes, string->size() + 7)
-                            : std::span<const uint8_t>{};
-      } else {
-        _remaining = {};
-      }
-      return *this;
-    }
-
-    iterator operator++(int) {
-      iterator tmp = *this;
-      ++(*this);
-      return tmp;
-    }
-
-    friend bool operator==(const iterator& lhs, const iterator& rhs) {
-      return std::ranges::equal(lhs._remaining, rhs._remaining);
-    }
-
-    friend bool operator!=(const iterator& lhs, const iterator& rhs) {
-      return !(lhs == rhs);
-    }
-
-  private:
-    std::span<const uint8_t> _remaining;
-  };
-
-  iterator begin() const { return iterator(_buffer); }
-
-  iterator end() const { return iterator(std::span<const uint8_t>{}); }
-
-private:
-  std::span<const uint8_t> _buffer;
-};
-
-std::optional<value> find_value(const uint8_t expected_id,
-                                const value_view& values) {
-  if (const auto it = std::ranges::find_if(
-          values,
-          [&](const auto value) { return std::get<0>(value) == expected_id; });
-      it != values.end()) {
-    return std::get<1>(*it);
-  }
-
-  return std::nullopt;
-}
-
-template <typename T>
-std::optional<T> find_value_for_type(const uint8_t id,
-                                     const value_view& values) {
-  if (const auto value = find_value(id, values)) {
-    if (const auto n = std::get_if<T>(&*value)) {
-      return *n;
-    }
-  }
-  return std::nullopt;
-}
-
-} // namespace
 
 namespace {
 fluid_type to_fluid_type(const uint16_t type) {
