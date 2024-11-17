@@ -54,9 +54,8 @@ private:
 
 TEST_CASE("client") {
   SECTION("read_devices") {
-    client<mock_tcp_socket> client{0, 0, std::chrono::seconds{0}};
-
-    const auto devices = client.read_devices();
+    const auto devices =
+        read_devices<mock_tcp_socket>(0, 0, std::chrono::seconds{0});
 
     CHECK(devices == parsed_devices);
   }

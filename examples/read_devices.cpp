@@ -1,4 +1,5 @@
 #include "spymarine/client.hpp"
+#include "spymarine/defaults.hpp"
 #include "spymarine/device_ostream.hpp"
 #include "spymarine/tcp_socket.hpp"
 #include "spymarine/udp_socket.hpp"
@@ -9,21 +10,15 @@
 #include <sstream>
 
 int main(int argc, char** argv) {
-  constexpr auto simarine_default_udp_port = 43210;
-  constexpr auto simarine_default_tcp_port = 5001;
-
   const auto discovered_ip =
       spymarine::udp_socket::open().and_then([](auto udp_socket) {
-        return udp_socket.bind(INADDR_ANY, simarine_default_udp_port)
+        return udp_socket.bind(INADDR_ANY, spymarine::simarine_default_udp_port)
             .and_then([&]() { return udp_socket.discover(); });
       });
 
   if (discovered_ip) {
-    spymarine::client<spymarine::tcp_socket> client{*discovered_ip,
-                                                    simarine_default_tcp_port};
-
     std::cout << "Reading devices" << std::endl;
-    if (const auto devices = client.read_devices()) {
+    if (const auto devices = spymarine::read_devices(*discovered_ip)) {
       std::cout << "Devices read" << std::endl;
       for (const auto& device : *devices) {
         std::stringstream str;

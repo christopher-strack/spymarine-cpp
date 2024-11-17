@@ -1,10 +1,12 @@
 #pragma once
 
+#include "spymarine/defaults.hpp"
 #include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/overloaded.hpp"
 #include "spymarine/parse_device.hpp"
 #include "spymarine/parse_message.hpp"
+#include "spymarine/tcp_socket.hpp"
 
 #include <array>
 #include <chrono>
@@ -143,5 +145,15 @@ private:
   std::chrono::system_clock::duration _request_limit;
   std::optional<std::chrono::system_clock::time_point> _last_request_time;
 };
+
+template <typename tcp_socket_type = tcp_socket>
+std::expected<std::vector<device>, client_error>
+read_devices(const uint32_t address,
+             const uint16_t port = simarine_default_tcp_port,
+             const std::chrono::system_clock::duration request_limit =
+                 std::chrono::milliseconds{10}) {
+  client<tcp_socket_type> client{address, port, request_limit};
+  return client.read_devices();
+}
 
 } // namespace spymarine
