@@ -11,9 +11,9 @@ class numeric_value {
 public:
   explicit numeric_value(std::span<const uint8_t, 4> bytes);
 
-  uint16_t first() const;
-  uint16_t second() const;
-  uint32_t number() const;
+  int16_t first() const;
+  int16_t second() const;
+  int32_t number() const;
 
 private:
   std::array<uint8_t, 4> _bytes;
