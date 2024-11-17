@@ -1,4 +1,4 @@
-#include "spymarine/value_view.hpp"
+#include "spymarine/message_values_iterator.hpp"
 
 #include <algorithm>
 #include <optional>
@@ -25,23 +25,25 @@ std::span<const uint8_t> advance_bytes(std::span<const uint8_t> bytes,
 
 } // namespace
 
-value_iterator::value_iterator() : _id_and_value{0, invalid_value{}} {}
+message_values_iterator::message_values_iterator()
+    : _data{0, invalid_value{}} {}
 
-value_iterator::value_iterator(std::span<const uint8_t> buffer)
-    : _id_and_value{0, invalid_value{}}, _bytes{buffer} {
-  update_id_and_value();
+message_values_iterator::message_values_iterator(
+    std::span<const uint8_t> buffer)
+    : _data{0, invalid_value{}}, _bytes{buffer} {
+  update_data();
 }
 
-value_iterator::value_type value_iterator::operator*() const {
-  return _id_and_value;
+message_values_iterator::value_type message_values_iterator::operator*() const {
+  return _data;
 }
 
-std::add_pointer_t<value_iterator::value_type const>
-value_iterator::operator->() const {
-  return std::addressof(_id_and_value);
+std::add_pointer_t<message_values_iterator::value_type const>
+message_values_iterator::operator->() const {
+  return std::addressof(_data);
 }
 
-value_iterator& value_iterator::operator++() {
+message_values_iterator& message_values_iterator::operator++() {
   if (_bytes.size() < 2) {
     _bytes = {};
     return *this;
@@ -54,50 +56,52 @@ value_iterator& value_iterator::operator++() {
   } else if (value_type == 3) {
     _bytes = advance_bytes(_bytes, 12);
   } else if (value_type == 4) {
-    const auto string = std::get<std::string_view>(_id_and_value.value);
+    const auto string = std::get<std::string_view>(_data.value);
     _bytes = advance_bytes(_bytes, string.size() + 9);
   } else {
     _bytes = {};
   }
 
-  update_id_and_value();
+  update_data();
 
   return *this;
 }
 
-value_iterator value_iterator::operator++(int) {
-  value_iterator tmp = *this;
+message_values_iterator message_values_iterator::operator++(int) {
+  message_values_iterator tmp = *this;
   ++(*this);
   return tmp;
 }
 
-void value_iterator::update_id_and_value() {
+void message_values_iterator::update_data() {
   if (_bytes.size() < 2) {
     return;
   }
 
-  _id_and_value.id = _bytes[0];
+  _data.id = _bytes[0];
 
   const auto value_type = _bytes[1];
   const auto payload = _bytes.subspan(2);
 
   if (value_type == 1 && payload.size() >= 4) {
-    _id_and_value.value = numeric_value{payload.subspan<0, 4>()};
+    _data.value = numeric_value{payload.subspan<0, 4>()};
   } else if (value_type == 3 && payload.size() >= 9) {
-    _id_and_value.value = numeric_value{payload.subspan<5, 4>()};
+    _data.value = numeric_value{payload.subspan<5, 4>()};
   } else if (value_type == 4) {
     const auto string = read_string(payload);
-    _id_and_value.value = string ? value{*string} : invalid_value{};
+    _data.value = string ? message_value{*string} : invalid_value{};
   } else {
-    _id_and_value.value = invalid_value{};
+    _data.value = invalid_value{};
   }
 }
 
-bool operator==(const value_iterator& lhs, const value_iterator& rhs) {
+bool operator==(const message_values_iterator& lhs,
+                const message_values_iterator& rhs) {
   return std::ranges::equal(lhs._bytes, rhs._bytes);
 }
 
-bool operator!=(const value_iterator& lhs, const value_iterator& rhs) {
+bool operator!=(const message_values_iterator& lhs,
+                const message_values_iterator& rhs) {
   return !(lhs == rhs);
 }
 

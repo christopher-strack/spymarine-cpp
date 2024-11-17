@@ -21,6 +21,7 @@ private:
 
 struct invalid_value {};
 
-using value = std::variant<numeric_value, std::string_view, invalid_value>;
+using message_value =
+    std::variant<numeric_value, std::string_view, invalid_value>;
 
 } // namespace spymarine

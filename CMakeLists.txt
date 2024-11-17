@@ -11,13 +11,13 @@ add_library(spymarine
     src/device.cpp
     src/file_descriptor.cpp
     src/message.cpp
+    src/message_values_iterator.cpp
+    src/message_values_view.cpp
+    src/message_value.cpp
     src/parse_device.cpp
     src/parse_message.cpp
     src/tcp_socket.cpp
     src/udp_socket.cpp
-    src/value_iterator.cpp
-    src/value_view.cpp
-    src/value.cpp
 )
 
 target_include_directories(spymarine PUBLIC include)

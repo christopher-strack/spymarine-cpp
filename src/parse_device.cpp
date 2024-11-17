@@ -1,6 +1,6 @@
 #include "spymarine/parse_device.hpp"
+#include "spymarine/message_values_view.hpp"
 #include "spymarine/overloaded.hpp"
-#include "spymarine/value_view.hpp"
 
 namespace spymarine {
 
@@ -55,7 +55,7 @@ battery_type to_battery_type(const uint16_t battery_type) {
 std::expected<parsed_device, error>
 parse_device(const std::span<const uint8_t> bytes,
              const uint8_t state_start_index) {
-  const auto values = value_view{bytes};
+  const auto values = message_values_view{bytes};
   const auto type_value = find_value_for_type<numeric_value>(1, values);
   if (!type_value) {
     return std::unexpected{error::invalid_device_message};
