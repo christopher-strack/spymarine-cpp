@@ -1,4 +1,4 @@
-#include "spymarine/client.hpp"
+#include "spymarine/read_devices.hpp"
 #include "spymarine/overloaded.hpp"
 
 namespace spymarine::detail {
@@ -38,7 +38,7 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
 
 namespace spymarine {
 
-std::string error_message(client_error err) {
+std::string error_message(read_devices_error err) {
   return std::visit(overloaded{
                         [](error e) { return std::to_string(int(e)); },
                         [](std::error_code ec) { return ec.message(); },

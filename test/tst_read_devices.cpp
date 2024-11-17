@@ -1,9 +1,9 @@
 #include "data.hpp"
 #include "raw_data.hpp"
 
-#include "spymarine/client.hpp"
 #include "spymarine/device.hpp"
 #include "spymarine/device_ostream.hpp"
+#include "spymarine/read_devices.hpp"
 
 #include <catch2/catch_all.hpp>
 
@@ -52,13 +52,11 @@ private:
 };
 } // namespace
 
-TEST_CASE("client") {
-  SECTION("read_devices") {
-    const auto devices =
-        read_devices<mock_tcp_socket>(0, 0, std::chrono::seconds{0});
+TEST_CASE("read_devices") {
+  const auto devices =
+      read_devices<mock_tcp_socket>(0, 0, std::chrono::seconds{0});
 
-    CHECK(devices == parsed_devices);
-  }
+  CHECK(devices == parsed_devices);
 }
 
 } // namespace spymarine

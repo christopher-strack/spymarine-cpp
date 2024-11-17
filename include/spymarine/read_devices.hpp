@@ -19,6 +19,17 @@
 #include <variant>
 
 namespace spymarine {
+
+using read_devices_error = std::variant<error, std::error_code>;
+
+inline read_devices_error to_client_error(const error& err) { return err; }
+
+std::string error_message(read_devices_error error);
+
+} // namespace spymarine
+
+namespace spymarine::detail {
+
 template <typename tcp_socket_type>
 concept tcp_socket_concept =
     requires(tcp_socket_type socket, uint32_t ip, uint16_t port) {
@@ -36,15 +47,7 @@ concept tcp_socket_concept =
       } -> std::same_as<std::expected<std::span<uint8_t>, std::error_code>>;
     };
 
-namespace detail {
 std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
-}
-
-using client_error = std::variant<error, std::error_code>;
-
-inline client_error to_client_error(const error& err) { return err; }
-
-std::string error_message(client_error error);
 
 template <tcp_socket_concept tcp_socket_type> class client {
 public:
@@ -53,7 +56,7 @@ public:
              std::chrono::milliseconds{10})
       : _ip_address{address}, _port{port}, _request_limit{request_limit} {}
 
-  std::expected<std::vector<device>, client_error> read_devices() {
+  std::expected<std::vector<device>, read_devices_error> read_devices() {
     std::vector<device> devices;
     request_device_count().and_then([&devices, this](const auto device_count) {
       return read_devices(device_count, devices);
@@ -62,8 +65,8 @@ public:
   }
 
 private:
-  std::expected<void, client_error> read_devices(const uint8_t device_count,
-                                                 std::vector<device>& devices) {
+  std::expected<void, read_devices_error>
+  read_devices(const uint8_t device_count, std::vector<device>& devices) {
     devices.reserve(device_count);
 
     uint8_t state_start_index = 0;
@@ -88,19 +91,19 @@ private:
     return {};
   }
 
-  std::expected<uint8_t, client_error> request_device_count() {
+  std::expected<uint8_t, read_devices_error> request_device_count() {
     return request_message({message_type::device_count, {}})
-        .and_then(
-            [](const auto& message) -> std::expected<uint8_t, client_error> {
-              if (message.type == message_type::device_count &&
-                  message.data.size() >= 6) {
-                return message.data[5] + 1;
-              }
-              return std::unexpected{error::invalid_device_count_message};
-            });
+        .and_then([](const auto& message)
+                      -> std::expected<uint8_t, read_devices_error> {
+          if (message.type == message_type::device_count &&
+              message.data.size() >= 6) {
+            return message.data[5] + 1;
+          }
+          return std::unexpected{error::invalid_device_count_message};
+        });
   }
 
-  std::expected<parsed_device, client_error>
+  std::expected<parsed_device, read_devices_error>
   request_device_info(uint8_t device_id, uint8_t state_start_index) {
     const std::array<uint8_t, 19> data{
         0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00,
@@ -113,10 +116,11 @@ private:
         });
   }
 
-  std::expected<message, client_error> request_message(const message& msg) {
+  std::expected<message, read_devices_error>
+  request_message(const message& msg) {
     wait_for_request_limit();
 
-    const std::expected<std::span<uint8_t>, client_error> raw_response =
+    const std::expected<std::span<uint8_t>, read_devices_error> raw_response =
         tcp_socket_type::open().and_then([&, this](auto socket) {
           return socket.connect(_ip_address, _port)
               .and_then([&, this]() {
@@ -146,13 +150,17 @@ private:
   std::optional<std::chrono::system_clock::time_point> _last_request_time;
 };
 
+} // namespace spymarine::detail
+
+namespace spymarine {
+
 template <typename tcp_socket_type = tcp_socket>
-std::expected<std::vector<device>, client_error>
+std::expected<std::vector<device>, read_devices_error>
 read_devices(const uint32_t address,
              const uint16_t port = simarine_default_tcp_port,
              const std::chrono::system_clock::duration request_limit =
                  std::chrono::milliseconds{10}) {
-  client<tcp_socket_type> client{address, port, request_limit};
+  detail::client<tcp_socket_type> client{address, port, request_limit};
   return client.read_devices();
 }
 

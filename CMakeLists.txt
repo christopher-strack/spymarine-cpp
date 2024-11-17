@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_library(spymarine
-    src/client.cpp
     src/device_ostream.cpp
     src/device.cpp
     src/file_descriptor.cpp
@@ -16,6 +15,7 @@ add_library(spymarine
     src/message_value.cpp
     src/parse_device.cpp
     src/parse_message.cpp
+    src/read_devices.cpp
     src/tcp_socket.cpp
     src/udp_socket.cpp
 )
@@ -28,7 +28,7 @@ option(BUILD_EXAMPLES "Build examples" OFF)
 if(BUILD_TESTS)
     find_package(Catch2 CONFIG REQUIRED)
 
-    add_executable(spymarine_tests test/tst_client.cpp test/tst_device.cpp test/tst_parse_message.cpp)
+    add_executable(spymarine_tests test/tst_device.cpp test/tst_parse_message.cpp test/tst_read_devices.cpp)
 
     target_link_libraries(spymarine_tests PRIVATE Catch2::Catch2WithMain spymarine)
 endif()

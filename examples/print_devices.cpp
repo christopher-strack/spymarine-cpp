@@ -1,6 +1,6 @@
-#include "spymarine/client.hpp"
 #include "spymarine/defaults.hpp"
 #include "spymarine/device_ostream.hpp"
+#include "spymarine/read_devices.hpp"
 #include "spymarine/tcp_socket.hpp"
 #include "spymarine/udp_socket.hpp"
 
