@@ -28,7 +28,7 @@ option(BUILD_EXAMPLES "Build examples" OFF)
 if(BUILD_TESTS)
     find_package(Catch2 CONFIG REQUIRED)
 
-    add_executable(spymarine_tests test/tst_client.cpp test/tst_parse_message.cpp)
+    add_executable(spymarine_tests test/tst_client.cpp test/tst_device.cpp test/tst_parse_message.cpp)
 
     target_link_libraries(spymarine_tests PRIVATE Catch2::Catch2WithMain spymarine)
 endif()

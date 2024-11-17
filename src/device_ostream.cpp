@@ -29,7 +29,8 @@ std::ostream& operator<<(std::ostream& os, const sensor_type type) {
 
 std::ostream& operator<<(std::ostream& os, const sensor_info& info) {
   return os << "sensor_info{type=" << info.type
-            << ",state_index=" << int(info.state_index) << "}";
+            << ",state_index=" << int(info.state_index)
+            << ",value=" << int(info.value) << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, const pico_internal_device& device) {
