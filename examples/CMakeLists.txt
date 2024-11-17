@@ -1,0 +1,3 @@
+add_executable(print_devices_example print_devices.cpp)
+
+target_link_libraries(print_devices_example PRIVATE spymarine)

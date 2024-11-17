@@ -17,23 +17,9 @@ option(BUILD_EXAMPLES "Build examples" OFF)
 add_subdirectory(src)
 
 if(BUILD_TESTS)
-    find_package(Catch2 CONFIG REQUIRED)
-
-    add_executable(
-        spymarine_tests
-        test/tst_device.cpp
-        test/tst_parse_message.cpp
-        test/tst_read_devices.cpp
-    )
-
-    target_link_libraries(
-        spymarine_tests
-        PRIVATE Catch2::Catch2WithMain spymarine
-    )
+    add_subdirectory(test)
 endif()
 
 if(BUILD_EXAMPLES)
-    add_executable(print_devices_example examples/print_devices.cpp)
-
-    target_link_libraries(print_devices_example PRIVATE spymarine)
+    add_subdirectory(examples)
 endif()
