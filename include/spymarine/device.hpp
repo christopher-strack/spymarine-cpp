@@ -35,7 +35,7 @@ struct sensor_info {
 };
 
 struct pico_internal_device {
-  sensor_info voltage_sensor;
+  sensor_info sensor;
 
   explicit pico_internal_device(uint8_t state_start_index);
 
@@ -45,7 +45,7 @@ struct pico_internal_device {
 struct voltage_device {
   std::string name;
 
-  sensor_info voltage_sensor;
+  sensor_info sensor;
 
   voltage_device(std::string name, uint8_t state_start_index);
 
@@ -55,7 +55,7 @@ struct voltage_device {
 struct current_device {
   std::string name;
 
-  sensor_info current_sensor;
+  sensor_info sensor;
 
   current_device(std::string name, uint8_t state_start_index);
 
@@ -65,7 +65,7 @@ struct current_device {
 struct temperature_device {
   std::string name;
 
-  sensor_info temperature_sensor;
+  sensor_info sensor;
 
   temperature_device(std::string name, uint8_t state_start_index);
 
@@ -75,7 +75,7 @@ struct temperature_device {
 struct barometer_device {
   std::string name;
 
-  sensor_info pressure_sensor;
+  sensor_info sensor;
 
   barometer_device(std::string name, uint8_t state_start_index);
 
@@ -85,7 +85,7 @@ struct barometer_device {
 struct resistive_device {
   std::string name;
 
-  sensor_info resistive_sensor;
+  sensor_info sensor;
 
   resistive_device(std::string name, uint8_t state_start_index);
 
@@ -159,26 +159,20 @@ template <typename T> sensor_map build_sensor_map(T& devices_range) {
   };
 
   for (device& device : devices_range) {
-    std::visit(
-        overloaded{
-            [](pico_internal_device&) {},
-            [&](voltage_device& d) { insert_sensor(d.voltage_sensor); },
-            [&](current_device& d) { insert_sensor(d.current_sensor); },
-            [&](temperature_device& d) { insert_sensor(d.temperature_sensor); },
-            [&](barometer_device& d) { insert_sensor(d.pressure_sensor); },
-            [&](resistive_device& d) { insert_sensor(d.resistive_sensor); },
-            [&](tank_device& d) {
-              insert_sensor(d.level_sensor);
-              insert_sensor(d.volume_sensor);
-            },
-            [&](battery_device& d) {
-              insert_sensor(d.charge_sensor);
-              insert_sensor(d.remaining_capacity_sensor);
-              insert_sensor(d.current_sensor);
-              insert_sensor(d.voltage_sensor);
-            },
-        },
-        device);
+    std::visit(overloaded{
+                   [&](auto& d) { insert_sensor(d.sensor); },
+                   [&](tank_device& d) {
+                     insert_sensor(d.level_sensor);
+                     insert_sensor(d.volume_sensor);
+                   },
+                   [&](battery_device& d) {
+                     insert_sensor(d.charge_sensor);
+                     insert_sensor(d.remaining_capacity_sensor);
+                     insert_sensor(d.current_sensor);
+                     insert_sensor(d.voltage_sensor);
+                   },
+               },
+               device);
   }
 
   return result;

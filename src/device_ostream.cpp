@@ -34,33 +34,32 @@ std::ostream& operator<<(std::ostream& os, const sensor_info& info) {
 }
 
 std::ostream& operator<<(std::ostream& os, const pico_internal_device& device) {
-  return os << "pico_internal_device{voltage_sensor=" << device.voltage_sensor
-            << "}";
+  return os << "pico_internal_device{voltage_sensor=" << device.sensor << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, const voltage_device& device) {
   return os << "voltage_device{name=" << device.name
-            << ",voltage_sensor=" << device.voltage_sensor << "}";
+            << ",voltage_sensor=" << device.sensor << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, const current_device& device) {
   return os << "current_device{name=" << device.name
-            << ",current_sensor=" << device.current_sensor << "}";
+            << ",current_sensor=" << device.sensor << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, const temperature_device& device) {
   return os << "temperature_device{name=" << device.name
-            << ",temperature_sensor=" << device.temperature_sensor << "}";
+            << ",temperature_sensor=" << device.sensor << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, const barometer_device& device) {
   return os << "barometer_device{name=" << device.name
-            << ",pressure_sensor=" << device.pressure_sensor << "}";
+            << ",pressure_sensor=" << device.sensor << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, const resistive_device& device) {
   return os << "resistive_device{name=" << device.name
-            << ",resistive_sensor=" << device.resistive_sensor << "}";
+            << ",resistive_sensor=" << device.sensor << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, const fluid_type type) {
