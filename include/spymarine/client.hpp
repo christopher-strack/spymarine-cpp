@@ -34,11 +34,6 @@ concept tcp_socket_concept =
       } -> std::same_as<std::expected<std::span<uint8_t>, std::error_code>>;
     };
 
-template <typename container_type>
-concept device_container_concept = requires(container_type container) {
-  container.insert(container.end(), device{voltage_device{"", 0}});
-};
-
 namespace detail {
 std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 }
@@ -56,21 +51,18 @@ public:
              std::chrono::milliseconds{10})
       : _ip_address{address}, _port{port}, _request_limit{request_limit} {}
 
-  template <device_container_concept container_type>
-  std::expected<void, client_error> read_devices(container_type& devices) {
-    return request_device_count().and_then(
-        [&devices, this](const auto device_count) {
-          return read_devices(device_count, devices);
-        });
+  std::expected<std::vector<device>, client_error> read_devices() {
+    std::vector<device> devices;
+    request_device_count().and_then([&devices, this](const auto device_count) {
+      return read_devices(device_count, devices);
+    });
+    return devices;
   }
 
 private:
-  template <device_container_concept container_type>
   std::expected<void, client_error> read_devices(const uint8_t device_count,
-                                                 container_type& devices) {
-    if constexpr (requires(container_type c) { c.reserve(device_count); }) {
-      devices.reserve(device_count);
-    }
+                                                 std::vector<device>& devices) {
+    devices.reserve(device_count);
 
     uint8_t state_start_index = 0;
 

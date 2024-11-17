@@ -23,10 +23,9 @@ int main(int argc, char** argv) {
                                                     simarine_default_tcp_port};
 
     std::cout << "Reading devices" << std::endl;
-    std::vector<spymarine::device> devices;
-    if (client.read_devices(devices)) {
+    if (const auto devices = client.read_devices()) {
       std::cout << "Devices read" << std::endl;
-      for (const auto& device : devices) {
+      for (const auto& device : *devices) {
         std::stringstream str;
         str << device;
         std::cout << "Device: " << str.str() << std::endl;
