@@ -84,13 +84,6 @@ TEST_CASE("client") {
     };
     CHECK(devices == expected_devices);
   }
-
-  BENCHMARK("read_devices") {
-    client<mock_tcp_socket> client{0, 0, std::chrono::seconds{0}};
-    std::vector<device> devices;
-    [[maybe_unused]] const auto result = client.read_devices(devices);
-    return devices;
-  };
 }
 
 } // namespace spymarine
