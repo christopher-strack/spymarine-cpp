@@ -1,13 +1,8 @@
 #include "spymarine/tcp_socket.hpp"
 #include "spymarine/file_descriptor.hpp"
 
-#include <cstdio>
 #include <netinet/in.h>
 #include <sys/socket.h>
-
-#include <cstring>
-#include <expected>
-#include <system_error>
 
 namespace spymarine {
 

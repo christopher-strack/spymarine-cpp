@@ -4,10 +4,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#include <cstring>
-#include <expected>
-#include <system_error>
-
 namespace spymarine {
 
 udp_socket::udp_socket(file_descriptor fd) : _fd{std::move(fd)} {}
