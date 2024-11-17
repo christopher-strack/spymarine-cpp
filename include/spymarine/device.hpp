@@ -37,7 +37,8 @@ struct sensor {
 struct pico_internal_device {
   sensor device_sensor;
 
-  explicit pico_internal_device(uint8_t state_start_index);
+  explicit pico_internal_device(uint8_t state_start_index,
+                                float sensor_value = 0.0f);
 
   auto operator<=>(const pico_internal_device&) const = default;
 };
@@ -47,7 +48,8 @@ struct voltage_device {
 
   sensor device_sensor;
 
-  voltage_device(std::string name, uint8_t state_start_index);
+  voltage_device(std::string name, uint8_t state_start_index,
+                 float sensor_value = 0.0f);
 
   auto operator<=>(const voltage_device&) const = default;
 };
@@ -57,7 +59,8 @@ struct current_device {
 
   sensor device_sensor;
 
-  current_device(std::string name, uint8_t state_start_index);
+  current_device(std::string name, uint8_t state_start_index,
+                 float sensor_value = 0.0f);
 
   auto operator<=>(const current_device&) const = default;
 };
@@ -67,7 +70,8 @@ struct temperature_device {
 
   sensor device_sensor;
 
-  temperature_device(std::string name, uint8_t state_start_index);
+  temperature_device(std::string name, uint8_t state_start_index,
+                     float sensor_value = 0.0f);
 
   auto operator<=>(const temperature_device&) const = default;
 };
@@ -77,7 +81,8 @@ struct barometer_device {
 
   sensor device_sensor;
 
-  barometer_device(std::string name, uint8_t state_start_index);
+  barometer_device(std::string name, uint8_t state_start_index,
+                   float sensor_value = 0.0f);
 
   auto operator<=>(const barometer_device&) const = default;
 };
@@ -87,7 +92,8 @@ struct resistive_device {
 
   sensor device_sensor;
 
-  resistive_device(std::string name, uint8_t state_start_index);
+  resistive_device(std::string name, uint8_t state_start_index,
+                   float sensor_value = 0.0f);
 
   auto operator<=>(const resistive_device&) const = default;
 };
@@ -108,7 +114,8 @@ struct tank_device {
   sensor level_sensor;
 
   tank_device(std::string name, fluid_type type, float capacity,
-              uint8_t state_start_index);
+              uint8_t state_start_index, float volume = 0.0f,
+              float level = 0.0f);
 
   auto operator<=>(const tank_device&) const = default;
 };
@@ -134,7 +141,9 @@ struct battery_device {
   sensor voltage_sensor;
 
   battery_device(std::string name, battery_type type, float capacity,
-                 uint8_t state_start_index);
+                 uint8_t state_start_index, float charge = 0.0f,
+                 float remaining_capacity = 0.0f, float current = 0.0f,
+                 float voltage = 0.0f);
 
   auto operator<=>(const battery_device&) const = default;
 };
