@@ -35,7 +35,7 @@ struct sensor_info {
 };
 
 struct pico_internal_device {
-  sensor_info sensor;
+  sensor_info device_sensor;
 
   explicit pico_internal_device(uint8_t state_start_index);
 
@@ -45,7 +45,7 @@ struct pico_internal_device {
 struct voltage_device {
   std::string name;
 
-  sensor_info sensor;
+  sensor_info device_sensor;
 
   voltage_device(std::string name, uint8_t state_start_index);
 
@@ -55,7 +55,7 @@ struct voltage_device {
 struct current_device {
   std::string name;
 
-  sensor_info sensor;
+  sensor_info device_sensor;
 
   current_device(std::string name, uint8_t state_start_index);
 
@@ -65,7 +65,7 @@ struct current_device {
 struct temperature_device {
   std::string name;
 
-  sensor_info sensor;
+  sensor_info device_sensor;
 
   temperature_device(std::string name, uint8_t state_start_index);
 
@@ -75,7 +75,7 @@ struct temperature_device {
 struct barometer_device {
   std::string name;
 
-  sensor_info sensor;
+  sensor_info device_sensor;
 
   barometer_device(std::string name, uint8_t state_start_index);
 
@@ -85,7 +85,7 @@ struct barometer_device {
 struct resistive_device {
   std::string name;
 
-  sensor_info sensor;
+  sensor_info device_sensor;
 
   resistive_device(std::string name, uint8_t state_start_index);
 
@@ -160,7 +160,7 @@ template <typename T> sensor_map build_sensor_map(T& devices_range) {
 
   for (device& device : devices_range) {
     std::visit(overloaded{
-                   [&](auto& d) { insert_sensor(d.sensor); },
+                   [&](auto& d) { insert_sensor(d.device_sensor); },
                    [&](tank_device& d) {
                      insert_sensor(d.level_sensor);
                      insert_sensor(d.volume_sensor);
