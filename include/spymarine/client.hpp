@@ -119,21 +119,17 @@ private:
         });
   }
 
-  std::expected<message, client_error> request_message(const message& m) {
+  std::expected<message, client_error> request_message(const message& msg) {
     wait_for_request_limit();
 
     const std::expected<std::span<uint8_t>, client_error> raw_response =
-        tcp_socket_type::open()
-            .and_then([this](auto socket) {
-              return socket.connect(_ip_address, _port)
-                  .transform([&]() mutable { return std::move(socket); });
-            })
-            .and_then([&, this](auto socket) {
-              return socket.send(detail::write_message_data(m, _buffer))
-                  .transform([&]() mutable { return std::move(socket); });
-            })
-            .and_then(
-                [&, this](auto socket) { return socket.receive(_buffer); });
+        tcp_socket_type::open().and_then([&, this](auto socket) {
+          return socket.connect(_ip_address, _port)
+              .and_then([&, this]() {
+                return socket.send(detail::write_message_data(msg, _buffer));
+              })
+              .and_then([&, this]() { return socket.receive(_buffer); });
+        });
 
     return raw_response.and_then([](const auto raw_response) {
       return parse_message(raw_response).transform_error(to_client_error);
