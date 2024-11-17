@@ -26,16 +26,16 @@ enum class sensor_type {
   capacity,
 };
 
-struct sensor_info {
+struct sensor {
   sensor_type type;
   uint8_t state_index;
   float value;
 
-  auto operator<=>(const sensor_info&) const = default;
+  auto operator<=>(const sensor&) const = default;
 };
 
 struct pico_internal_device {
-  sensor_info device_sensor;
+  sensor device_sensor;
 
   explicit pico_internal_device(uint8_t state_start_index);
 
@@ -45,7 +45,7 @@ struct pico_internal_device {
 struct voltage_device {
   std::string name;
 
-  sensor_info device_sensor;
+  sensor device_sensor;
 
   voltage_device(std::string name, uint8_t state_start_index);
 
@@ -55,7 +55,7 @@ struct voltage_device {
 struct current_device {
   std::string name;
 
-  sensor_info device_sensor;
+  sensor device_sensor;
 
   current_device(std::string name, uint8_t state_start_index);
 
@@ -65,7 +65,7 @@ struct current_device {
 struct temperature_device {
   std::string name;
 
-  sensor_info device_sensor;
+  sensor device_sensor;
 
   temperature_device(std::string name, uint8_t state_start_index);
 
@@ -75,7 +75,7 @@ struct temperature_device {
 struct barometer_device {
   std::string name;
 
-  sensor_info device_sensor;
+  sensor device_sensor;
 
   barometer_device(std::string name, uint8_t state_start_index);
 
@@ -85,7 +85,7 @@ struct barometer_device {
 struct resistive_device {
   std::string name;
 
-  sensor_info device_sensor;
+  sensor device_sensor;
 
   resistive_device(std::string name, uint8_t state_start_index);
 
@@ -104,8 +104,8 @@ struct tank_device {
   fluid_type type;
   float capacity;
 
-  sensor_info volume_sensor;
-  sensor_info level_sensor;
+  sensor volume_sensor;
+  sensor level_sensor;
 
   tank_device(std::string name, fluid_type type, float capacity,
               uint8_t state_start_index);
@@ -128,10 +128,10 @@ struct battery_device {
   battery_type type;
   float capacity;
 
-  sensor_info charge_sensor;
-  sensor_info remaining_capacity_sensor;
-  sensor_info current_sensor;
-  sensor_info voltage_sensor;
+  sensor charge_sensor;
+  sensor remaining_capacity_sensor;
+  sensor current_sensor;
+  sensor voltage_sensor;
 
   battery_device(std::string name, battery_type type, float capacity,
                  uint8_t state_start_index);
@@ -144,18 +144,17 @@ using device =
                  temperature_device, barometer_device, resistive_device,
                  tank_device, battery_device>;
 
-using sensor_map = std::unordered_map<uint8_t, std::vector<sensor_info*>>;
+using sensor_map = std::unordered_map<uint8_t, std::vector<sensor*>>;
 
 template <typename T> sensor_map build_sensor_map(T& devices_range) {
   sensor_map result;
 
-  const auto insert_sensor = [&result](sensor_info& sensor) {
-    auto it = result.find(sensor.state_index);
+  const auto insert_sensor = [&result](sensor& s) {
+    auto it = result.find(s.state_index);
     if (it == result.end()) {
-      it =
-          result.emplace(sensor.state_index, std::vector<sensor_info*>{}).first;
+      it = result.emplace(s.state_index, std::vector<sensor*>{}).first;
     }
-    it->second.push_back(std::addressof(sensor));
+    it->second.push_back(std::addressof(s));
   };
 
   for (device& device : devices_range) {

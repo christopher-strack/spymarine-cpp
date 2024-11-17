@@ -79,7 +79,7 @@ void update_sensor_states(message state_message, sensor_map& map) {
   for (const auto& entry : state_values) {
     if (const auto value = std::get_if<numeric_value>(&entry.value)) {
       if (const auto it = map.find(entry.id); it != map.end()) {
-        for (sensor_info* sensor : it->second) {
+        for (sensor* sensor : it->second) {
           sensor->value = sensor_value(*value, sensor->type);
         }
       }

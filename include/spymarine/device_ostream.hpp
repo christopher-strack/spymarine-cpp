@@ -8,7 +8,7 @@ namespace spymarine {
 
 std::ostream& operator<<(std::ostream& os, const sensor_type type);
 
-std::ostream& operator<<(std::ostream& os, const sensor_info& info);
+std::ostream& operator<<(std::ostream& os, const sensor& info);
 
 std::ostream& operator<<(std::ostream& os, const pico_internal_device& device);
 
