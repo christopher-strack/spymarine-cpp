@@ -35,7 +35,7 @@ endif()
 
 
 if(BUILD_EXAMPLES)
-    add_executable(read_devices_example examples/read_devices.cpp)
+    add_executable(print_devices_example examples/print_devices.cpp)
 
-    target_link_libraries(read_devices_example PRIVATE spymarine)
+    target_link_libraries(print_devices_example PRIVATE spymarine)
 endif()
