@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_library(spymarine
     src/device_ostream.cpp
     src/device.cpp
+    src/discover.cpp
     src/file_descriptor.cpp
     src/message.cpp
     src/message_values_iterator.cpp
