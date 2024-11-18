@@ -84,22 +84,4 @@ float sensor_value(numeric_value value, sensor_type type) {
   return 0.0f;
 }
 
-void update_sensor_states(message state_message, sensor_map& map) {
-  if (state_message.type != message_type::sensor_state) {
-    return;
-  }
-
-  message_values_view state_values{state_message.data};
-
-  for (const auto& entry : state_values) {
-    if (const auto value = std::get_if<numeric_value>(&entry.value)) {
-      if (const auto it = map.find(entry.id); it != map.end()) {
-        for (sensor* sensor : it->second) {
-          sensor->value = sensor_value(*value, sensor->type);
-        }
-      }
-    }
-  }
-}
-
 } // namespace spymarine

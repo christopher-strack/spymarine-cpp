@@ -14,6 +14,7 @@ target_sources(
         parse_device.cpp
         parse_message.cpp
         read_devices.cpp
+        sensor_reader.cpp
         tcp_socket.cpp
         udp_socket.cpp
 )
@@ -38,6 +39,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/read_devices.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/sensor_reader.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/tcp_socket.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/udp_socket.hpp
 )
