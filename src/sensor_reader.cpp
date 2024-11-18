@@ -1,4 +1,7 @@
 #include "spymarine/sensor_reader.hpp"
+#include "spymarine/defaults.hpp"
+#include "spymarine/message_values_view.hpp"
+#include "spymarine/overloaded.hpp"
 
 namespace spymarine {
 
@@ -49,6 +52,21 @@ void update_sensor_states(message state_message, sensor_map& map) {
       }
     }
   }
+}
+
+std::expected<sensor_reader<udp_socket>, error>
+make_sensor_reader(std::vector<device>& devices) {
+  auto bound_socket = udp_socket::open().and_then([&](auto socket) {
+    return socket.bind(0, simarine_default_udp_port).transform([&]() {
+      return std::move(socket);
+    });
+  });
+
+  if (bound_socket) {
+    return sensor_reader{devices, std::move(*bound_socket)};
+  }
+
+  return std::unexpected{bound_socket.error()};
 }
 
 } // namespace spymarine

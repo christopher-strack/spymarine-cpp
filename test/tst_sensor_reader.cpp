@@ -11,20 +11,23 @@
 #include <expected>
 
 namespace spymarine {
-
-TEST_CASE("device") {
-  SECTION("update_sensor_states") {
-    const auto state_message = parse_message(raw_state_response);
-    REQUIRE(state_message);
-    REQUIRE(state_message->type == message_type::sensor_state);
-
-    std::vector<device> devices = parsed_devices;
-    auto sensor_map = build_sensor_map(devices);
-
-    update_sensor_states(*state_message, sensor_map);
-
-    CHECK(devices == parsed_devices_with_values);
+namespace {
+class mock_udp_socket {
+public:
+  std::expected<std::span<const uint8_t>, std::error_code>
+  receive(std::span<uint8_t> buffer) {
+    return std::span<const uint8_t>{raw_state_response};
   }
+};
+} // namespace
+
+TEST_CASE("sensor_reader") {
+  auto devices = parsed_devices;
+  sensor_reader reader{devices, mock_udp_socket{}};
+
+  REQUIRE(reader.update());
+
+  CHECK(devices == parsed_devices_with_values);
 }
 
 } // namespace spymarine
