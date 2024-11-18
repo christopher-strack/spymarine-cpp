@@ -46,7 +46,7 @@ std::expected<uint32_t, std::error_code> udp_socket::discover() {
   return ntohl(address.sin_addr.s_addr);
 }
 
-std::expected<std::span<uint8_t>, std::error_code>
+std::expected<std::span<const uint8_t>, std::error_code>
 udp_socket::receive(std::span<uint8_t> buffer) {
   const auto result = ::recv(_fd.get(), buffer.data(), buffer.size(), 0);
   if (result == -1) {

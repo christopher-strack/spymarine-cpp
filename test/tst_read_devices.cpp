@@ -28,7 +28,7 @@ public:
     return {};
   }
 
-  std::expected<std::span<uint8_t>, std::error_code>
+  std::expected<std::span<const uint8_t>, std::error_code>
   receive(std::span<uint8_t> buffer) {
     if (!_last_sent_message) {
       return std::unexpected{std::make_error_code(std::errc::io_error)};

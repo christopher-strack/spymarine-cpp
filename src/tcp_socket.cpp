@@ -39,7 +39,7 @@ tcp_socket::send(std::span<uint8_t> buffer) {
   return {};
 }
 
-std::expected<std::span<uint8_t>, std::error_code>
+std::expected<std::span<const uint8_t>, std::error_code>
 tcp_socket::receive(std::span<uint8_t> buffer) {
   const auto result = ::recv(_fd.get(), buffer.data(), buffer.size(), 0);
   if (result == -1) {

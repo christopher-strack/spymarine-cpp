@@ -17,7 +17,7 @@ public:
 
   std::expected<uint32_t, std::error_code> discover();
 
-  std::expected<std::span<uint8_t>, std::error_code>
+  std::expected<std::span<const uint8_t>, std::error_code>
   receive(std::span<uint8_t> buffer);
 
   udp_socket(const udp_socket& rhs) = delete;

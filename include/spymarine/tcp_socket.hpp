@@ -17,7 +17,7 @@ public:
 
   std::expected<void, std::error_code> send(std::span<uint8_t>);
 
-  std::expected<std::span<uint8_t>, std::error_code>
+  std::expected<std::span<const uint8_t>, std::error_code>
   receive(std::span<uint8_t> buffer);
 
   tcp_socket(const tcp_socket& rhs) = delete;

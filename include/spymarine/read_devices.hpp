@@ -24,21 +24,21 @@
 namespace spymarine::detail {
 
 template <typename tcp_socket_type>
-concept tcp_socket_concept =
-    requires(tcp_socket_type socket, uint32_t ip, uint16_t port) {
-      {
-        tcp_socket_type::open()
-      } -> std::same_as<std::expected<tcp_socket_type, std::error_code>>;
-      {
-        socket.connect(ip, port)
-      } -> std::same_as<std::expected<void, std::error_code>>;
-      {
-        socket.send(std::span<uint8_t>{})
-      } -> std::same_as<std::expected<void, std::error_code>>;
-      {
-        socket.receive(std::span<uint8_t>{})
-      } -> std::same_as<std::expected<std::span<uint8_t>, std::error_code>>;
-    };
+concept tcp_socket_concept = requires(tcp_socket_type socket, uint32_t ip,
+                                      uint16_t port) {
+  {
+    tcp_socket_type::open()
+  } -> std::same_as<std::expected<tcp_socket_type, std::error_code>>;
+  {
+    socket.connect(ip, port)
+  } -> std::same_as<std::expected<void, std::error_code>>;
+  {
+    socket.send(std::span<uint8_t>{})
+  } -> std::same_as<std::expected<void, std::error_code>>;
+  {
+    socket.receive(std::span<uint8_t>{})
+  } -> std::same_as<std::expected<std::span<const uint8_t>, std::error_code>>;
+};
 
 std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 
@@ -114,7 +114,7 @@ private:
   std::expected<message, error> request_message(const message& msg) {
     wait_for_request_limit();
 
-    const std::expected<std::span<uint8_t>, error> raw_response =
+    const std::expected<std::span<const uint8_t>, error> raw_response =
         tcp_socket_type::open().and_then([&, this](auto socket) {
           return socket.connect(_ip_address, _port)
               .and_then([&, this]() {
