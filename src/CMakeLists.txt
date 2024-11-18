@@ -28,7 +28,6 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/device.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/device_ostream.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/discover.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/file_descriptor.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_value.hpp
@@ -36,6 +35,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_values_view.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/overloaded.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_device.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/parse_error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/read_devices.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/tcp_socket.hpp

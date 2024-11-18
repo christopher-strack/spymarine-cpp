@@ -48,7 +48,7 @@ public:
   }
 
 private:
-  std::expected<message, error> _last_sent_message;
+  std::expected<message, parse_error> _last_sent_message;
 };
 } // namespace
 

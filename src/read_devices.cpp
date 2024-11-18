@@ -40,7 +40,7 @@ namespace spymarine {
 
 std::string error_message(read_devices_error err) {
   return std::visit(overloaded{
-                        [](error e) { return std::to_string(int(e)); },
+                        [](parse_error e) { return std::to_string(int(e)); },
                         [](std::error_code ec) { return ec.message(); },
                     },
                     err);

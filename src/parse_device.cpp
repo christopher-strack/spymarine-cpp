@@ -52,13 +52,13 @@ battery_type to_battery_type(const uint16_t battery_type) {
 }
 } // namespace
 
-std::expected<parsed_device, error>
+std::expected<parsed_device, parse_error>
 parse_device(const std::span<const uint8_t> bytes,
              const uint8_t state_start_index) {
   const auto values = message_values_view{bytes};
   const auto type_value = find_value_for_type<numeric_value>(1, values);
   if (!type_value) {
-    return std::unexpected{error::invalid_device_message};
+    return std::unexpected{parse_error::invalid_device_message};
   }
 
   const auto type = type_value->second();
@@ -127,9 +127,9 @@ parse_device(const std::span<const uint8_t> bytes,
   case 14:
     return unknown_device{};
   default:
-    return std::unexpected{error::invalid_device_type};
+    return std::unexpected{parse_error::invalid_device_type};
   }
 
-  return std::unexpected{error::invalid_device_message};
+  return std::unexpected{parse_error::invalid_device_message};
 }
 } // namespace spymarine

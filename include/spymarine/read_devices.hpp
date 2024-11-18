@@ -2,9 +2,9 @@
 
 #include "spymarine/defaults.hpp"
 #include "spymarine/device.hpp"
-#include "spymarine/error.hpp"
 #include "spymarine/overloaded.hpp"
 #include "spymarine/parse_device.hpp"
+#include "spymarine/parse_error.hpp"
 #include "spymarine/parse_message.hpp"
 #include "spymarine/tcp_socket.hpp"
 
@@ -20,9 +20,11 @@
 
 namespace spymarine {
 
-using read_devices_error = std::variant<error, std::error_code>;
+using read_devices_error = std::variant<parse_error, std::error_code>;
 
-inline read_devices_error to_client_error(const error& err) { return err; }
+inline read_devices_error to_client_error(const parse_error& err) {
+  return err;
+}
 
 std::string error_message(read_devices_error error);
 
@@ -99,7 +101,7 @@ private:
               message.data.size() >= 6) {
             return message.data[5] + 1;
           }
-          return std::unexpected{error::invalid_device_count_message};
+          return std::unexpected{parse_error::invalid_device_count_message};
         });
   }
 

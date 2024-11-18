@@ -35,13 +35,13 @@ TEST_CASE("parse_header") {
         header_bytes{0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x41,
                      0x85, 0xde, 0xc3, 0x46, 0x01, 0x61, 0xff};
     CHECK(parse_header(std::span{valid_bytes}.subspan(0, 13)).error() ==
-          error::invalid_data_length);
+          parse_error::invalid_data_length);
   }
 
   SECTION("returns error if header doesn't match pattern") {
     auto bytes = header_bytes{0x01, 0x00, 0x00, 0x00, 0x00, 0xff, 0x41,
                               0x85, 0xde, 0xc3, 0x46, 0x01, 0x61, 0xff};
-    CHECK(parse_header(bytes).error() == error::invalid_header);
+    CHECK(parse_header(bytes).error() == parse_error::invalid_header);
   }
 }
 
@@ -65,13 +65,14 @@ TEST_CASE("parse_message") {
   SECTION("returns error if length is invalid") {
     auto invalid_message = valid_message;
     invalid_message[12] += 1;
-    CHECK(parse_message(invalid_message).error() == error::invalid_data_length);
+    CHECK(parse_message(invalid_message).error() ==
+          parse_error::invalid_data_length);
   }
 
   SECTION("returns error if crc is invalid") {
     auto invalid_message = valid_message;
     invalid_message[invalid_message.size() - 1] += 1;
-    CHECK(parse_message(invalid_message).error() == error::invalid_crc);
+    CHECK(parse_message(invalid_message).error() == parse_error::invalid_crc);
   }
 }
 

@@ -2,7 +2,7 @@
 
 namespace spymarine {
 
-enum class error {
+enum class parse_error {
   invalid_header,
   invalid_data_length,
   invalid_crc,
