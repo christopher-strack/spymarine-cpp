@@ -2,6 +2,8 @@
 
 #include "spymarine/defaults.hpp"
 #include "spymarine/device.hpp"
+#include "spymarine/message_value.hpp"
+#include "spymarine/message_values_view.hpp"
 #include "spymarine/overloaded.hpp"
 #include "spymarine/parse_device.hpp"
 #include "spymarine/parse_error.hpp"
@@ -95,9 +97,12 @@ private:
     return request_message({message_type::device_count, {}})
         .and_then([](const auto& message)
                       -> std::expected<uint8_t, read_devices_error> {
-          if (message.type == message_type::device_count &&
-              message.data.size() >= 6) {
-            return message.data[5] + 1;
+          if (message.type == message_type::device_count) {
+            message_values_view values{message.data};
+            if (const auto count =
+                    find_value_for_type<numeric_value>(1, values)) {
+              return count->number() + 1;
+            }
           }
           return std::unexpected{parse_error::invalid_device_count_message};
         });
