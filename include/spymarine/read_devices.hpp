@@ -22,15 +22,13 @@ namespace spymarine {
 
 using read_devices_error = std::variant<parse_error, std::error_code>;
 
-inline read_devices_error to_read_devices_error(const parse_error& err) {
-  return err;
-}
-
 std::string error_message(read_devices_error error);
 
 } // namespace spymarine
 
 namespace spymarine::detail {
+
+read_devices_error to_read_devices_error(const parse_error& err);
 
 template <typename tcp_socket_type>
 concept tcp_socket_concept =

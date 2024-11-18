@@ -10,6 +10,8 @@ std::array<uint8_t, 2> to_bytes(uint16_t value) {
 
 } // namespace
 
+read_devices_error to_read_devices_error(const parse_error& err) { return err; }
+
 std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
   const auto payload_size = header_size + m.data.size();
   const auto total_size = payload_size + 2;
