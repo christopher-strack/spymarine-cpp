@@ -6,6 +6,7 @@ target_sources(
         device_ostream.cpp
         device.cpp
         discover.cpp
+        error.cpp
         file_descriptor.cpp
         message.cpp
         message_values_iterator.cpp
@@ -29,6 +30,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/device.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/device_ostream.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/discover.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/file_descriptor.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_value.hpp

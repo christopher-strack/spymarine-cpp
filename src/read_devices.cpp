@@ -10,8 +10,6 @@ std::array<uint8_t, 2> to_bytes(uint16_t value) {
 
 } // namespace
 
-read_devices_error to_read_devices_error(const parse_error& err) { return err; }
-
 std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
   const auto payload_size = header_size + m.data.size();
   const auto total_size = payload_size + 2;
@@ -37,15 +35,3 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
 }
 
 } // namespace spymarine::detail
-
-namespace spymarine {
-
-std::string error_message(read_devices_error err) {
-  return std::visit(overloaded{
-                        [](parse_error e) { return std::to_string(int(e)); },
-                        [](std::error_code ec) { return ec.message(); },
-                    },
-                    err);
-}
-
-} // namespace spymarine
