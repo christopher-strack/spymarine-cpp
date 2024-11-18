@@ -22,7 +22,7 @@ namespace spymarine {
 
 using read_devices_error = std::variant<parse_error, std::error_code>;
 
-inline read_devices_error to_client_error(const parse_error& err) {
+inline read_devices_error to_read_devices_error(const parse_error& err) {
   return err;
 }
 
@@ -51,11 +51,11 @@ concept tcp_socket_concept =
 
 std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 
-template <tcp_socket_concept tcp_socket_type> class client {
+template <tcp_socket_concept tcp_socket_type> class device_reader {
 public:
-  client(uint32_t address, uint16_t port,
-         const std::chrono::system_clock::duration request_limit =
-             std::chrono::milliseconds{10})
+  device_reader(uint32_t address, uint16_t port,
+                const std::chrono::system_clock::duration request_limit =
+                    std::chrono::milliseconds{10})
       : _ip_address{address}, _port{port}, _request_limit{request_limit} {}
 
   std::expected<std::vector<device>, read_devices_error> read_devices() {
@@ -114,7 +114,7 @@ private:
     return request_message({message_type::device_info, data})
         .and_then([state_start_index](const auto& message) {
           return parse_device(message.data, state_start_index)
-              .transform_error(to_client_error);
+              .transform_error(to_read_devices_error);
         });
   }
 
@@ -132,7 +132,7 @@ private:
         });
 
     return raw_response.and_then([](const auto raw_response) {
-      return parse_message(raw_response).transform_error(to_client_error);
+      return parse_message(raw_response).transform_error(to_read_devices_error);
     });
   }
 
@@ -162,8 +162,9 @@ read_devices(const uint32_t address,
              const uint16_t port = simarine_default_tcp_port,
              const std::chrono::system_clock::duration request_limit =
                  std::chrono::milliseconds{10}) {
-  detail::client<tcp_socket_type> client{address, port, request_limit};
-  return client.read_devices();
+  detail::device_reader<tcp_socket_type> device_reader{address, port,
+                                                       request_limit};
+  return device_reader.read_devices();
 }
 
 } // namespace spymarine
