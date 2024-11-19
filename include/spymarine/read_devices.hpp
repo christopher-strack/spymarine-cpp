@@ -173,12 +173,12 @@ template <detail::tcp_socket_concept tcp_socket_type = tcp_socket>
 std::expected<std::vector<device>, error>
 read_devices(const uint32_t address,
              const uint16_t port = simarine_default_tcp_port,
-             std::invocable<const device&> auto filter_function =
+             std::function<bool(const device&)> filter_function =
                  do_not_filter_devices{},
              const std::chrono::system_clock::duration request_limit =
                  std::chrono::milliseconds{10}) {
   detail::device_reader<tcp_socket_type> device_reader{
-      address, port, filter_function, request_limit};
+      address, port, std::move(filter_function), request_limit};
   return device_reader.read_devices();
 }
 

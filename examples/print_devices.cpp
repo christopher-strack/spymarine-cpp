@@ -1,39 +1,31 @@
-#include "spymarine/device_ostream.hpp"
+#include "example_utils.hpp"
+
 #include "spymarine/discover.hpp"
 #include "spymarine/read_devices.hpp"
 
 #include <print>
-#include <sstream>
-
-namespace {
-
-std::string device_string(const spymarine::device& device) {
-  std::stringstream str;
-  str << device;
-  return str.str();
-}
-
-} // namespace
 
 int main(int argc, char** argv) {
-  std::println("Discovering Simarine device");
+  std::println("Discover Simarine device");
 
-  if (const auto ip = spymarine::discover()) {
-    std::println("Reading devices");
+  const auto result = spymarine::discover()
+                          .transform_error(spymarine::error_from_error_code)
+                          .and_then([](const auto ip) {
+                            std::println("Read devices");
 
-    if (const auto devices = spymarine::read_devices(*ip)) {
-      std::println("Found {} devices", devices->size());
+                            return spymarine::read_devices(ip);
+                          })
+                          .transform([](auto devices) {
+                            std::println("Found {} devices", devices.size());
 
-      for (const auto& device : *devices) {
-        std::println("Device: {}", device_string(device));
-      }
-    } else {
-      std::println("Failed to read devices: {}",
-                   spymarine::error_message(devices.error()));
-    }
-  } else {
-    std::println("Couldn't find Simarine device: {}",
-                 spymarine::error_message(ip.error()));
+                            for (const auto& device : devices) {
+                              std::println("{}", device_string(device));
+                            }
+                          });
+
+  if (!result) {
+    std::println("Failed to read sensor states: {}",
+                 spymarine::error_message(result.error()));
   }
 
   return 0;

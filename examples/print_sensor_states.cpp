@@ -1,20 +1,10 @@
-#include "spymarine/device_ostream.hpp"
+#include "example_utils.hpp"
+
 #include "spymarine/discover.hpp"
 #include "spymarine/read_devices.hpp"
 #include "spymarine/sensor_reader.hpp"
 
 #include <print>
-#include <sstream>
-
-namespace {
-
-std::string device_string(const spymarine::device& device) {
-  std::stringstream str;
-  str << device;
-  return str.str();
-}
-
-} // namespace
 
 int main(int argc, char** argv) {
   std::println("Discover Simarine device");
