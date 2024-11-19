@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
             return spymarine::make_sensor_reader(devices)
                 .and_then([](auto sensor_reader) {
                   std::println("Reading sensor states");
-                  return sensor_reader.update();
+                  return sensor_reader.read_and_update();
                 })
                 .transform([&]() {
                   for (const auto& device : devices) {

@@ -23,7 +23,7 @@ TEST_CASE("sensor_reader") {
   auto devices = parsed_devices;
   sensor_reader reader{devices, mock_udp_socket{}};
 
-  REQUIRE(reader.update());
+  REQUIRE(reader.read_and_update());
 
   CHECK(devices == parsed_devices_with_values);
 }

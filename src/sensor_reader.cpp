@@ -1,6 +1,5 @@
 #include "spymarine/sensor_reader.hpp"
 #include "spymarine/defaults.hpp"
-#include "spymarine/message_values_view.hpp"
 #include "spymarine/overloaded.hpp"
 
 namespace spymarine {
@@ -34,24 +33,6 @@ sensor_map build_sensor_map(std::vector<device>& devices_range) {
   }
 
   return result;
-}
-
-void update_sensor_states(message state_message, sensor_map& map) {
-  if (state_message.type != message_type::sensor_state) {
-    return;
-  }
-
-  message_values_view state_values{state_message.data};
-
-  for (const auto& entry : state_values) {
-    if (const auto value = std::get_if<numeric_value>(&entry.value)) {
-      if (const auto it = map.find(entry.id); it != map.end()) {
-        for (sensor* sensor : it->second) {
-          sensor->value = sensor_value(*value, sensor->type);
-        }
-      }
-    }
-  }
 }
 
 std::expected<sensor_reader<udp_socket>, error>
