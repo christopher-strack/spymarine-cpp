@@ -3,6 +3,7 @@
 #include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message.hpp"
+#include "spymarine/parse_message.hpp"
 #include "spymarine/udp_socket.hpp"
 
 #include <expected>
