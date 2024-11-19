@@ -16,10 +16,25 @@
 #include <concepts>
 #include <cstdint>
 #include <expected>
+#include <functional>
 #include <optional>
 #include <system_error>
 #include <thread>
 #include <variant>
+
+namespace spymarine {
+
+struct do_not_filter_devices {
+  bool operator()(const device& devices) { return true; }
+};
+
+template <typename... DeviceTypes> struct filter_by_device_type {
+  bool operator()(const device& devices) {
+    return (std::holds_alternative<DeviceTypes>(devices) || ...);
+  }
+};
+
+} // namespace spymarine
 
 namespace spymarine::detail {
 
@@ -45,9 +60,11 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 template <tcp_socket_concept tcp_socket_type> class device_reader {
 public:
   device_reader(uint32_t address, uint16_t port,
-                const std::chrono::system_clock::duration request_limit =
-                    std::chrono::milliseconds{10})
-      : _ip_address{address}, _port{port}, _request_limit{request_limit} {}
+                std::invocable<const device&> auto filter_function,
+                const std::chrono::system_clock::duration request_limit)
+      : _ip_address{address}, _port{port},
+        _filter_function{std::move(filter_function)},
+        _request_limit{request_limit} {}
 
   std::expected<std::vector<device>, error> read_devices() {
     std::vector<device> devices;
@@ -71,8 +88,10 @@ private:
         std::visit(overloaded{
                        [](null_device) {},
                        [](unknown_device) {},
-                       [&devices](auto device) {
-                         devices.insert(devices.end(), std::move(device));
+                       [this, &devices](auto device) {
+                         if (_filter_function(device)) {
+                           devices.insert(devices.end(), std::move(device));
+                         }
                        },
                    },
                    std::move(*parsed_device));
@@ -143,34 +162,24 @@ private:
   std::array<uint8_t, 1024> _buffer;
   std::chrono::system_clock::duration _request_limit;
   std::optional<std::chrono::system_clock::time_point> _last_request_time;
+  std::function<bool(const device&)> _filter_function;
 };
 
 } // namespace spymarine::detail
 
 namespace spymarine {
 
-template <typename tcp_socket_type = tcp_socket>
+template <detail::tcp_socket_concept tcp_socket_type = tcp_socket>
 std::expected<std::vector<device>, error>
 read_devices(const uint32_t address,
              const uint16_t port = simarine_default_tcp_port,
+             std::invocable<const device&> auto filter_function =
+                 do_not_filter_devices{},
              const std::chrono::system_clock::duration request_limit =
                  std::chrono::milliseconds{10}) {
-  detail::device_reader<tcp_socket_type> device_reader{address, port,
-                                                       request_limit};
+  detail::device_reader<tcp_socket_type> device_reader{
+      address, port, filter_function, request_limit};
   return device_reader.read_devices();
-}
-
-template <typename... DeviceTypes>
-bool is_device_any_of(const device& devices) {
-  return (std::holds_alternative<DeviceTypes>(devices) || ...);
-}
-
-template <typename... DeviceTypes>
-void filter_devices(std::vector<device>& devices) {
-  const auto e = std::ranges::remove_if(devices, [](const device& device) {
-    return !is_device_any_of<DeviceTypes...>(device);
-  });
-  devices.erase(e.begin(), e.end());
 }
 
 } // namespace spymarine

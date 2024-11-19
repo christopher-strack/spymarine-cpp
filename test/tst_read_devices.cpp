@@ -53,8 +53,8 @@ private:
 } // namespace
 
 TEST_CASE("read_devices") {
-  const auto devices =
-      read_devices<mock_tcp_socket>(0, 0, std::chrono::seconds{0});
+  const auto devices = read_devices<mock_tcp_socket>(
+      0, 0, do_not_filter_devices{}, std::chrono::seconds{0});
 
   CHECK(devices == parsed_devices);
 }
