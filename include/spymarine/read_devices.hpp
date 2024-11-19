@@ -160,4 +160,17 @@ read_devices(const uint32_t address,
   return device_reader.read_devices();
 }
 
+template <typename... DeviceTypes>
+bool is_device_any_of(const device& devices) {
+  return (std::holds_alternative<DeviceTypes>(devices) || ...);
+}
+
+template <typename... DeviceTypes>
+void filter_devices(std::vector<device>& devices) {
+  const auto e = std::ranges::remove_if(devices, [](const device& device) {
+    return !is_device_any_of<DeviceTypes...>(device);
+  });
+  devices.erase(e.begin(), e.end());
+}
+
 } // namespace spymarine

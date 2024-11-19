@@ -1,9 +1,7 @@
 #include "data.hpp"
 #include "raw_data.hpp"
 
-#include "spymarine/device.hpp"
 #include "spymarine/device_ostream.hpp"
-#include "spymarine/parse_message.hpp"
 #include "spymarine/sensor_reader.hpp"
 
 #include <catch2/catch_all.hpp>
