@@ -1,5 +1,7 @@
 add_executable(print_devices_example)
-
 target_sources(print_devices_example PRIVATE print_devices.cpp)
-
 target_link_libraries(print_devices_example PRIVATE spymarine)
+
+add_executable(read_sensor_states)
+target_sources(read_sensor_states PRIVATE read_sensor_states.cpp)
+target_link_libraries(read_sensor_states PRIVATE spymarine)
