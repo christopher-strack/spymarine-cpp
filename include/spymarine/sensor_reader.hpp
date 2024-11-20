@@ -10,6 +10,7 @@
 #include <chrono>
 #include <expected>
 #include <optional>
+#include <print>
 #include <system_error>
 #include <unordered_map>
 #include <vector>
@@ -90,6 +91,12 @@ template <udp_socket_concept udp_socket_type>
 class moving_average_sensor_reader
     : public sensor_reader_base<udp_socket_type> {
 public:
+  moving_average_sensor_reader(
+      const std::chrono::steady_clock::duration moving_average_interval,
+      std::vector<device>& devices, udp_socket_type udp_socket)
+      : sensor_reader_base<udp_socket_type>(devices, std::move(udp_socket)),
+        _moving_average_interval{moving_average_interval} {}
+
   using sensor_reader_base<udp_socket_type>::sensor_reader_base;
 
   std::expected<bool, error> read_and_update() {
@@ -106,7 +113,7 @@ public:
 
     const auto delta = std::chrono::steady_clock::now() - *_last_window_time;
     const auto moving_average_window_completed =
-        delta >= _moving_average_duration;
+        delta >= _moving_average_interval;
 
     if (moving_average_window_completed) {
       _last_window_time = std::nullopt;
@@ -125,8 +132,7 @@ public:
   }
 
 private:
-  std::chrono::steady_clock::duration _moving_average_duration =
-      std::chrono::seconds{10};
+  std::chrono::steady_clock::duration _moving_average_interval;
   int _average_count = 0;
   std::optional<std::chrono::steady_clock::time_point> _last_window_time{};
 };
@@ -135,6 +141,8 @@ std::expected<sensor_reader<udp_socket>, error>
 make_sensor_reader(std::vector<device>& devices);
 
 std::expected<moving_average_sensor_reader<udp_socket>, error>
-make_moving_average_sensor_reader(std::vector<device>& devices);
+make_moving_average_sensor_reader(
+    std::chrono::steady_clock::duration moving_average_interval,
+    std::vector<device>& devices);
 
 } // namespace spymarine

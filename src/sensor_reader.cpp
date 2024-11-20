@@ -55,9 +55,12 @@ make_sensor_reader(std::vector<device>& devices) {
 }
 
 std::expected<moving_average_sensor_reader<udp_socket>, error>
-make_moving_average_sensor_reader(std::vector<device>& devices) {
+make_moving_average_sensor_reader(
+    const std::chrono::steady_clock::duration moving_average_interval,
+    std::vector<device>& devices) {
   return open_bound_socket().transform([&](auto socket) {
-    return moving_average_sensor_reader<udp_socket>{devices, std::move(socket)};
+    return moving_average_sensor_reader<udp_socket>{moving_average_interval,
+                                                    devices, std::move(socket)};
   });
 }
 

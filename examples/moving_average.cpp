@@ -5,6 +5,7 @@
 #include "spymarine/sensor_reader.hpp"
 #include "spymarine/udp_socket.hpp"
 
+#include <chrono>
 #include <print>
 
 namespace {
@@ -54,7 +55,8 @@ int main(int argc, char** argv) {
           .and_then([](auto devices) {
             std::println("Found {} devices", devices.size());
 
-            return spymarine::make_moving_average_sensor_reader(devices)
+            return spymarine::make_moving_average_sensor_reader(
+                       std::chrono::seconds{10}, devices)
                 .transform([&](auto sensor_reader) {
                   std::println("Reading sensor states");
                   process_sensor_values(devices, sensor_reader);
