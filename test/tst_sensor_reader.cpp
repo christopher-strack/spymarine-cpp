@@ -21,9 +21,9 @@ public:
 
 TEST_CASE("sensor_reader") {
   auto devices = parsed_devices;
-  sensor_reader reader{devices, mock_udp_socket{}};
+  sensor_reader<mock_udp_socket> reader{devices, mock_udp_socket{}};
 
-  REQUIRE(reader.read_and_update(update_method::replace));
+  REQUIRE(reader.read_and_update());
 
   CHECK(devices == parsed_devices_with_values);
 }

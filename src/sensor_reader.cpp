@@ -35,19 +35,30 @@ sensor_map build_sensor_map(std::vector<device>& devices_range) {
   return result;
 }
 
-std::expected<sensor_reader<udp_socket>, error>
-make_sensor_reader(std::vector<device>& devices) {
-  auto bound_socket = udp_socket::open().and_then([&](auto socket) {
+namespace {
+
+std::expected<udp_socket, error> open_bound_socket() {
+  return udp_socket::open().and_then([&](auto socket) {
     return socket.bind(0, simarine_default_udp_port).transform([&]() {
       return std::move(socket);
     });
   });
+}
 
-  if (bound_socket) {
-    return sensor_reader{devices, std::move(*bound_socket)};
-  }
+} // namespace
 
-  return std::unexpected{bound_socket.error()};
+std::expected<sensor_reader<udp_socket>, error>
+make_sensor_reader(std::vector<device>& devices) {
+  return open_bound_socket().transform([&](auto socket) {
+    return sensor_reader<udp_socket>{devices, std::move(socket)};
+  });
+}
+
+std::expected<moving_average_sensor_reader<udp_socket>, error>
+make_moving_average_sensor_reader(std::vector<device>& devices) {
+  return open_bound_socket().transform([&](auto socket) {
+    return moving_average_sensor_reader<udp_socket>{devices, std::move(socket)};
+  });
 }
 
 } // namespace spymarine

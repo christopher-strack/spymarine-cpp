@@ -11,24 +11,23 @@ namespace {
 
 void process_sensor_values(
     const std::vector<spymarine::device>& devices,
-    spymarine::sensor_reader<spymarine::udp_socket>& sensor_reader) {
+    spymarine::moving_average_sensor_reader<spymarine::udp_socket>&
+        sensor_reader) {
   std::println("Start processing sensor values");
 
-  auto last_sent_print = std::chrono::steady_clock::now();
   while (true) {
-    const auto delta = std::chrono::steady_clock::now() - last_sent_print;
-    if (delta >= std::chrono::seconds{10}) {
-      last_sent_print = std::chrono::steady_clock::now();
+    const auto result =
+        sensor_reader.read_and_update().transform([&](bool window_completed) {
+          if (window_completed) {
+            for (const auto& device : devices) {
+              std::println("{}", device_string(device));
+            }
+          }
+        });
 
-      for (const auto& device : devices) {
-        std::println("{}", device_string(device));
-      }
-
-      [[maybe_unused]] const auto result =
-          sensor_reader.read_and_update(spymarine::update_method::replace);
-    } else {
-      [[maybe_unused]] const auto result = sensor_reader.read_and_update(
-          spymarine::update_method::cumulative_average);
+    if (!result) {
+      std::println("Failed to read sensor values: {}",
+                   spymarine::error_message(result.error()));
     }
   }
 }
@@ -55,8 +54,8 @@ int main(int argc, char** argv) {
           .and_then([](auto devices) {
             std::println("Found {} devices", devices.size());
 
-            return spymarine::make_sensor_reader(devices).transform(
-                [&](auto sensor_reader) {
+            return spymarine::make_moving_average_sensor_reader(devices)
+                .transform([&](auto sensor_reader) {
                   std::println("Reading sensor states");
                   process_sensor_values(devices, sensor_reader);
                 });
