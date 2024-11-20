@@ -18,8 +18,6 @@ using sensor_map = std::unordered_map<uint8_t, std::vector<sensor*>>;
 
 sensor_map build_sensor_map(std::vector<device>& devices_range);
 
-void update_sensor_states(message state_message, sensor_map& map);
-
 template <typename udp_socket_type>
 concept udp_socket_concept = requires(udp_socket_type socket, uint32_t ip,
                                       uint16_t port) {
@@ -28,6 +26,8 @@ concept udp_socket_concept = requires(udp_socket_type socket, uint32_t ip,
   } -> std::same_as<std::expected<std::span<const uint8_t>, std::error_code>>;
 };
 
+enum class update_method { replace, cumulative_average };
+
 template <udp_socket_concept udp_socket_type> class sensor_reader {
 public:
   sensor_reader(std::vector<device>& devices, udp_socket_type udp_socket)
@@ -35,19 +35,19 @@ public:
     _sensor_map = build_sensor_map(devices);
   }
 
-  std::expected<void, error> read_and_update() {
-    _average_count = 0;
-    return read_and_update(
-        [](float last_value, float new_value) { return new_value; });
-  }
-
-  std::expected<void, error> read_and_update_average() {
-    return read_and_update([this](float last_value, float new_value) {
-      const auto result =
-          (last_value * _average_count + new_value) / (_average_count + 1);
-      _average_count++;
-      return result;
-    });
+  std::expected<void, error> read_and_update(update_method method) {
+    switch (method) {
+    case update_method::replace:
+      _average_count = 0;
+      return read_and_update([](float, float new_value) { return new_value; });
+    case update_method::cumulative_average:
+      return read_and_update([this](float last_value, float new_value) {
+        const auto result =
+            (last_value * _average_count + new_value) / (_average_count + 1);
+        _average_count++;
+        return result;
+      });
+    }
   }
 
 private:
