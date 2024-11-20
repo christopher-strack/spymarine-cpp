@@ -5,3 +5,7 @@ target_link_libraries(print_devices_example PRIVATE spymarine)
 add_executable(print_sensor_states)
 target_sources(print_sensor_states PRIVATE print_sensor_states.cpp)
 target_link_libraries(print_sensor_states PRIVATE spymarine)
+
+add_executable(cumulative_average)
+target_sources(cumulative_average PRIVATE cumulative_average.cpp)
+target_link_libraries(cumulative_average PRIVATE spymarine)

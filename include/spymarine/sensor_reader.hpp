@@ -36,9 +36,14 @@ public:
   }
 
   std::expected<void, error> read_and_update(update_method method) {
+    if (method == update_method::cumulative_average && !_values_initialized) {
+      method = update_method::replace;
+    }
+
     switch (method) {
     case update_method::replace:
       _average_count = 0;
+      _values_initialized = true;
       return read_and_update([](float, float new_value) { return new_value; });
     case update_method::cumulative_average:
       return read_and_update([this](float last_value, float new_value) {
@@ -86,6 +91,7 @@ private:
   udp_socket_type _udp_socket;
   sensor_map _sensor_map;
   std::array<uint8_t, 1024> _buffer;
+  bool _values_initialized = false;
   int _average_count = 0;
 };
 
