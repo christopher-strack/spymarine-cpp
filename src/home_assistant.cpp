@@ -202,6 +202,37 @@ make_home_assistant_device_discovery_message(const device& device) {
       device);
 }
 
+std::optional<std::string>
+make_home_assistant_sensor_topic(const device& device) {
+  using R = std::optional<std::string>;
+  return std::visit(
+      overloaded{
+          [](const battery_device& d) -> R {
+            return std::format("homeassistant/device/simarine_battery_{}/state",
+                               d.charge_sensor.state_index);
+          },
+          [](const tank_device& d) -> R {
+            return std::format("homeassistant/device/simarine_tank_{}/state",
+                               d.volume_sensor.state_index);
+          },
+          [](const temperature_device& d) -> R {
+            return std::format(
+                "homeassistant/device/simarine_temperature_{}/state",
+                d.device_sensor.state_index);
+          },
+          [](const voltage_device& d) -> R {
+            return std::format("homeassistant/device/simarine_voltage_{}/state",
+                               d.device_sensor.state_index);
+          },
+          [](const current_device& d) -> R {
+            return std::format("homeassistant/device/simarine_current_{}/state",
+                               d.device_sensor.state_index);
+          },
+          [](const auto& d) -> R { return std::nullopt; },
+      },
+      device);
+}
+
 namespace {
 
 std::string make_battery_sensor_message(const battery_device& battery) {
