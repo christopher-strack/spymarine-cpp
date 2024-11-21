@@ -8,6 +8,9 @@
 namespace spymarine {
 
 std::optional<std::string>
+make_home_assistant_device_discovery_topic(const device& device);
+
+std::optional<std::string>
 make_home_assistant_device_discovery_message(const device& device);
 
 std::optional<std::string>
