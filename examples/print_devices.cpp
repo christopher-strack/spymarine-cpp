@@ -1,6 +1,7 @@
 #include "example_utils.hpp"
 
 #include "spymarine/discover.hpp"
+#include "spymarine/home_assistant.hpp"
 #include "spymarine/read_devices.hpp"
 
 #include <print>

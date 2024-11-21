@@ -8,6 +8,7 @@ target_sources(
         discover.cpp
         error.cpp
         file_descriptor.cpp
+        home_assistant.cpp
         message.cpp
         message_values_iterator.cpp
         message_values_view.cpp
@@ -33,6 +34,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/discover.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/file_descriptor.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/home_assistant.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_value.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_values_iterator.hpp
