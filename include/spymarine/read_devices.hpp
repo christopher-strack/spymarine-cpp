@@ -160,9 +160,9 @@ private:
   uint32_t _ip_address;
   uint16_t _port;
   std::array<uint8_t, 1024> _buffer;
+  std::function<bool(const device&)> _filter_function;
   std::chrono::system_clock::duration _request_limit;
   std::optional<std::chrono::system_clock::time_point> _last_request_time;
-  std::function<bool(const device&)> _filter_function;
 };
 
 } // namespace spymarine::detail
