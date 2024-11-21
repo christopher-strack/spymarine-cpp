@@ -41,7 +41,7 @@ std::string make_battery_discovery(const battery_device& battery) {
             "unit_of_measurement": "V",
             "value_template": "{{{{ value_json.voltage }}}}",
             "unique_id": "voltage_{}"
-        }},
+        }}
     }},
     "state_topic": "simarine_battery_{}/state",
     "qos": 1
@@ -83,7 +83,7 @@ std::string make_tank_discovery(const tank_device& tank) {
             "unit_of_measurement": "%",
             "value_template": "{{{{ value_json.level }}}}",
             "unique_id": "level_{}"
-        }},
+        }}
     }},
     "state_topic": "simarine_tank_{}/state",
     "qos": 1
@@ -118,7 +118,7 @@ std::string make_sensor_discovery(const auto& device, const char* type,
             "unit_of_measurement": "{}",
             "value_template": "{{{{ value_json.value }}}}",
             "unique_id": "{}_{}"
-        }},
+        }}
     }},
     "state_topic": "simarine_{}_{}/state",
     "qos": 1
@@ -205,32 +205,30 @@ make_home_assistant_device_discovery_message(const device& device) {
 std::optional<std::string>
 make_home_assistant_sensor_topic(const device& device) {
   using R = std::optional<std::string>;
-  return std::visit(
-      overloaded{
-          [](const battery_device& d) -> R {
-            return std::format("homeassistant/device/simarine_battery_{}/state",
-                               d.charge_sensor.state_index);
-          },
-          [](const tank_device& d) -> R {
-            return std::format("homeassistant/device/simarine_tank_{}/state",
-                               d.volume_sensor.state_index);
-          },
-          [](const temperature_device& d) -> R {
-            return std::format(
-                "homeassistant/device/simarine_temperature_{}/state",
-                d.device_sensor.state_index);
-          },
-          [](const voltage_device& d) -> R {
-            return std::format("homeassistant/device/simarine_voltage_{}/state",
-                               d.device_sensor.state_index);
-          },
-          [](const current_device& d) -> R {
-            return std::format("homeassistant/device/simarine_current_{}/state",
-                               d.device_sensor.state_index);
-          },
-          [](const auto& d) -> R { return std::nullopt; },
-      },
-      device);
+  return std::visit(overloaded{
+                        [](const battery_device& d) -> R {
+                          return std::format("simarine_battery_{}/state",
+                                             d.charge_sensor.state_index);
+                        },
+                        [](const tank_device& d) -> R {
+                          return std::format("simarine_tank_{}/state",
+                                             d.volume_sensor.state_index);
+                        },
+                        [](const temperature_device& d) -> R {
+                          return std::format("simarine_temperature_{}/state",
+                                             d.device_sensor.state_index);
+                        },
+                        [](const voltage_device& d) -> R {
+                          return std::format("simarine_voltage_{}/state",
+                                             d.device_sensor.state_index);
+                        },
+                        [](const current_device& d) -> R {
+                          return std::format("simarine_current_{}/state",
+                                             d.device_sensor.state_index);
+                        },
+                        [](const auto& d) -> R { return std::nullopt; },
+                    },
+                    device);
 }
 
 namespace {
