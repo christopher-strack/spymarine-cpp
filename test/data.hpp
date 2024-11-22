@@ -28,7 +28,7 @@ const auto parsed_devices = std::vector<device>{
     battery_device{"Starterbatterie", battery_type::agm, 100.0f, 33},
     tank_device{"Abwasser", fluid_type::waste_water, 70.0f, 38},
     temperature_device{"Innen", 39},
-    temperature_device{"Au\xa3\x65n ", 40},
+    temperature_device{"Au?en ", 40},
     temperature_device{"Boiler", 41},
 };
 
@@ -57,7 +57,7 @@ const auto parsed_devices_with_values = std::vector<device>{
                    79.6f, -0.01f, 12.26f},
     tank_device{"Abwasser", fluid_type::waste_water, 70.0f, 38, 3.7f, 5.2f},
     temperature_device{"Innen", 39, 10.7f},
-    temperature_device{"Au\xa3\x65n ", 40, 9.1f},
+    temperature_device{"Au?en ", 40, 9.1f},
     temperature_device{"Boiler", 41, 39.4f},
 };
 
