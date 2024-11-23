@@ -1,6 +1,7 @@
 #include "spymarine/parse_message.hpp"
 
 #include <algorithm>
+#include <print>
 
 namespace spymarine {
 
@@ -10,6 +11,17 @@ uint16_t to_uint16(const std::span<const uint8_t, 2> data) {
   return uint16_t((data[0] << 8) | data[1]);
 }
 
+std::optional<message_type> parse_message_type(uint8_t type) {
+  switch (type) {
+  case uint8_t(message_type::device_count):
+    return message_type::device_count;
+  case uint8_t(message_type::device_info):
+    return message_type::device_info;
+  case uint8_t(message_type::sensor_state):
+    return message_type::sensor_state;
+  }
+  return std::nullopt;
+};
 } // namespace
 
 std::expected<header, parse_error>
@@ -54,9 +66,13 @@ uint16_t crc(const std::span<const uint8_t> bytes) {
 std::expected<message, parse_error>
 parse_message(const std::span<const uint8_t> data) {
   return parse_header(data).and_then(
-      [&](const auto header) -> std::expected<message, parse_error> {
-        const auto data_length = data.size() - header_size + 1;
+      [&](const header header) -> std::expected<message, parse_error> {
+        const auto type = parse_message_type(header.type);
+        if (!type) {
+          return std::unexpected{parse_error::unknown_message};
+        }
 
+        const auto data_length = data.size() - header_size + 1;
         if (header.length != data_length) {
           return std::unexpected{parse_error::invalid_data_length};
         }
@@ -70,7 +86,7 @@ parse_message(const std::span<const uint8_t> data) {
           return std::unexpected{parse_error::invalid_crc};
         }
 
-        return message{static_cast<message_type>(header.type),
+        return message{*type,
                        std::span{data.begin() + header_size, data.end() - 2}};
       });
 }

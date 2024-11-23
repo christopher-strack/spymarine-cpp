@@ -10,6 +10,8 @@ error error_from_error_code(const std::error_code& ec) { return ec; }
 namespace {
 std::string to_string(parse_error e) {
   switch (e) {
+  case parse_error::unknown_message:
+    return "unknown_message";
   case parse_error::invalid_header:
     return "invalid_header";
   case parse_error::invalid_data_length:
