@@ -158,6 +158,8 @@ private:
         std::this_thread::sleep_for(_request_limit - delta);
       }
     }
+
+    _last_request_time = std::chrono::system_clock::now();
   }
 
   uint32_t _ip_address;
