@@ -38,14 +38,24 @@ public:
 protected:
   std::expected<void, error>
   read_and_process_values(std::invocable<float, float> auto update_function) {
-    return _udp_socket.receive(_buffer)
-        .transform_error(error_from_error_code)
-        .and_then([](const auto data) {
-          return parse_message(data).transform_error(error_from_parse_error);
-        })
-        .transform([this, &update_function](const auto message) {
-          read_and_process_values(message, _sensor_map, update_function);
-        });
+    std::expected<void, error> result =
+        std::unexpected{parse_error::unknown_message};
+
+    while (!result.has_value() &&
+           result.error() == error{parse_error::unknown_message}) {
+      result =
+          _udp_socket.receive(_buffer)
+              .transform_error(error_from_error_code)
+              .and_then([](const auto data) {
+                return parse_message(data).transform_error(
+                    error_from_parse_error);
+              })
+              .transform([this, &update_function](const auto message) {
+                read_and_process_values(message, _sensor_map, update_function);
+              });
+    }
+
+    return result;
   }
 
   void
