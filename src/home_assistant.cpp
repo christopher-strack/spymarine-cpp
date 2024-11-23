@@ -13,7 +13,8 @@ std::string make_battery_discovery(const battery_device& battery) {
 {{
     "dev": {{
         "ids": "simarine_battery_{}",
-        "name": "{}"
+        "name": "{}",
+        "mf": "Simarine"
     }},
     "o": {{
         "name": "spymarine",
@@ -63,7 +64,8 @@ std::string make_tank_discovery(const tank_device& tank) {
 {{
     "dev": {{
         "ids": "simarine_tank_{}",
-        "name": "{}"
+        "name": "{}",
+        "mf": "Simarine"
     }},
     "o": {{
         "name": "spymarine",
@@ -104,7 +106,8 @@ std::string make_sensor_discovery(const auto& device, const char* type,
 {{
     "dev": {{
         "ids": "simarine_{}_{}",
-        "name": "{}"
+        "name": "{}",
+        "mf": "Simarine"
     }},
     "o": {{
         "name": "spymarine",
@@ -234,13 +237,8 @@ make_home_assistant_sensor_topic(const device& device) {
 namespace {
 
 std::string make_battery_sensor_message(const battery_device& battery) {
-  constexpr auto format_string = R"(
-{{
-    "battery": {},
-    "current": {},
-    "voltage": {}
-}}
-)";
+  constexpr auto format_string =
+      R"({{"battery": {},"current": {},"voltage": {}}})";
 
   return std::format(format_string, battery.charge_sensor.value,
                      battery.current_sensor.value,
@@ -248,11 +246,7 @@ std::string make_battery_sensor_message(const battery_device& battery) {
 }
 
 std::string make_tank_sensor_message(const tank_device& tank) {
-  constexpr auto format_string = R"(
-{{
-    "volume": {},
-    "level": {}
-}}
+  constexpr auto format_string = R"({{"volume": {},"level": {}}}
 )";
 
   return std::format(format_string, tank.volume_sensor.value,
