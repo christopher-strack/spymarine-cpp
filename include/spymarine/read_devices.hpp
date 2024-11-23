@@ -125,8 +125,8 @@ private:
         .and_then([state_start_index](const auto& message)
                       -> std::expected<parsed_device, error> {
           if (message.type == message_type::device_info) {
-          return parse_device(message.data, state_start_index)
-              .transform_error(error_from_parse_error);
+            return parse_device(message.data, state_start_index)
+                .transform_error(error_from_parse_error);
           } else {
             return std::unexpected{parse_error::invalid_device_message};
           }
@@ -181,7 +181,7 @@ read_devices(const uint32_t address,
              std::function<bool(const device&)> filter_function =
                  do_not_filter_devices{},
              const std::chrono::system_clock::duration request_limit =
-                 std::chrono::milliseconds{10}) {
+                 std::chrono::milliseconds{100}) {
   detail::device_reader<tcp_socket_type> device_reader{
       address, port, std::move(filter_function), request_limit};
   return device_reader.read_devices();
