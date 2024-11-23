@@ -12,14 +12,12 @@
 #include "spymarine/tcp_socket.hpp"
 
 #include <array>
-#include <chrono>
 #include <concepts>
 #include <cstdint>
 #include <expected>
 #include <functional>
 #include <optional>
 #include <system_error>
-#include <thread>
 #include <variant>
 
 namespace spymarine {
@@ -59,12 +57,10 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 
 template <tcp_socket_concept tcp_socket_type> class device_reader {
 public:
-  device_reader(uint32_t address, uint16_t port,
-                std::invocable<const device&> auto filter_function,
-                const std::chrono::system_clock::duration request_limit)
-      : _ip_address{address}, _port{port},
-        _filter_function{std::move(filter_function)},
-        _request_limit{request_limit} {}
+  device_reader(tcp_socket_type socket,
+                std::invocable<const device&> auto filter_function)
+      : _socket{std::move(socket)},
+        _filter_function{std::move(filter_function)} {}
 
   std::expected<std::vector<device>, error> read_devices() {
     return request_device_count().and_then(
@@ -134,16 +130,9 @@ private:
   }
 
   std::expected<message, error> request_message(const message& msg) {
-    wait_for_request_limit();
-
     const std::expected<std::span<const uint8_t>, error> raw_response =
-        tcp_socket_type::open().and_then([&, this](auto socket) {
-          return socket.connect(_ip_address, _port)
-              .and_then([&, this]() {
-                return socket.send(detail::write_message_data(msg, _buffer));
-              })
-              .and_then([&, this]() { return socket.receive(_buffer); });
-        });
+        _socket.send(detail::write_message_data(msg, _buffer))
+            .and_then([&, this]() { return _socket.receive(_buffer); });
 
     return raw_response.and_then([](const auto raw_response) {
       return parse_message(raw_response)
@@ -151,23 +140,9 @@ private:
     });
   }
 
-  void wait_for_request_limit() {
-    if (_last_request_time) {
-      const auto delta = std::chrono::system_clock::now() - *_last_request_time;
-      if (delta < _request_limit) {
-        std::this_thread::sleep_for(_request_limit - delta);
-      }
-    }
-
-    _last_request_time = std::chrono::system_clock::now();
-  }
-
-  uint32_t _ip_address;
-  uint16_t _port;
+  tcp_socket_type _socket;
   std::array<uint8_t, 1024> _buffer;
   std::function<bool(const device&)> _filter_function;
-  std::chrono::system_clock::duration _request_limit;
-  std::optional<std::chrono::system_clock::time_point> _last_request_time;
 };
 
 } // namespace spymarine::detail
@@ -179,12 +154,18 @@ std::expected<std::vector<device>, error>
 read_devices(const uint32_t address,
              const uint16_t port = simarine_default_tcp_port,
              std::function<bool(const device&)> filter_function =
-                 do_not_filter_devices{},
-             const std::chrono::system_clock::duration request_limit =
-                 std::chrono::milliseconds{100}) {
-  detail::device_reader<tcp_socket_type> device_reader{
-      address, port, std::move(filter_function), request_limit};
-  return device_reader.read_devices();
+                 do_not_filter_devices{}) {
+  return tcp_socket_type::open()
+      .transform_error(error_from_error_code)
+      .and_then([&](auto socket) {
+        return socket.connect(address, port)
+            .transform_error(error_from_error_code)
+            .and_then([&]() {
+              detail::device_reader<tcp_socket_type> device_reader{
+                  std::move(socket), std::move(filter_function)};
+              return device_reader.read_devices();
+            });
+      });
 }
 
 } // namespace spymarine
