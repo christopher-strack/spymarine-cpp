@@ -67,16 +67,14 @@ public:
         _request_limit{request_limit} {}
 
   std::expected<std::vector<device>, error> read_devices() {
-    std::vector<device> devices;
-    request_device_count().and_then([&devices, this](const auto device_count) {
-      return read_devices(device_count, devices);
-    });
-    return devices;
+    return request_device_count().and_then(
+        [this](const auto device_count) { return read_devices(device_count); });
   }
 
 private:
-  std::expected<void, error> read_devices(const uint8_t device_count,
-                                          std::vector<device>& devices) {
+  std::expected<std::vector<device>, error>
+  read_devices(const uint8_t device_count) {
+    std::vector<device> devices;
     devices.reserve(device_count);
 
     uint8_t state_start_index = 0;
@@ -100,7 +98,7 @@ private:
       }
     }
 
-    return {};
+    return devices;
   }
 
   std::expected<uint8_t, error> request_device_count() {
@@ -124,9 +122,14 @@ private:
         0x00, 0x00, 0x00, 0xff, 0x00, 0x00,      0x00, 0x00, 0xff};
 
     return request_message({message_type::device_info, data})
-        .and_then([state_start_index](const auto& message) {
+        .and_then([state_start_index](const auto& message)
+                      -> std::expected<parsed_device, error> {
+          if (message.type == message_type::device_info) {
           return parse_device(message.data, state_start_index)
               .transform_error(error_from_parse_error);
+          } else {
+            return std::unexpected{parse_error::invalid_device_message};
+          }
         });
   }
 
