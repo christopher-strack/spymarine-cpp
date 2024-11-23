@@ -13,16 +13,17 @@
 
 namespace spymarine {
 namespace {
-class mock_tcp_socket {
+template <typename T> class test_tcp_socket_base {
 public:
-  static std::expected<mock_tcp_socket, std::error_code> open() {
-    return mock_tcp_socket{};
-  }
+  static std::expected<T, std::error_code> open() { return T{}; }
 
   std::expected<void, std::error_code> connect(uint32_t, uint16_t) {
     return {};
   }
+};
 
+class mock_tcp_socket : public test_tcp_socket_base<mock_tcp_socket> {
+public:
   std::expected<void, std::error_code> send(std::span<uint8_t> data) {
     _last_sent_message = parse_message(data);
     return {};
@@ -50,13 +51,35 @@ public:
 private:
   std::expected<message, parse_error> _last_sent_message;
 };
+
+class failing_tcp_socket : public test_tcp_socket_base<failing_tcp_socket> {
+public:
+  std::expected<void, std::error_code> send(std::span<uint8_t> data) {
+    return {};
+  }
+
+  std::expected<std::span<const uint8_t>, std::error_code>
+  receive(std::span<uint8_t> buffer) {
+    return std::unexpected{std::make_error_code(std::errc::connection_refused)};
+  }
+};
 } // namespace
 
 TEST_CASE("read_devices") {
-  const auto devices = read_devices<mock_tcp_socket>(
-      0, 0, do_not_filter_devices{}, std::chrono::seconds{0});
+  SECTION("return parsed devices") {
+    const auto devices =
+        read_devices<mock_tcp_socket>(0, 0, do_not_filter_devices{});
 
-  CHECK(devices == parsed_devices);
+    CHECK(devices == parsed_devices);
+  }
+
+  SECTION("return connection error") {
+    const auto devices =
+        read_devices<failing_tcp_socket>(0, 0, do_not_filter_devices{});
+
+    REQUIRE_FALSE(devices);
+    CHECK(std::holds_alternative<std::error_code>(devices.error()));
+  }
 }
 
 } // namespace spymarine

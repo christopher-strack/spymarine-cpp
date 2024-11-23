@@ -17,15 +17,35 @@ public:
     return std::span<const uint8_t>{raw_state_response};
   }
 };
+
+class failing_udp_socket {
+public:
+  std::expected<std::span<const uint8_t>, std::error_code>
+  receive(std::span<uint8_t> buffer) {
+    return std::unexpected{std::make_error_code(std::errc::io_error)};
+  }
+};
 } // namespace
 
 TEST_CASE("sensor_reader") {
   auto devices = parsed_devices;
-  sensor_reader<mock_udp_socket> reader{devices, mock_udp_socket{}};
 
-  REQUIRE(reader.read_and_update());
+  SECTION("valid message updates devices") {
+    sensor_reader<mock_udp_socket> reader{devices, mock_udp_socket{}};
 
-  CHECK(devices == parsed_devices_with_values);
+    REQUIRE(reader.read_and_update());
+
+    CHECK(devices == parsed_devices_with_values);
+  }
+
+  SECTION("fails if udp socket fails") {
+    sensor_reader<failing_udp_socket> reader{devices, failing_udp_socket{}};
+
+    const auto result = reader.read_and_update();
+
+    REQUIRE_FALSE(result);
+    CHECK(std::holds_alternative<std::error_code>(result.error()));
+  }
 }
 
 } // namespace spymarine
