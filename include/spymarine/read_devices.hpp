@@ -17,7 +17,6 @@
 #include <expected>
 #include <functional>
 #include <optional>
-#include <system_error>
 #include <variant>
 
 namespace spymarine {
@@ -37,21 +36,19 @@ template <typename... DeviceTypes> struct filter_by_device_type {
 namespace spymarine::detail {
 
 template <typename tcp_socket_type>
-concept tcp_socket_concept = requires(tcp_socket_type socket, uint32_t ip,
-                                      uint16_t port) {
-  {
-    tcp_socket_type::open()
-  } -> std::same_as<std::expected<tcp_socket_type, std::error_code>>;
-  {
-    socket.connect(ip, port)
-  } -> std::same_as<std::expected<void, std::error_code>>;
-  {
-    socket.send(std::span<uint8_t>{})
-  } -> std::same_as<std::expected<void, std::error_code>>;
-  {
-    socket.receive(std::span<uint8_t>{})
-  } -> std::same_as<std::expected<std::span<const uint8_t>, std::error_code>>;
-};
+concept tcp_socket_concept =
+    requires(tcp_socket_type socket, uint32_t ip, uint16_t port) {
+      {
+        tcp_socket_type::open()
+      } -> std::same_as<std::expected<tcp_socket_type, error>>;
+      { socket.connect(ip, port) } -> std::same_as<std::expected<void, error>>;
+      {
+        socket.send(std::span<uint8_t>{})
+      } -> std::same_as<std::expected<void, error>>;
+      {
+        socket.receive(std::span<uint8_t>{})
+      } -> std::same_as<std::expected<std::span<const uint8_t>, error>>;
+    };
 
 std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 
@@ -121,8 +118,7 @@ private:
         .and_then([state_start_index](const auto& message)
                       -> std::expected<parsed_device, error> {
           if (message.type == message_type::device_info) {
-            return parse_device(message.data, state_start_index)
-                .transform_error(error_from_parse_error);
+            return parse_device(message.data, state_start_index);
           } else {
             return std::unexpected{parse_error::invalid_device_message};
           }
@@ -134,10 +130,8 @@ private:
         _socket.send(detail::write_message_data(msg, _buffer))
             .and_then([&, this]() { return _socket.receive(_buffer); });
 
-    return raw_response.and_then([](const auto raw_response) {
-      return parse_message(raw_response)
-          .transform_error(error_from_parse_error);
-    });
+    return raw_response.and_then(
+        [](const auto raw_response) { return parse_message(raw_response); });
   }
 
   tcp_socket_type _socket;
@@ -155,17 +149,13 @@ read_devices(std::span<uint8_t> buffer, const uint32_t address,
              const uint16_t port = simarine_default_tcp_port,
              std::function<bool(const device&)> filter_function =
                  do_not_filter_devices{}) {
-  return tcp_socket_type::open()
-      .transform_error(error_from_error_code)
-      .and_then([&](auto socket) {
-        return socket.connect(address, port)
-            .transform_error(error_from_error_code)
-            .and_then([&]() {
-              detail::device_reader<tcp_socket_type> device_reader{
-                  buffer, std::move(socket), std::move(filter_function)};
-              return device_reader.read_devices();
-            });
-      });
+  return tcp_socket_type::open().and_then([&](auto socket) {
+    return socket.connect(address, port).and_then([&]() {
+      detail::device_reader<tcp_socket_type> device_reader{
+          buffer, std::move(socket), std::move(filter_function)};
+      return device_reader.read_devices();
+    });
+  });
 }
 
 } // namespace spymarine

@@ -63,7 +63,7 @@ std::string replace_non_ascii(const std::string_view& input) {
 }
 } // namespace
 
-std::expected<parsed_device, parse_error>
+std::expected<parsed_device, error>
 parse_device(const std::span<const uint8_t> bytes,
              const uint8_t state_start_index) {
   const auto values = message_values_view{bytes};

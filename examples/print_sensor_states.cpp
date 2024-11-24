@@ -12,7 +12,6 @@ int main(int argc, char** argv) {
   std::array<uint8_t, 2048> buffer;
   const auto result =
       spymarine::discover()
-          .transform_error(spymarine::error_from_error_code)
           .and_then([&](const auto ip) {
             std::println("Read devices");
 

@@ -10,7 +10,6 @@
 #include <chrono>
 #include <expected>
 #include <optional>
-#include <system_error>
 #include <unordered_map>
 #include <vector>
 
@@ -21,12 +20,12 @@ using sensor_map = std::unordered_map<uint8_t, std::vector<sensor*>>;
 sensor_map build_sensor_map(std::vector<device>& devices_range);
 
 template <typename udp_socket_type>
-concept udp_socket_concept = requires(udp_socket_type socket, uint32_t ip,
-                                      uint16_t port) {
-  {
-    socket.receive(std::span<uint8_t>{})
-  } -> std::same_as<std::expected<std::span<const uint8_t>, std::error_code>>;
-};
+concept udp_socket_concept =
+    requires(udp_socket_type socket, uint32_t ip, uint16_t port) {
+      {
+        socket.receive(std::span<uint8_t>{})
+      } -> std::same_as<std::expected<std::span<const uint8_t>, error>>;
+    };
 
 template <udp_socket_concept udp_socket_type> class sensor_reader_base {
 public:
@@ -46,11 +45,7 @@ protected:
            result.error() == error{parse_error::unknown_message}) {
       result =
           _udp_socket.receive(_buffer)
-              .transform_error(error_from_error_code)
-              .and_then([](const auto data) {
-                return parse_message(data).transform_error(
-                    error_from_parse_error);
-              })
+              .and_then([](const auto data) { return parse_message(data); })
               .transform([this, &update_function](const auto message) {
                 read_and_process_values(message, _sensor_map, update_function);
               });

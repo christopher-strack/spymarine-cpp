@@ -1,7 +1,7 @@
 #pragma once
 
 #include "spymarine/device.hpp"
-#include "spymarine/parse_error.hpp"
+#include "spymarine/error.hpp"
 
 #include <expected>
 #include <span>
@@ -30,7 +30,7 @@ using parsed_device =
 
 uint8_t sensor_state_offset(const parsed_device& device);
 
-std::expected<parsed_device, parse_error>
+std::expected<parsed_device, error>
 parse_device(const std::span<const uint8_t> bytes, uint8_t state_start_index);
 
 } // namespace spymarine

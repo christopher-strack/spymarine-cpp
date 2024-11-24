@@ -23,8 +23,7 @@ std::optional<message_type> parse_message_type(uint8_t type) {
 };
 } // namespace
 
-std::expected<header, parse_error>
-parse_header(const std::span<const uint8_t> data) {
+std::expected<header, error> parse_header(const std::span<const uint8_t> data) {
   if (data.size() < header_size) {
     return std::unexpected{parse_error::invalid_data_length};
   }
@@ -62,10 +61,10 @@ uint16_t crc(const std::span<const uint8_t> bytes) {
   return crc;
 }
 
-std::expected<message, parse_error>
+std::expected<message, error>
 parse_message(const std::span<const uint8_t> data) {
   return parse_header(data).and_then(
-      [&](const header header) -> std::expected<message, parse_error> {
+      [&](const header header) -> std::expected<message, error> {
         const auto type = parse_message_type(header.type);
         if (!type) {
           return std::unexpected{parse_error::unknown_message};

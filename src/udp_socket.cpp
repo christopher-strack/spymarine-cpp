@@ -8,7 +8,7 @@ namespace spymarine {
 
 udp_socket::udp_socket(file_descriptor fd) : _fd{std::move(fd)} {}
 
-std::expected<udp_socket, std::error_code> udp_socket::open() {
+std::expected<udp_socket, error> udp_socket::open() {
   auto fd = ::socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
   if (fd == -1) {
     return std::unexpected{std::error_code{errno, std::system_category()}};
@@ -16,8 +16,7 @@ std::expected<udp_socket, std::error_code> udp_socket::open() {
   return udp_socket{file_descriptor(fd)};
 }
 
-std::expected<void, std::error_code> udp_socket::bind(uint32_t ip,
-                                                      uint16_t port) {
+std::expected<void, error> udp_socket::bind(uint32_t ip, uint16_t port) {
   sockaddr_in address{};
   address.sin_family = PF_INET;
   address.sin_addr.s_addr = htonl(ip);
@@ -30,7 +29,7 @@ std::expected<void, std::error_code> udp_socket::bind(uint32_t ip,
   return {};
 }
 
-std::expected<uint32_t, std::error_code> udp_socket::discover() {
+std::expected<uint32_t, error> udp_socket::discover() {
   sockaddr_in address;
   socklen_t address_len = sizeof(address);
 
@@ -46,7 +45,7 @@ std::expected<uint32_t, std::error_code> udp_socket::discover() {
   return ntohl(address.sin_addr.s_addr);
 }
 
-std::expected<std::span<const uint8_t>, std::error_code>
+std::expected<std::span<const uint8_t>, error>
 udp_socket::receive(std::span<uint8_t> buffer) {
   const auto result = ::recv(_fd.get(), buffer.data(), buffer.size(), 0);
   if (result == -1) {

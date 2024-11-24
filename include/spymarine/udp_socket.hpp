@@ -1,23 +1,23 @@
 #pragma once
 
+#include "spymarine/error.hpp"
 #include "spymarine/file_descriptor.hpp"
 
 #include <cstdint>
 #include <expected>
 #include <span>
-#include <system_error>
 
 namespace spymarine {
 
 class udp_socket {
 public:
-  static std::expected<udp_socket, std::error_code> open();
+  static std::expected<udp_socket, error> open();
 
-  std::expected<void, std::error_code> bind(uint32_t ip, uint16_t port);
+  std::expected<void, error> bind(uint32_t ip, uint16_t port);
 
-  std::expected<uint32_t, std::error_code> discover();
+  std::expected<uint32_t, error> discover();
 
-  std::expected<std::span<const uint8_t>, std::error_code>
+  std::expected<std::span<const uint8_t>, error>
   receive(std::span<uint8_t> buffer);
 
   udp_socket(const udp_socket& rhs) = delete;

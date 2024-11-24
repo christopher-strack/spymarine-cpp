@@ -3,10 +3,6 @@
 
 namespace spymarine {
 
-error error_from_parse_error(const parse_error& err) { return err; }
-
-error error_from_error_code(const std::error_code& ec) { return ec; }
-
 namespace {
 std::string to_string(parse_error e) {
   switch (e) {

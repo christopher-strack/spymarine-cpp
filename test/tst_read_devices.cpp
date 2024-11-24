@@ -16,21 +16,19 @@ namespace spymarine {
 namespace {
 template <typename T> class test_tcp_socket_base {
 public:
-  static std::expected<T, std::error_code> open() { return T{}; }
+  static std::expected<T, error> open() { return T{}; }
 
-  std::expected<void, std::error_code> connect(uint32_t, uint16_t) {
-    return {};
-  }
+  std::expected<void, error> connect(uint32_t, uint16_t) { return {}; }
 };
 
 class mock_tcp_socket : public test_tcp_socket_base<mock_tcp_socket> {
 public:
-  std::expected<void, std::error_code> send(std::span<uint8_t> data) {
+  std::expected<void, error> send(std::span<uint8_t> data) {
     _last_sent_message = parse_message(data);
     return {};
   }
 
-  std::expected<std::span<const uint8_t>, std::error_code>
+  std::expected<std::span<const uint8_t>, error>
   receive(std::span<uint8_t> buffer) {
     if (!_last_sent_message) {
       return std::unexpected{std::make_error_code(std::errc::io_error)};
@@ -50,16 +48,14 @@ public:
   }
 
 private:
-  std::expected<message, parse_error> _last_sent_message;
+  std::expected<message, error> _last_sent_message;
 };
 
 class failing_tcp_socket : public test_tcp_socket_base<failing_tcp_socket> {
 public:
-  std::expected<void, std::error_code> send(std::span<uint8_t> data) {
-    return {};
-  }
+  std::expected<void, error> send(std::span<uint8_t> data) { return {}; }
 
-  std::expected<std::span<const uint8_t>, std::error_code>
+  std::expected<std::span<const uint8_t>, error>
   receive(std::span<uint8_t> buffer) {
     return std::unexpected{std::make_error_code(std::errc::connection_refused)};
   }

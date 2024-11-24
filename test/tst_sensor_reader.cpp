@@ -13,7 +13,7 @@ namespace spymarine {
 namespace {
 class mock_udp_socket {
 public:
-  std::expected<std::span<const uint8_t>, std::error_code>
+  std::expected<std::span<const uint8_t>, error>
   receive(std::span<uint8_t> buffer) {
     return std::span<const uint8_t>{raw_state_response};
   }
@@ -21,7 +21,7 @@ public:
 
 class failing_udp_socket {
 public:
-  std::expected<std::span<const uint8_t>, std::error_code>
+  std::expected<std::span<const uint8_t>, error>
   receive(std::span<uint8_t> buffer) {
     return std::unexpected{std::make_error_code(std::errc::io_error)};
   }
