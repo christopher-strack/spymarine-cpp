@@ -48,19 +48,21 @@ std::expected<udp_socket, error> open_bound_socket() {
 } // namespace
 
 std::expected<sensor_reader<udp_socket>, error>
-make_sensor_reader(std::vector<device>& devices) {
+make_sensor_reader(const std::span<uint8_t> buffer,
+                   std::vector<device>& devices) {
   return open_bound_socket().transform([&](auto socket) {
-    return sensor_reader<udp_socket>{devices, std::move(socket)};
+    return sensor_reader<udp_socket>{buffer, devices, std::move(socket)};
   });
 }
 
 std::expected<moving_average_sensor_reader<udp_socket>, error>
 make_moving_average_sensor_reader(
+    const std::span<uint8_t> buffer,
     const std::chrono::steady_clock::duration moving_average_interval,
     std::vector<device>& devices) {
   return open_bound_socket().transform([&](auto socket) {
-    return moving_average_sensor_reader<udp_socket>{moving_average_interval,
-                                                    devices, std::move(socket)};
+    return moving_average_sensor_reader<udp_socket>{
+        buffer, moving_average_interval, devices, std::move(socket)};
   });
 }
 

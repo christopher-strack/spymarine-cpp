@@ -1,6 +1,7 @@
 #include "data.hpp"
 #include "raw_data.hpp"
 
+#include "spymarine/buffer.hpp"
 #include "spymarine/device_ostream.hpp"
 #include "spymarine/sensor_reader.hpp"
 
@@ -29,9 +30,10 @@ public:
 
 TEST_CASE("sensor_reader") {
   auto devices = parsed_devices;
+  buffer buffer;
 
   SECTION("valid message updates devices") {
-    sensor_reader<mock_udp_socket> reader{devices, mock_udp_socket{}};
+    sensor_reader<mock_udp_socket> reader{buffer, devices, mock_udp_socket{}};
 
     REQUIRE(reader.read_and_update());
 
@@ -39,7 +41,8 @@ TEST_CASE("sensor_reader") {
   }
 
   SECTION("fails if udp socket fails") {
-    sensor_reader<failing_udp_socket> reader{devices, failing_udp_socket{}};
+    sensor_reader<failing_udp_socket> reader{buffer, devices,
+                                             failing_udp_socket{}};
 
     const auto result = reader.read_and_update();
 

@@ -1,6 +1,7 @@
 #include "data.hpp"
 #include "raw_data.hpp"
 
+#include "spymarine/buffer.hpp"
 #include "spymarine/device.hpp"
 #include "spymarine/device_ostream.hpp"
 #include "spymarine/read_devices.hpp"
@@ -66,16 +67,18 @@ public:
 } // namespace
 
 TEST_CASE("read_devices") {
+  buffer buffer;
+
   SECTION("return parsed devices") {
     const auto devices =
-        read_devices<mock_tcp_socket>(0, 0, do_not_filter_devices{});
+        read_devices<mock_tcp_socket>(buffer, 0, 0, do_not_filter_devices{});
 
     CHECK(devices == parsed_devices);
   }
 
   SECTION("return connection error") {
     const auto devices =
-        read_devices<failing_tcp_socket>(0, 0, do_not_filter_devices{});
+        read_devices<failing_tcp_socket>(buffer, 0, 0, do_not_filter_devices{});
 
     REQUIRE_FALSE(devices);
     CHECK(std::holds_alternative<std::error_code>(devices.error()));

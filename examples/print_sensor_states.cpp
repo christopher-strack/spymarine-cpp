@@ -9,10 +9,11 @@
 int main(int argc, char** argv) {
   std::println("Discover Simarine device");
 
+  std::array<uint8_t, 2048> buffer;
   const auto result =
       spymarine::discover()
           .transform_error(spymarine::error_from_error_code)
-          .and_then([](const auto ip) {
+          .and_then([&](const auto ip) {
             std::println("Read devices");
 
             spymarine::filter_by_device_type<spymarine::temperature_device,
@@ -21,12 +22,13 @@ int main(int argc, char** argv) {
                 device_filter;
 
             return spymarine::read_devices<spymarine::tcp_socket>(
-                ip, spymarine::simarine_default_tcp_port, device_filter);
+                buffer, ip, spymarine::simarine_default_tcp_port,
+                device_filter);
           })
-          .and_then([](auto devices) {
+          .and_then([&](auto devices) {
             std::println("Found {} devices", devices.size());
 
-            return spymarine::make_sensor_reader(devices)
+            return spymarine::make_sensor_reader(buffer, devices)
                 .and_then([](auto sensor_reader) {
                   std::println("Reading sensor states");
                   return sensor_reader.read_and_update();

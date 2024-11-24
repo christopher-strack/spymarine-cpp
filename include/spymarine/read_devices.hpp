@@ -57,9 +57,9 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
 
 template <tcp_socket_concept tcp_socket_type> class device_reader {
 public:
-  device_reader(tcp_socket_type socket,
+  device_reader(std::span<uint8_t> buffer, tcp_socket_type socket,
                 std::invocable<const device&> auto filter_function)
-      : _socket{std::move(socket)},
+      : _buffer{buffer}, _socket{std::move(socket)},
         _filter_function{std::move(filter_function)} {}
 
   std::expected<std::vector<device>, error> read_devices() {
@@ -141,7 +141,7 @@ private:
   }
 
   tcp_socket_type _socket;
-  std::array<uint8_t, 1024> _buffer;
+  std::span<uint8_t> _buffer;
   std::function<bool(const device&)> _filter_function;
 };
 
@@ -151,7 +151,7 @@ namespace spymarine {
 
 template <detail::tcp_socket_concept tcp_socket_type = tcp_socket>
 std::expected<std::vector<device>, error>
-read_devices(const uint32_t address,
+read_devices(std::span<uint8_t> buffer, const uint32_t address,
              const uint16_t port = simarine_default_tcp_port,
              std::function<bool(const device&)> filter_function =
                  do_not_filter_devices{}) {
@@ -162,7 +162,7 @@ read_devices(const uint32_t address,
             .transform_error(error_from_error_code)
             .and_then([&]() {
               detail::device_reader<tcp_socket_type> device_reader{
-                  std::move(socket), std::move(filter_function)};
+                  buffer, std::move(socket), std::move(filter_function)};
               return device_reader.read_devices();
             });
       });

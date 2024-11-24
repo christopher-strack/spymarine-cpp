@@ -30,8 +30,9 @@ concept udp_socket_concept = requires(udp_socket_type socket, uint32_t ip,
 
 template <udp_socket_concept udp_socket_type> class sensor_reader_base {
 public:
-  sensor_reader_base(std::vector<device>& devices, udp_socket_type udp_socket)
-      : _udp_socket{std::move(udp_socket)} {
+  sensor_reader_base(std::span<uint8_t> buffer, std::vector<device>& devices,
+                     udp_socket_type udp_socket)
+      : _udp_socket{std::move(udp_socket)}, _buffer{buffer} {
     _sensor_map = build_sensor_map(devices);
   }
 
@@ -82,7 +83,7 @@ protected:
 private:
   udp_socket_type _udp_socket;
   sensor_map _sensor_map;
-  std::array<uint8_t, 1024> _buffer;
+  std::span<uint8_t> _buffer;
 };
 
 template <udp_socket_concept udp_socket_type>
@@ -101,9 +102,11 @@ class moving_average_sensor_reader
     : public sensor_reader_base<udp_socket_type> {
 public:
   moving_average_sensor_reader(
+      std::span<uint8_t> buffer,
       const std::chrono::steady_clock::duration moving_average_interval,
       std::vector<device>& devices, udp_socket_type udp_socket)
-      : sensor_reader_base<udp_socket_type>(devices, std::move(udp_socket)),
+      : sensor_reader_base<udp_socket_type>(buffer, devices,
+                                            std::move(udp_socket)),
         _moving_average_interval{moving_average_interval} {}
 
   using sensor_reader_base<udp_socket_type>::sensor_reader_base;
@@ -147,10 +150,11 @@ private:
 };
 
 std::expected<sensor_reader<udp_socket>, error>
-make_sensor_reader(std::vector<device>& devices);
+make_sensor_reader(std::span<uint8_t> buffer, std::vector<device>& devices);
 
 std::expected<moving_average_sensor_reader<udp_socket>, error>
 make_moving_average_sensor_reader(
+    std::span<uint8_t> buffer,
     std::chrono::steady_clock::duration moving_average_interval,
     std::vector<device>& devices);
 

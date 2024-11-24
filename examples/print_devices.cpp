@@ -1,7 +1,7 @@
 #include "example_utils.hpp"
 
+#include "spymarine/buffer.hpp"
 #include "spymarine/discover.hpp"
-#include "spymarine/home_assistant.hpp"
 #include "spymarine/read_devices.hpp"
 
 #include <print>
@@ -9,12 +9,13 @@
 int main(int argc, char** argv) {
   std::println("Discover Simarine device");
 
+  spymarine::buffer buffer;
   const auto result = spymarine::discover()
                           .transform_error(spymarine::error_from_error_code)
-                          .and_then([](const auto ip) {
+                          .and_then([&](const auto ip) {
                             std::println("Read devices");
 
-                            return spymarine::read_devices(ip);
+                            return spymarine::read_devices(buffer, ip);
                           })
                           .transform([](auto devices) {
                             std::println("Found {} devices", devices.size());
