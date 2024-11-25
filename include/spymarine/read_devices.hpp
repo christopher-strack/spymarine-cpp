@@ -133,8 +133,8 @@ private:
         });
   }
 
-  tcp_socket_type _socket;
   std::span<uint8_t> _buffer;
+  tcp_socket_type _socket;
   std::function<bool(const device&)> _filter_function;
 };
 
