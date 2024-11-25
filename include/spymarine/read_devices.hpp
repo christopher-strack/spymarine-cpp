@@ -126,12 +126,11 @@ private:
   }
 
   std::expected<message, error> request_message(const message& msg) {
-    const std::expected<std::span<const uint8_t>, error> raw_response =
-        _socket.send(detail::write_message_data(msg, _buffer))
-            .and_then([&, this]() { return _socket.receive(_buffer); });
-
-    return raw_response.and_then(
-        [](const auto raw_response) { return parse_message(raw_response); });
+    return _socket.send(detail::write_message_data(msg, _buffer))
+        .and_then([&, this]() { return _socket.receive(_buffer); })
+        .and_then([](const std::span<const uint8_t> data) {
+          return parse_message(data);
+        });
   }
 
   tcp_socket_type _socket;

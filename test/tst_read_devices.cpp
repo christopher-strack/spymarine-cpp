@@ -1,3 +1,4 @@
+#include "catch_string_maker.hpp"
 #include "data.hpp"
 #include "raw_data.hpp"
 
@@ -24,31 +25,30 @@ public:
 class mock_tcp_socket : public test_tcp_socket_base<mock_tcp_socket> {
 public:
   std::expected<void, error> send(std::span<uint8_t> data) {
-    _last_sent_message = parse_message(data);
+    if (const auto message = parse_message(data)) {
+      if (message->type == message_type::device_count) {
+        _response = raw_device_count_response;
+      } else if (message->type == message_type::device_info) {
+        const auto device_id = message->data[5];
+        _response = raw_device_info_response[device_id];
+      } else {
+        return std::unexpected{
+            std::make_error_code(std::errc::connection_refused)};
+      }
+    }
     return {};
   }
 
   std::expected<std::span<const uint8_t>, error>
   receive(std::span<uint8_t> buffer) {
-    if (!_last_sent_message) {
-      return std::unexpected{std::make_error_code(std::errc::io_error)};
-    }
-
-    if (_last_sent_message->type == message_type::device_count) {
-      std::ranges::copy(raw_device_count_response, buffer.begin());
-      return buffer.subspan(0, raw_device_count_response.size());
-    } else if (_last_sent_message->type == message_type::device_info) {
-      const auto device_id = _last_sent_message->data[5];
-      const auto& data = raw_device_info_response[device_id];
-      std::ranges::copy(data, buffer.begin());
-      return buffer.subspan(0, data.size());
-    }
-
-    return std::unexpected{std::make_error_code(std::errc::io_error)};
+    const auto length = std::min(buffer.size(), _response.size());
+    std::ranges::copy_n(_response.begin(), length, buffer.begin());
+    _response.erase(_response.begin(), _response.begin() + length);
+    return buffer.subspan(0, length);
   }
 
 private:
-  std::expected<message, error> _last_sent_message;
+  std::vector<uint8_t> _response;
 };
 
 class failing_tcp_socket : public test_tcp_socket_base<failing_tcp_socket> {
@@ -60,6 +60,7 @@ public:
     return std::unexpected{std::make_error_code(std::errc::connection_refused)};
   }
 };
+
 } // namespace
 
 TEST_CASE("read_devices") {
