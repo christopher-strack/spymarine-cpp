@@ -19,7 +19,7 @@ std::string make_battery_discovery(const battery_device& battery) {
     "o": {{
         "name": "spymarine",
         "sw": "0.1",
-        "url": "https://github.com/christopher-strack/esp-simarine-home-assistant"
+        "url": "https://github.com/christopher-strack/spymarine-cpp"
     }},
     "cmps": {{
         "battery_{}": {{
@@ -70,7 +70,7 @@ std::string make_tank_discovery(const tank_device& tank) {
     "o": {{
         "name": "spymarine",
         "sw": "0.1",
-        "url": "https://github.com/christopher-strack/esp-simarine-home-assistant"
+        "url": "https://github.com/christopher-strack/spymarine-cpp"
     }},
     "cmps": {{
         "volume_{}": {{
@@ -112,7 +112,7 @@ std::string make_sensor_discovery(const auto& device, const char* type,
     "o": {{
         "name": "spymarine",
         "sw": "0.1",
-        "url": "https://github.com/christopher-strack/esp-simarine-home-assistant"
+        "url": "https://github.com/christopher-strack/spymarine-cpp"
     }},
     "cmps": {{
         "{}_{}": {{
