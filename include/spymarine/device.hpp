@@ -129,7 +129,7 @@ using device =
                  temperature_device, barometer_device, resistive_device,
                  tank_device, battery_device>;
 
-std::string_view device_name(const device& device);
+std::string_view device_type(const device& device);
 
 uint8_t device_id(const device& device);
 

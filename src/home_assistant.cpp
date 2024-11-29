@@ -168,7 +168,7 @@ std::string make_home_assistant_device_discovery_payload(const device& device) {
 
 std::string make_home_assistant_device_discovery_topic(const device& device) {
   return std::format("homeassistant/device/simarine_{}_{}/config",
-                     device_name(device), device_id(device));
+                     device_type(device), device_id(device));
 }
 } // namespace
 

@@ -60,7 +60,7 @@ battery_device::battery_device(std::string name, const battery_type type,
       voltage_sensor{sensor_type::voltage, uint8_t(state_start_index + 2),
                      voltage} {}
 
-std::string_view device_name(const device& device) {
+std::string_view device_type(const device& device) {
   return std::visit(
       overloaded{
           [](const pico_internal_device& d) { return "pico_internal"; },
