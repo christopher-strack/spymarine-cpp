@@ -10,7 +10,7 @@ namespace spymarine {
 
 struct mqtt_message {
   std::string topic;
-  std::string_view payload;
+  std::string payload;
 };
 
 mqtt_message make_home_assistant_device_discovery(const device& device);
