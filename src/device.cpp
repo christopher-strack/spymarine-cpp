@@ -1,4 +1,5 @@
 #include "spymarine/device.hpp"
+#include "spymarine/overloaded.hpp"
 
 namespace spymarine {
 
@@ -58,5 +59,30 @@ battery_device::battery_device(std::string name, const battery_type type,
                      current},
       voltage_sensor{sensor_type::voltage, uint8_t(state_start_index + 2),
                      voltage} {}
+
+std::string_view device_name(const device& device) {
+  return std::visit(
+      overloaded{
+          [](const pico_internal_device& d) { return "pico_internal"; },
+          [](const battery_device& d) { return "battery"; },
+          [](const tank_device& d) { return "tank"; },
+          [](const temperature_device& d) { return "temperature"; },
+          [](const voltage_device& d) { return "voltage"; },
+          [](const current_device& d) { return "current"; },
+          [](const barometer_device& d) { return "barometer"; },
+          [](const resistive_device& d) { return "resistive"; },
+      },
+      device);
+}
+
+uint8_t device_id(const device& device) {
+  return std::visit(
+      overloaded{
+          [&](const battery_device& d) { return d.charge_sensor.state_index; },
+          [](const tank_device& d) { return d.volume_sensor.state_index; },
+          [](const auto& d) { return d.device_sensor.state_index; },
+      },
+      device);
+}
 
 } // namespace spymarine

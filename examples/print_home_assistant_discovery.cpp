@@ -20,11 +20,9 @@ int main(int argc, char** argv) {
             std::println("Found {} devices", devices.size());
 
             for (const auto& device : devices) {
-              if (const auto discovery_message =
-                      spymarine::make_home_assistant_device_discovery_message(
-                          device)) {
-                std::println("{}", *discovery_message);
-              }
+              const auto message =
+                  spymarine::make_home_assistant_device_discovery(device);
+              std::println("{}: {}", message.topic, message.payload);
             }
           });
 

@@ -2,8 +2,10 @@
 #include "spymarine/device.hpp"
 #include "spymarine/overloaded.hpp"
 
+#include <algorithm>
 #include <format>
 #include <optional>
+#include <ranges>
 #include <string>
 
 namespace spymarine {
@@ -101,7 +103,7 @@ std::string make_tank_discovery(const tank_device& tank) {
 }
 
 std::string make_sensor_discovery(const auto& device, const char* type,
-                                  const char* unit) {
+                                  const char* device_class, const char* unit) {
   constexpr auto format_string = R"(
 {{
     "dev": {{
@@ -132,77 +134,49 @@ std::string make_sensor_discovery(const auto& device, const char* type,
   const auto sensor_id = device.device_sensor.state_index;
 
   return std::format(format_string, type, device_id, device.name, type,
-                     device_id, type, unit, type, sensor_id, type, device_id);
+                     device_id, device_class, unit, type, sensor_id, type,
+                     device_id);
 }
 
-std::string make_temperature_discovery(const temperature_device& temperature) {
-  return make_sensor_discovery(temperature, "temperature", "°C");
+std::string make_home_assistant_device_discovery_payload(const device& device) {
+  return std::visit(
+      overloaded{
+          [](const pico_internal_device& d) {
+            return make_sensor_discovery(d, "pico_internal", "voltage", "V");
+          },
+          [](const voltage_device& d) {
+            return make_sensor_discovery(d, "voltage", "voltage", "V");
+          },
+          [](const current_device& d) {
+            return make_sensor_discovery(d, "current", "current", "A");
+          },
+          [](const temperature_device& d) {
+            return make_sensor_discovery(d, "temperature", "temperature", "°C");
+          },
+          [](const barometer_device& d) {
+            return make_sensor_discovery(d, "barometer", "atmospheric_pressure",
+                                         "mbar");
+          },
+          [](const resistive_device& d) {
+            return make_sensor_discovery(d, "resistive", "None", "ohm");
+          },
+          [](const battery_device& d) { return make_battery_discovery(d); },
+          [](const tank_device& d) { return make_tank_discovery(d); },
+      },
+      device);
 }
 
-std::string make_voltage_discovery(const voltage_device& voltage) {
-  return make_sensor_discovery(voltage, "voltage", "V");
-}
-
-std::string make_current_discovery(const current_device& current) {
-  return make_sensor_discovery(current, "current", "A");
+std::string make_home_assistant_device_discovery_topic(const device& device) {
+  return std::format("homeassistant/device/simarine_{}_{}/config",
+                     device_name(device), device_id(device));
 }
 } // namespace
 
-std::optional<std::string>
-make_home_assistant_device_discovery_topic(const device& device) {
-  using R = std::optional<std::string>;
-  return std::visit(
-      overloaded{
-          [](const battery_device& d) -> R {
-            return std::format(
-                "homeassistant/device/simarine_battery_{}/config",
-                d.charge_sensor.state_index);
-          },
-          [](const tank_device& d) -> R {
-            return std::format("homeassistant/device/simarine_tank_{}/config",
-                               d.volume_sensor.state_index);
-          },
-          [](const temperature_device& d) -> R {
-            return std::format(
-                "homeassistant/device/simarine_temperature_{}/config",
-                d.device_sensor.state_index);
-          },
-          [](const voltage_device& d) -> R {
-            return std::format(
-                "homeassistant/device/simarine_voltage_{}/config",
-                d.device_sensor.state_index);
-          },
-          [](const current_device& d) -> R {
-            return std::format(
-                "homeassistant/device/simarine_current_{}/config",
-                d.device_sensor.state_index);
-          },
-          [](const auto& d) -> R { return std::nullopt; },
-      },
-      device);
-}
-
-std::optional<std::string>
-make_home_assistant_device_discovery_message(const device& device) {
-  using R = std::optional<std::string>;
-  return std::visit(
-      overloaded{
-          [](const battery_device& d) -> R {
-            return make_battery_discovery(d);
-          },
-          [](const tank_device& d) -> R { return make_tank_discovery(d); },
-          [](const temperature_device& d) -> R {
-            return make_temperature_discovery(d);
-          },
-          [](const voltage_device& d) -> R {
-            return make_voltage_discovery(d);
-          },
-          [](const current_device& d) -> R {
-            return make_current_discovery(d);
-          },
-          [](const auto& d) -> R { return std::nullopt; },
-      },
-      device);
+mqtt_message make_home_assistant_device_discovery(const device& device) {
+  return mqtt_message{
+      .topic = make_home_assistant_device_discovery_topic(device),
+      .payload = make_home_assistant_device_discovery_payload(device),
+  };
 }
 
 std::optional<std::string>

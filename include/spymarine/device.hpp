@@ -9,6 +9,8 @@
 namespace spymarine {
 
 struct pico_internal_device {
+  static constexpr std::string_view name = "Pico internal";
+
   sensor device_sensor;
 
   explicit pico_internal_device(uint8_t state_start_index,
@@ -126,5 +128,9 @@ using device =
     std::variant<pico_internal_device, voltage_device, current_device,
                  temperature_device, barometer_device, resistive_device,
                  tank_device, battery_device>;
+
+std::string_view device_name(const device& device);
+
+uint8_t device_id(const device& device);
 
 } // namespace spymarine
