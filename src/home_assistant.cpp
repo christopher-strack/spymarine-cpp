@@ -3,137 +3,96 @@
 #include "spymarine/overloaded.hpp"
 
 #include <format>
-#include <optional>
 #include <string>
 
 namespace spymarine {
 namespace {
+constexpr std::string make_device_object(const uint8_t device_id,
+                                         const std::string_view type,
+                                         const std::string_view name) {
+  constexpr auto format_string =
+      R"({{"ids":"simarine_{}_{}","name":"{}","mf":"Simarine"}})";
+  return std::format(format_string, type, device_id, name);
+}
+
+constexpr std::string make_sensor_component_entry(
+    const uint8_t device_id, const std::string_view type,
+    const std::string_view device_class, const std::string_view unit,
+    const std::string_view template_name) {
+  constexpr auto format_string =
+      R"("{}":{{"p":"sensor","device_class":"{}","unit_of_measurement":"{}","value_template":"{{{{ value_json.{} }}}}","unique_id":"{}"}})";
+  const auto unique_id = std::format("{}_{}", type, device_id);
+  return std::format(format_string, unique_id, device_class, unit,
+                     template_name, unique_id);
+}
+
+constexpr std::string
+make_generic_sensor_component_entry(const uint8_t device_id,
+                                    const std::string_view type,
+                                    const std::string_view unit) {
+  constexpr auto format_string =
+      R"("{}":{{"p":"sensor","unit_of_measurement":"{}","value_template":"{{{{ value_json.{} }}}}","unique_id":"{}"}})";
+  const auto unique_id = std::format("{}_{}", type, device_id);
+  return std::format(format_string, unique_id, unit, type, unique_id);
+}
+
+constexpr std::string_view origin_object() {
+  return R"({"name":"spymarine","sw":"0.1","url":"https://github.com/christopher-strack/spymarine-cpp"})";
+}
+
+std::string make_home_assistant_state_topic(const device& device) {
+  return std::format("simarine_{}_{}/state", device_type(device),
+                     device_id(device));
+}
+
 std::string make_battery_discovery(const battery_device& battery) {
-  constexpr auto format_string = R"(
-{{
-    "dev": {{
-        "ids": "simarine_battery_{}",
-        "name": "{}",
-        "mf": "Simarine"
-    }},
-    "o": {{
-        "name": "spymarine",
-        "sw": "0.1",
-        "url": "https://github.com/christopher-strack/spymarine-cpp"
-    }},
-    "cmps": {{
-        "battery_{}": {{
-            "p": "sensor",
-            "device_class": "battery",
-            "unit_of_measurement": "%",
-            "value_template": "{{{{ value_json.battery }}}}",
-            "unique_id": "battery_{}"
-        }},
-        "current_{}": {{
-            "p": "sensor",
-            "device_class": "current",
-            "unit_of_measurement": "A",
-            "value_template": "{{{{ value_json.current }}}}",
-            "unique_id": "current_{}"
-        }},
-        "voltage_{}": {{
-            "p": "sensor",
-            "device_class": "voltage",
-            "unit_of_measurement": "V",
-            "value_template": "{{{{ value_json.voltage }}}}",
-            "unique_id": "voltage_{}"
-        }}
-    }},
-    "state_topic": "simarine_battery_{}/state",
-    "qos": 1
-}}
-)";
+  constexpr auto format_string =
+      R"({{"dev":{},"o":{},"cmps":{{{},{},{}}},"state_topic":"{}","qos":1}})";
 
   const auto device_id = battery.charge_sensor.state_index;
-  const auto charge_id = battery.charge_sensor.state_index;
-  const auto current_id = battery.current_sensor.state_index;
-  const auto voltage_id = battery.voltage_sensor.state_index;
 
-  return std::format(format_string, device_id, battery.name, charge_id,
-                     charge_id, current_id, current_id, voltage_id, voltage_id,
-                     device_id);
+  return std::format(
+      format_string, make_device_object(device_id, "battery", battery.name),
+      origin_object(),
+      make_sensor_component_entry(battery.charge_sensor.state_index, "battery",
+                                  "battery", "%", "battery"),
+      make_sensor_component_entry(battery.current_sensor.state_index, "current",
+                                  "current", "A", "current"),
+      make_sensor_component_entry(battery.voltage_sensor.state_index, "voltage",
+                                  "voltage", "V", "voltage"),
+      make_home_assistant_state_topic(battery));
 }
 
 std::string make_tank_discovery(const tank_device& tank) {
-  constexpr auto format_string = R"(
-{{
-    "dev": {{
-        "ids": "simarine_tank_{}",
-        "name": "{}",
-        "mf": "Simarine"
-    }},
-    "o": {{
-        "name": "spymarine",
-        "sw": "0.1",
-        "url": "https://github.com/christopher-strack/spymarine-cpp"
-    }},
-    "cmps": {{
-        "volume_{}": {{
-            "p": "sensor",
-            "device_class": "volume",
-            "unit_of_measurement": "L",
-            "value_template": "{{{{ value_json.volume }}}}",
-            "unique_id": "volume_{}"
-        }},
-        "level_{}": {{
-            "p": "sensor",
-            "unit_of_measurement": "%",
-            "value_template": "{{{{ value_json.level }}}}",
-            "unique_id": "level_{}"
-        }}
-    }},
-    "state_topic": "simarine_tank_{}/state",
-    "qos": 1
-}}
-)";
+  constexpr auto format_string =
+      R"({{"dev":{},"o":{},"cmps":{{{},{}}},"state_topic":"{}","qos":1}})";
 
   const auto device_id = tank.volume_sensor.state_index;
-  const auto volume_id = tank.volume_sensor.state_index;
-  const auto level_id = tank.level_sensor.state_index;
 
-  return std::format(format_string, device_id, tank.name, volume_id, volume_id,
-                     level_id, level_id, device_id);
+  return std::format(
+      format_string, make_device_object(device_id, "tank", tank.name),
+      origin_object(),
+      make_sensor_component_entry(tank.volume_sensor.state_index, "volume",
+                                  "volume", "L", "volume"),
+      make_generic_sensor_component_entry(tank.level_sensor.state_index,
+                                          "level", "%"),
+      make_home_assistant_state_topic(tank));
 }
 
-std::string make_sensor_discovery(const auto& device, const char* type,
-                                  const char* device_class, const char* unit) {
-  constexpr auto format_string = R"(
-{{
-    "dev": {{
-        "ids": "simarine_{}_{}",
-        "name": "{}",
-        "mf": "Simarine"
-    }},
-    "o": {{
-        "name": "spymarine",
-        "sw": "0.1",
-        "url": "https://github.com/christopher-strack/spymarine-cpp"
-    }},
-    "cmps": {{
-        "{}_{}": {{
-            "p": "sensor",
-            "device_class": "{}",
-            "unit_of_measurement": "{}",
-            "value_template": "{{{{ value_json.value }}}}",
-            "unique_id": "{}_{}"
-        }}
-    }},
-    "state_topic": "simarine_{}_{}/state",
-    "qos": 1
-}}
-)";
+std::string make_sensor_discovery(const auto& device, std::string_view type,
+                                  std::string_view device_class,
+                                  std::string_view unit) {
+  constexpr auto format_string =
+      R"({{"dev":{},"o":{},"cmps":{{{}}},"state_topic":"{}","qos":1}})";
 
   const auto device_id = device.device_sensor.state_index;
-  const auto sensor_id = device.device_sensor.state_index;
 
-  return std::format(format_string, type, device_id, device.name, type,
-                     device_id, device_class, unit, type, sensor_id, type,
-                     device_id);
+  return std::format(
+      format_string, make_device_object(device_id, type, device.name),
+      origin_object(),
+      make_sensor_component_entry(device.device_sensor.state_index, type,
+                                  device_class, unit, "value"),
+      make_home_assistant_state_topic(device));
 }
 
 std::string make_home_assistant_device_discovery_payload(const device& device) {
@@ -170,47 +129,19 @@ std::string make_home_assistant_device_discovery_topic(const device& device) {
 }
 } // namespace
 
-mqtt_message make_home_assistant_device_discovery(const device& device) {
+mqtt_message
+make_home_assistant_device_discovery_message(const device& device) {
   return mqtt_message{
       .topic = make_home_assistant_device_discovery_topic(device),
       .payload = make_home_assistant_device_discovery_payload(device),
   };
 }
 
-std::optional<std::string>
-make_home_assistant_sensor_topic(const device& device) {
-  using R = std::optional<std::string>;
-  return std::visit(overloaded{
-                        [](const battery_device& d) -> R {
-                          return std::format("simarine_battery_{}/state",
-                                             d.charge_sensor.state_index);
-                        },
-                        [](const tank_device& d) -> R {
-                          return std::format("simarine_tank_{}/state",
-                                             d.volume_sensor.state_index);
-                        },
-                        [](const temperature_device& d) -> R {
-                          return std::format("simarine_temperature_{}/state",
-                                             d.device_sensor.state_index);
-                        },
-                        [](const voltage_device& d) -> R {
-                          return std::format("simarine_voltage_{}/state",
-                                             d.device_sensor.state_index);
-                        },
-                        [](const current_device& d) -> R {
-                          return std::format("simarine_current_{}/state",
-                                             d.device_sensor.state_index);
-                        },
-                        [](const auto& d) -> R { return std::nullopt; },
-                    },
-                    device);
-}
-
 namespace {
 
 std::string make_battery_sensor_message(const battery_device& battery) {
   constexpr auto format_string =
-      R"({{"battery": {},"current": {},"voltage": {}}})";
+      R"({{"battery":{},"current":{},"voltage":{}}})";
 
   return std::format(format_string, battery.charge_sensor.value,
                      battery.current_sensor.value,
@@ -218,8 +149,7 @@ std::string make_battery_sensor_message(const battery_device& battery) {
 }
 
 std::string make_tank_sensor_message(const tank_device& tank) {
-  constexpr auto format_string = R"({{"volume": {},"level": {}}}
-)";
+  constexpr auto format_string = R"({{"volume":{},"level":{}}})";
 
   return std::format(format_string, tank.volume_sensor.value,
                      tank.level_sensor.value);
@@ -232,23 +162,32 @@ std::string make_sensor_message(const auto& device) {
 
 } // namespace
 
-std::optional<std::string>
-make_home_assistant_sensor_message(const device& device) {
-  using R = std::optional<std::string>;
-  return std::visit(
-      overloaded{
-          [](const battery_device& d) -> R {
-            return make_battery_sensor_message(d);
+mqtt_message make_home_assistant_state_message(const device& device) {
+  return mqtt_message{
+      .topic = make_home_assistant_state_topic(device),
+      .payload = std::visit(
+          overloaded{
+              [](const battery_device& battery) {
+                constexpr auto format_string =
+                    R"({{"battery":{},"current":{},"voltage":{}}})";
+
+                return std::format(format_string, battery.charge_sensor.value,
+                                   battery.current_sensor.value,
+                                   battery.voltage_sensor.value);
+              },
+              [](const tank_device& tank) {
+                constexpr auto format_string = R"({{"volume":{},"level":{}}})";
+
+                return std::format(format_string, tank.volume_sensor.value,
+                                   tank.level_sensor.value);
+              },
+              [](const auto& device) {
+                constexpr auto format_string = R"({{"value":{}}})";
+                return std::format(format_string, device.device_sensor.value);
+              },
           },
-          [](const tank_device& d) -> R { return make_tank_sensor_message(d); },
-          [](const temperature_device& d) -> R {
-            return make_sensor_message(d);
-          },
-          [](const voltage_device& d) -> R { return make_sensor_message(d); },
-          [](const current_device& d) -> R { return make_sensor_message(d); },
-          [](const auto& d) -> R { return std::nullopt; },
-      },
-      device);
+          device),
+  };
 }
 
 } // namespace spymarine

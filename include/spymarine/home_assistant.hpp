@@ -2,8 +2,6 @@
 
 #include "spymarine/device.hpp"
 
-#include <cstdint>
-#include <optional>
 #include <string>
 
 namespace spymarine {
@@ -13,12 +11,8 @@ struct mqtt_message {
   std::string payload;
 };
 
-mqtt_message make_home_assistant_device_discovery(const device& device);
+mqtt_message make_home_assistant_device_discovery_message(const device& device);
 
-std::optional<std::string>
-make_home_assistant_sensor_topic(const device& device);
-
-std::optional<std::string>
-make_home_assistant_sensor_message(const device& device);
+mqtt_message make_home_assistant_state_message(const device& device);
 
 } // namespace spymarine
