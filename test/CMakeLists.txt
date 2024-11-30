@@ -1,4 +1,5 @@
 find_package(Catch2 CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 add_executable(spymarine_tests)
 
