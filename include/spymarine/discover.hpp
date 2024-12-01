@@ -3,6 +3,7 @@
 #include "spymarine/defaults.hpp"
 #include "spymarine/error.hpp"
 
+#include <cstdint>
 #include <expected>
 
 namespace spymarine {
