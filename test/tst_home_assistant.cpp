@@ -9,7 +9,7 @@ namespace {
 auto origin_object() {
   return nlohmann::json::object({
       {"name", "spymarine"},
-      {"sw", "0.1"},
+      {"sw", PROJECT_VERSION},
       {"url", "https://github.com/christopher-strack/spymarine-cpp"},
   });
 }

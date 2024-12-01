@@ -37,7 +37,8 @@ make_generic_sensor_component_entry(const uint8_t device_id,
 }
 
 constexpr std::string_view origin_object() {
-  return R"({"name":"spymarine","sw":"0.1","url":"https://github.com/christopher-strack/spymarine-cpp"})";
+  return R"({"name":"spymarine","sw":")" PROJECT_VERSION
+         R"(","url":"https://github.com/christopher-strack/spymarine-cpp"})";
 }
 
 std::string make_home_assistant_state_topic(const device& device) {

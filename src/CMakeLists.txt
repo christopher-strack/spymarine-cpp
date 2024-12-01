@@ -51,3 +51,5 @@ target_sources(
 )
 
 set_target_properties(spymarine PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)
+
+target_compile_definitions(spymarine PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
