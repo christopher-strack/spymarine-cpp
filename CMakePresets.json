@@ -2,13 +2,62 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "default",
+            "name": "_base",
+            "hidden": true,
             "binaryDir": "${sourceDir}/build",
+            "generator": "Ninja",
             "cacheVariables": {
                 "BUILD_TESTS": "ON",
                 "BUILD_EXAMPLES": "ON",
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
+            }
+        },
+        {
+            "name": "gcc",
+            "displayName": "GCC Build",
+            "inherits": [
+                "_base"
+            ],
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++"
+            }
+        },
+        {
+            "name": "clang",
+            "displayName": "Clang Build",
+            "inherits": [
+                "_base"
+            ],
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_CXX_FLAGS": "-stdlib=libc++"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "gcc",
+            "configurePreset": "gcc"
+        },
+        {
+            "name": "clang",
+            "configurePreset": "clang"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "gcc",
+            "configurePreset": "gcc",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "clang",
+            "configurePreset": "clang",
+            "output": {
+                "outputOnFailure": true
             }
         }
     ]

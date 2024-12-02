@@ -1,0 +1,42 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        compiler: ["clang", "gcc"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup cmake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "~3.28.0"
+          ninjaVersion: "^1.12.1"
+      - name: Install Clang 18
+        if: matrix.compiler == 'clang'
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y clang-18 libc++-18-dev libc++abi-18-dev
+            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 100
+            sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100
+      - name: Install GCC 14
+        if: matrix.compiler == 'gcc'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-14 g++-14 libstdc++-14-dev
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
+
+      - name: Run CMake
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: ${{ matrix.compiler }}
+          buildPreset: ${{ matrix.compiler }}
+          testPreset: ${{ matrix.compiler }}
