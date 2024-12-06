@@ -16,5 +16,5 @@ public:
   bool valid() const noexcept;
 
 private:
-  int fd;
+  int _fd;
 };
