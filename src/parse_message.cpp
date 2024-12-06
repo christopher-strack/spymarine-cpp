@@ -23,22 +23,23 @@ std::optional<message_type> parse_message_type(uint8_t type) {
 };
 } // namespace
 
-std::expected<header, error> parse_header(const std::span<const uint8_t> data) {
-  if (data.size() < header_size) {
+std::expected<header, error>
+parse_header(const std::span<const uint8_t> bytes) {
+  if (bytes.size() < header_size) {
     return std::unexpected{parse_error::invalid_data_length};
   }
 
   const std::array<uint8_t, 6> prefix = {0x00, 0x00, 0x00, 0x00, 0x00, 0xff};
-  if (!std::ranges::equal(data.subspan(0, prefix.size()), prefix)) {
+  if (!std::ranges::equal(bytes.subspan(0, prefix.size()), prefix)) {
     return std::unexpected{parse_error::invalid_header};
   }
 
-  if (data[13] != 0xff) {
+  if (bytes[13] != 0xff) {
     return std::unexpected{parse_error::invalid_header};
   }
 
-  const auto type = data.data()[6];
-  const auto length = to_uint16(data.subspan<11, 2>());
+  const auto type = bytes.data()[6];
+  const auto length = to_uint16(bytes.subspan<11, 2>());
 
   return header{type, length};
 }
@@ -62,30 +63,30 @@ uint16_t crc(const std::span<const uint8_t> bytes) {
 }
 
 std::expected<message, error>
-parse_message(const std::span<const uint8_t> data) {
-  return parse_header(data).and_then(
+parse_message(const std::span<const uint8_t> bytes) {
+  return parse_header(bytes).and_then(
       [&](const header header) -> std::expected<message, error> {
         const auto type = parse_message_type(header.type);
         if (!type) {
           return std::unexpected{parse_error::unknown_message};
         }
 
-        const auto data_length = data.size() - header_size + 1;
+        const auto data_length = bytes.size() - header_size + 1;
         if (header.length != data_length) {
           return std::unexpected{parse_error::invalid_data_length};
         }
 
         const auto calculated_crc =
-            crc(std::span{data.begin() + 1, data.end() - 3});
+            crc(std::span{bytes.begin() + 1, bytes.end() - 3});
         const auto received_crc =
-            to_uint16(std::span<const uint8_t, 2>{data.end() - 2, 2});
+            to_uint16(std::span<const uint8_t, 2>{bytes.end() - 2, 2});
 
         if (calculated_crc != received_crc) {
           return std::unexpected{parse_error::invalid_crc};
         }
 
         return message{*type,
-                       std::span{data.begin() + header_size, data.end() - 2}};
+                       std::span{bytes.begin() + header_size, bytes.end() - 2}};
       });
 }
 

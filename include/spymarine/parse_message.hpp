@@ -17,7 +17,7 @@ struct header {
   auto operator<=>(const header&) const = default;
 };
 
-std::expected<header, error> parse_header(const std::span<const uint8_t> data);
+std::expected<header, error> parse_header(const std::span<const uint8_t> bytes);
 
 /* Original source: https://github.com/htool/pico2signalk
  * Copyright Erik Bosman / @brainsmoke
@@ -25,6 +25,6 @@ std::expected<header, error> parse_header(const std::span<const uint8_t> data);
 uint16_t crc(const std::span<const uint8_t> bytes);
 
 std::expected<message, error>
-parse_message(const std::span<const uint8_t> data);
+parse_message(const std::span<const uint8_t> bytes);
 
 } // namespace spymarine

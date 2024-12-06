@@ -45,7 +45,7 @@ protected:
            result.error() == error{parse_error::unknown_message}) {
       result =
           _udp_socket.receive(_buffer)
-              .and_then([](const auto data) { return parse_message(data); })
+              .and_then([](const auto bytes) { return parse_message(bytes); })
               .transform([this, &update_function](const auto message) {
                 read_and_process_values(message, _sensor_map, update_function);
               });

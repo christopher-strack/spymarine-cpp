@@ -24,8 +24,8 @@ public:
 
 class mock_tcp_socket : public test_tcp_socket_base<mock_tcp_socket> {
 public:
-  std::expected<void, error> send(std::span<uint8_t> data) {
-    if (const auto message = parse_message(data)) {
+  std::expected<void, error> send(std::span<uint8_t> bytes) {
+    if (const auto message = parse_message(bytes)) {
       if (message->type == message_type::device_count) {
         _response = raw_device_count_response;
       } else if (message->type == message_type::device_info) {
@@ -53,7 +53,7 @@ private:
 
 class failing_tcp_socket : public test_tcp_socket_base<failing_tcp_socket> {
 public:
-  std::expected<void, error> send(std::span<uint8_t> data) { return {}; }
+  std::expected<void, error> send(std::span<uint8_t> bytes) { return {}; }
 
   std::expected<std::span<const uint8_t>, error>
   receive(std::span<uint8_t> buffer) {
