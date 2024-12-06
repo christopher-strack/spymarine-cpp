@@ -1,5 +1,4 @@
 #include "spymarine/read_devices.hpp"
-#include "spymarine/overloaded.hpp"
 
 namespace spymarine::detail {
 

@@ -1,5 +1,7 @@
 #include "spymarine/device_ostream.hpp"
 
+#include <ostream>
+
 namespace spymarine {
 
 std::ostream& operator<<(std::ostream& os, const sensor_type type) {

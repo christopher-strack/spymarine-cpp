@@ -2,7 +2,7 @@
 
 #include "spymarine/device.hpp"
 
-#include <ostream>
+#include <iosfwd>
 
 namespace spymarine {
 
