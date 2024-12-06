@@ -5,9 +5,6 @@
 
 namespace spymarine {
 
-/* The message type described by the header.
- * enum only represents the known subset.
- */
 enum class message_type {
   // Request the number of connected devices
   device_count = 0x02,
@@ -19,8 +16,6 @@ enum class message_type {
   sensor_state = 0xb0,
 };
 
-/* A message as received by a Simarine device
- */
 struct message {
   message_type type;
   std::span<const uint8_t> data;
