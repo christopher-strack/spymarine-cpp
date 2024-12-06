@@ -59,7 +59,7 @@ public:
 
   std::expected<std::vector<device>, error> read_devices() {
     return request_device_count().and_then(
-        [this](const auto device_count) { return read_devices(device_count); });
+        [&](const auto device_count) { return read_devices(device_count); });
   }
 
 private:

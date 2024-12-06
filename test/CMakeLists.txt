@@ -26,3 +26,5 @@ target_sources(
 target_link_libraries(spymarine_tests PRIVATE Catch2::Catch2WithMain nlohmann_json spymarine)
 
 target_compile_definitions(spymarine_tests PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
+
+target_compile_options(spymarine_tests PRIVATE -Wall -Werror)

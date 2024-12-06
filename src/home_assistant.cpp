@@ -138,31 +138,6 @@ make_home_assistant_device_discovery_message(const device& device) {
   };
 }
 
-namespace {
-
-std::string make_battery_sensor_message(const battery_device& battery) {
-  constexpr auto format_string =
-      R"({{"battery":{},"current":{},"voltage":{}}})";
-
-  return std::format(format_string, battery.charge_sensor.value,
-                     battery.current_sensor.value,
-                     battery.voltage_sensor.value);
-}
-
-std::string make_tank_sensor_message(const tank_device& tank) {
-  constexpr auto format_string = R"({{"volume":{},"level":{}}})";
-
-  return std::format(format_string, tank.volume_sensor.value,
-                     tank.level_sensor.value);
-}
-
-std::string make_sensor_message(const auto& device) {
-  constexpr auto format_string = R"({{"value":{}}})";
-  return std::format(format_string, device.device_sensor.value);
-}
-
-} // namespace
-
 mqtt_message make_home_assistant_state_message(const device& device) {
   return mqtt_message{
       .topic = make_home_assistant_state_topic(device),
