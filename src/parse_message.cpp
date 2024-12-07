@@ -1,6 +1,7 @@
 #include "spymarine/parse_message.hpp"
 
 #include <algorithm>
+#include <optional>
 
 namespace spymarine {
 
