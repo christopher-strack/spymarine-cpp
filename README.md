@@ -18,7 +18,7 @@ Catch2 and nlohman JSON is used for unit testing.
 Use CMake to build the project
 
 ```
-cmake -B build --preset default
+cmake -B build
 cmake --build build
 ```
 
