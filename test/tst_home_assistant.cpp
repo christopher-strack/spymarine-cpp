@@ -49,7 +49,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     const auto state_message = make_home_assistant_state_message(device);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic == discovery_json["state_topic"]);
+    CHECK(state_message.topic == discovery_json["state_topic"].get<std::string>());
     CHECK(state_json == nlohmann::json::object({{"value", 12.1}}));
   }
 
@@ -85,7 +85,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     const auto state_message = make_home_assistant_state_message(device);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic == discovery_json["state_topic"]);
+    CHECK(state_message.topic == discovery_json["state_topic"].get<std::string>());
     CHECK(state_json == nlohmann::json::object({{"value", 12.8}}));
   }
 
@@ -121,7 +121,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     const auto state_message = make_home_assistant_state_message(device);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic == discovery_json["state_topic"]);
+    CHECK(state_message.topic == discovery_json["state_topic"].get<std::string>());
     CHECK(state_json == nlohmann::json::object({{"value", 1.1}}));
   }
 
@@ -158,7 +158,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     const auto state_message = make_home_assistant_state_message(device);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic == discovery_json["state_topic"]);
+    CHECK(state_message.topic == discovery_json["state_topic"].get<std::string>());
     CHECK(state_json == nlohmann::json::object({{"value", 21.4}}));
   }
 
@@ -194,7 +194,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     const auto state_message = make_home_assistant_state_message(device);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic == discovery_json["state_topic"]);
+    CHECK(state_message.topic == discovery_json["state_topic"].get<std::string>());
     CHECK(state_json == nlohmann::json::object({{"value", 1134.5}}));
   }
 
@@ -230,7 +230,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     const auto state_message = make_home_assistant_state_message(device);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic == discovery_json["state_topic"]);
+    CHECK(state_message.topic == discovery_json["state_topic"].get<std::string>());
     CHECK(state_json == nlohmann::json::object({{"value", 88.5}}));
   }
 
@@ -273,7 +273,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     const auto state_message = make_home_assistant_state_message(device);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic == discovery_json["state_topic"]);
+    CHECK(state_message.topic == discovery_json["state_topic"].get<std::string>());
     CHECK(state_json ==
           nlohmann::json::object({{"volume", 34.5}, {"level", 20.1}}));
   }
@@ -325,7 +325,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     const auto state_message = make_home_assistant_state_message(device);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic == discovery_json["state_topic"]);
+    CHECK(state_message.topic == discovery_json["state_topic"].get<std::string>());
     CHECK(state_json == nlohmann::json::object({
                             {"battery", 89.3},
                             {"current", 5.7},
