@@ -15,7 +15,7 @@ float sensor_value(numeric_value value, sensor_type type) {
   case sensor_type::temperature:
     return value.second() / 10.0f;
   case sensor_type::pressure:
-    return value.number();
+    return value.number() / 100.0f;
   case sensor_type::resistive:
     return value.second();
   case sensor_type::charge:
