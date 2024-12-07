@@ -1,0 +1,11 @@
+{
+  "features": {
+    "tests": {
+      "description": "Dependencies for running tests",
+      "dependencies": [
+        "catch2",
+        "nlohmann-json"
+      ]
+    }
+  }
+}

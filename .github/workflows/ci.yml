@@ -19,6 +19,8 @@ jobs:
         with:
           cmakeVersion: "~3.28.0"
           ninjaVersion: "^1.12.1"
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
       - name: Install Clang 18
         if: matrix.compiler == 'clang'
         run: |

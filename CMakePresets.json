@@ -10,7 +10,9 @@
                 "BUILD_TESTS": "ON",
                 "BUILD_EXAMPLES": "ON",
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "1",
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_MANIFEST_FEATURES": "tests"
             }
         },
         {
