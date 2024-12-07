@@ -33,7 +33,7 @@ const auto parsed_devices = std::vector<device>{
 };
 
 const auto parsed_devices_with_values = std::vector<device>{
-    barometer_device{"Barometer", 3, 97983},
+    barometer_device{"Barometer", 3, 979.83},
     pico_internal_device{5, 13.26},
     voltage_device{"ST107 [5596] 1", 11, 0},
     voltage_device{"ST107 [5596] 2", 12, 0.035f},
