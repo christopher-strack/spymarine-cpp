@@ -22,6 +22,8 @@ struct null_device {
 };
 
 struct unknown_device {
+  int offset = 1;
+
   auto operator<=>(const unknown_device&) const = default;
 };
 

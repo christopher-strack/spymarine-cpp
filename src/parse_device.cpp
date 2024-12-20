@@ -18,7 +18,7 @@ uint8_t sensor_state_offset(const parsed_device& device) {
                         [](const tank_device&) { return 1; },
                         [](const battery_device&) { return 5; },
                         [](const null_device&) { return 0; },
-                        [](const unknown_device&) { return 1; },
+                        [](const unknown_device& d) { return d.offset; },
                     },
                     device);
 }
@@ -96,7 +96,7 @@ parse_device(const std::span<const uint8_t> bytes,
     }
     break;
   case 4:
-    return unknown_device{};
+    return unknown_device{.offset = 1};
   case 5:
     if (name_value) {
       return barometer_device{*name_value, state_start_index};
@@ -108,7 +108,7 @@ parse_device(const std::span<const uint8_t> bytes,
     }
     break;
   case 7:
-    return unknown_device{};
+    return unknown_device{.offset = 1};
   case 8: {
     const auto fluid_type = find_value_for_type<numeric_value>(6, bytes);
     const auto capacity = find_value_for_type<numeric_value>(7, bytes);
@@ -136,9 +136,9 @@ parse_device(const std::span<const uint8_t> bytes,
     break;
   }
   case 10:
-    return unknown_device{};
+    return unknown_device{.offset = 1};
   case 14:
-    return unknown_device{};
+    return unknown_device{.offset = 1};
   default:
     std::println("Unknown device type: {}", type);
     return std::unexpected{parse_error::invalid_device_type};
