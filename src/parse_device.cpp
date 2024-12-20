@@ -141,6 +141,9 @@ parse_device(const std::span<const uint8_t> bytes,
     return unknown_device{.offset = 1};
   default:
     std::println("Unknown device type: {}", type);
+    if (name_value) {
+      std::println("Unknown device type name: {}", *name_value);
+    }
     return std::unexpected{parse_error::invalid_device_type};
   }
 
