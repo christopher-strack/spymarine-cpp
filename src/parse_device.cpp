@@ -3,6 +3,7 @@
 #include "spymarine/overloaded.hpp"
 
 #include <algorithm>
+#include <print>
 
 namespace spymarine {
 
@@ -139,6 +140,7 @@ parse_device(const std::span<const uint8_t> bytes,
   case 14:
     return unknown_device{};
   default:
+    std::println("Unknown device type: {}", type);
     return std::unexpected{parse_error::invalid_device_type};
   }
 
