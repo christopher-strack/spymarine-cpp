@@ -17,8 +17,6 @@ int16_t numeric_value::second() const {
   return to_uint16(std::span{_bytes}.subspan<2, 2>());
 }
 
-int32_t numeric_value::number() const {
-  return (_bytes[0] << 24) | (_bytes[1] << 16) | (_bytes[2] << 8) | _bytes[3];
-}
+int32_t numeric_value::number() const { return to_uint32(std::span{_bytes}); }
 
 } // namespace spymarine
