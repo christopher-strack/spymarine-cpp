@@ -13,7 +13,6 @@ target_sources(
         message_values_view.cpp
         message_value.cpp
         parse_device.cpp
-        parse_message.cpp
         read_devices.cpp
         sensor.cpp
         sensor_reader.cpp
