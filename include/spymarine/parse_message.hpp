@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <expected>
 #include <optional>
 #include <span>
@@ -24,7 +25,14 @@ struct header {
 namespace detail {
 
 constexpr uint16_t to_uint16(const std::span<const uint8_t, 2> data) noexcept {
-  return uint16_t((data[0] << 8) | data[1]);
+  const auto native_order =
+      std::bit_cast<uint16_t, std::array<uint8_t, 2>>({data[1], data[0]});
+
+  if constexpr (std::endian::native == std::endian::big) {
+    return std::byteswap(native_order);
+  } else {
+    return native_order;
+  }
 }
 
 constexpr std::optional<message_type>
