@@ -26,6 +26,7 @@ target_sources(
         FILE_SET HEADERS
         BASE_DIRS ${PROJECT_SOURCE_DIR}/include
         FILES
+            ${PROJECT_SOURCE_DIR}/include/spymarine/byte_operations.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/defaults.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/device.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/device_ostream.hpp
