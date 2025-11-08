@@ -47,7 +47,8 @@ parse_header(const std::span<const uint8_t> bytes) noexcept {
     return std::unexpected{parse_error::invalid_data_length};
   }
 
-  const std::array<uint8_t, 6> prefix = {0x00, 0x00, 0x00, 0x00, 0x00, 0xff};
+  const auto prefix =
+      std::to_array<uint8_t>({0x00, 0x00, 0x00, 0x00, 0x00, 0xff});
   if (!std::ranges::equal(bytes.subspan(0, prefix.size()), prefix)) {
     return std::unexpected{parse_error::invalid_header};
   }
