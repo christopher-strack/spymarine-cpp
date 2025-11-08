@@ -96,8 +96,7 @@ parse_message(const std::span<const uint8_t> bytes) noexcept {
           return std::unexpected{parse_error::invalid_data_length};
         }
 
-        const auto calculated_crc =
-            crc(std::span{bytes.begin() + 1, bytes.end() - 3});
+        const auto calculated_crc = crc(bytes.subspan(1, bytes.size() - 4));
         const auto received_crc =
             to_uint16(std::span<const uint8_t, 2>{bytes.end() - 2, 2});
 
@@ -105,8 +104,8 @@ parse_message(const std::span<const uint8_t> bytes) noexcept {
           return std::unexpected{parse_error::invalid_crc};
         }
 
-        return message{*type,
-                       std::span{bytes.begin() + header_size, bytes.end() - 2}};
+        return message{
+            *type, bytes.subspan(header_size, bytes.size() - 2 - header_size)};
       });
 }
 
