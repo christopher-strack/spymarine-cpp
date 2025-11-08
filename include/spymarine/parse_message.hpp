@@ -8,6 +8,7 @@
 #include <expected>
 #include <optional>
 #include <span>
+#include <utility>
 
 namespace spymarine {
 
@@ -29,11 +30,11 @@ constexpr uint16_t to_uint16(const std::span<const uint8_t, 2> data) noexcept {
 constexpr std::optional<message_type>
 parse_message_type(uint8_t type) noexcept {
   switch (type) {
-  case uint8_t(message_type::device_count):
+  case std::to_underlying(message_type::device_count):
     return message_type::device_count;
-  case uint8_t(message_type::device_info):
+  case std::to_underlying(message_type::device_info):
     return message_type::device_info;
-  case uint8_t(message_type::sensor_state):
+  case std::to_underlying(message_type::sensor_state):
     return message_type::sensor_state;
   }
   return std::nullopt;

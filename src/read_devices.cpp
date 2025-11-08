@@ -20,7 +20,7 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
 
   const auto length = to_bytes(3 + m.data.size());
   const auto header = std::array<uint8_t, header_size>{
-      0x00, 0x00, 0x00, 0x00, 0x00,      0xff,      uint8_t(m.type),
+      0x00, 0x00, 0x00, 0x00, 0x00,      0xff,      std::to_underlying(m.type),
       0x04, 0x8c, 0x55, 0x4b, length[0], length[1], 0xff};
 
   auto it = std::copy(header.begin(), header.end(), buffer.begin());
