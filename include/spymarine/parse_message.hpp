@@ -45,18 +45,21 @@ parse_header(const std::span<const uint8_t> bytes) noexcept {
     return std::unexpected{parse_error::invalid_data_length};
   }
 
-  const auto prefix =
+  const auto header_bytes = bytes.subspan<0, header_size>();
+
+  constexpr auto prefix =
       std::to_array<uint8_t>({0x00, 0x00, 0x00, 0x00, 0x00, 0xff});
-  if (!std::ranges::equal(bytes.subspan(0, prefix.size()), prefix)) {
+
+  if (!std::ranges::equal(header_bytes.subspan<0, prefix.size()>(), prefix)) {
     return std::unexpected{parse_error::invalid_header};
   }
 
-  if (bytes[13] != 0xff) {
+  if (header_bytes[13] != 0xff) {
     return std::unexpected{parse_error::invalid_header};
   }
 
-  const auto type = bytes.data()[6];
-  const auto length = to_uint16(bytes.subspan<11, 2>());
+  const auto type = header_bytes[6];
+  const auto length = to_uint16(header_bytes.subspan<11, 2>());
 
   return header{type, length};
 }
