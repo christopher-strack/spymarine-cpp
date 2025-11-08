@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <span>
 
@@ -21,7 +22,12 @@ struct message {
   std::span<const uint8_t> data;
 };
 
-bool operator==(const message& lhs, const message& rhs);
-bool operator!=(const message& lhs, const message& rhs);
+constexpr bool operator==(const message& lhs, const message& rhs) noexcept {
+  return lhs.type == rhs.type && std::ranges::equal(lhs.data, rhs.data);
+}
+
+constexpr bool operator!=(const message& lhs, const message& rhs) noexcept {
+  return !(lhs == rhs);
+}
 
 } // namespace spymarine

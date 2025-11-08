@@ -9,7 +9,6 @@ target_sources(
         error.cpp
         file_descriptor.cpp
         home_assistant.cpp
-        message.cpp
         message_values_iterator.cpp
         message_values_view.cpp
         message_value.cpp
