@@ -1,5 +1,3 @@
-#include "raw_data.hpp"
-
 #include "spymarine/parse_message.hpp"
 
 #include <catch2/catch_all.hpp>
