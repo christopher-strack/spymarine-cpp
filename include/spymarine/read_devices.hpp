@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <expected>
 #include <functional>
+#include <vector>
 
 namespace spymarine {
 

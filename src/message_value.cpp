@@ -1,5 +1,7 @@
 #include "spymarine/message_value.hpp"
 
+#include <algorithm>
+
 namespace spymarine {
 
 numeric_value::numeric_value(std::span<const uint8_t, 4> bytes) {
