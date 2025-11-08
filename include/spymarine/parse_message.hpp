@@ -1,11 +1,11 @@
 #pragma once
 
+#include "spymarine/byte_operations.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message.hpp"
 
 #include <algorithm>
 #include <array>
-#include <bit>
 #include <expected>
 #include <optional>
 #include <span>
@@ -23,10 +23,6 @@ struct header {
 };
 
 namespace detail {
-
-constexpr uint16_t to_uint16(const std::span<const uint8_t, 2> data) noexcept {
-  return std::bit_cast<uint16_t, std::array<uint8_t, 2>>({data[1], data[0]});
-}
 
 constexpr std::optional<message_type>
 parse_message_type(uint8_t type) noexcept {
@@ -60,7 +56,7 @@ parse_header(const std::span<const uint8_t> bytes) noexcept {
   }
 
   const auto type = bytes.data()[6];
-  const auto length = detail::to_uint16(bytes.subspan<11, 2>());
+  const auto length = to_uint16(bytes.subspan<11, 2>());
 
   return header{type, length};
 }
@@ -103,7 +99,7 @@ parse_message(const std::span<const uint8_t> bytes) noexcept {
         const auto calculated_crc =
             crc(std::span{bytes.begin() + 1, bytes.end() - 3});
         const auto received_crc =
-            detail::to_uint16(std::span<const uint8_t, 2>{bytes.end() - 2, 2});
+            to_uint16(std::span<const uint8_t, 2>{bytes.end() - 2, 2});
 
         if (calculated_crc != received_crc) {
           return std::unexpected{parse_error::invalid_crc};
