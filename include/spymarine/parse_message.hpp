@@ -17,16 +17,17 @@ struct header {
   uint8_t type;
   uint16_t length;
 
-  constexpr auto operator<=>(const header&) const = default;
+  constexpr auto operator<=>(const header&) const noexcept = default;
 };
 
 namespace detail {
 
-constexpr uint16_t to_uint16(const std::span<const uint8_t, 2> data) {
+constexpr uint16_t to_uint16(const std::span<const uint8_t, 2> data) noexcept {
   return uint16_t((data[0] << 8) | data[1]);
 }
 
-constexpr std::optional<message_type> parse_message_type(uint8_t type) {
+constexpr std::optional<message_type>
+parse_message_type(uint8_t type) noexcept {
   switch (type) {
   case uint8_t(message_type::device_count):
     return message_type::device_count;
@@ -41,7 +42,7 @@ constexpr std::optional<message_type> parse_message_type(uint8_t type) {
 } // namespace detail
 
 constexpr std::expected<header, error>
-parse_header(const std::span<const uint8_t> bytes) {
+parse_header(const std::span<const uint8_t> bytes) noexcept {
   if (bytes.size() < header_size) {
     return std::unexpected{parse_error::invalid_data_length};
   }
@@ -64,7 +65,7 @@ parse_header(const std::span<const uint8_t> bytes) {
 /* Original source: https://github.com/htool/pico2signalk
  * Copyright Erik Bosman / @brainsmoke
  */
-constexpr uint16_t crc(const std::span<const uint8_t> bytes) {
+constexpr uint16_t crc(const std::span<const uint8_t> bytes) noexcept {
   const uint16_t poly = 0x1189;
   uint16_t crc = 0;
 
@@ -83,7 +84,7 @@ constexpr uint16_t crc(const std::span<const uint8_t> bytes) {
 }
 
 constexpr std::expected<message, error>
-parse_message(const std::span<const uint8_t> bytes) {
+parse_message(const std::span<const uint8_t> bytes) noexcept {
   return parse_header(bytes).and_then(
       [&](const header header) -> std::expected<message, error> {
         const auto type = detail::parse_message_type(header.type);
