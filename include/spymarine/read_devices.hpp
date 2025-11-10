@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <expected>
 #include <functional>
+#include <vector>
 
 namespace spymarine {
 
@@ -108,9 +109,9 @@ private:
 
   std::expected<parsed_device, error>
   request_device_info(uint8_t device_id, uint8_t state_start_index) {
-    const std::array<uint8_t, 19> data{
-        0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00,
-        0x00, 0x00, 0x00, 0xff, 0x00, 0x00,      0x00, 0x00, 0xff};
+    const auto data = std::to_array<uint8_t>(
+        {0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00, 0x00,
+         0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff});
 
     return request_message({message_type::device_info, data})
         .and_then([state_start_index](const auto& message)

@@ -4,6 +4,7 @@
 #include "spymarine/discover.hpp"
 #include "spymarine/read_devices.hpp"
 #include "spymarine/sensor_reader.hpp"
+#include "spymarine/tcp_socket.hpp"
 #include "spymarine/udp_socket.hpp"
 
 #include <chrono>

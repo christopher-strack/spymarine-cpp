@@ -9,12 +9,10 @@ target_sources(
         error.cpp
         file_descriptor.cpp
         home_assistant.cpp
-        message.cpp
         message_values_iterator.cpp
         message_values_view.cpp
         message_value.cpp
         parse_device.cpp
-        parse_message.cpp
         read_devices.cpp
         sensor.cpp
         sensor_reader.cpp
@@ -28,6 +26,8 @@ target_sources(
         FILE_SET HEADERS
         BASE_DIRS ${PROJECT_SOURCE_DIR}/include
         FILES
+            ${PROJECT_SOURCE_DIR}/include/spymarine/byte_operations.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/crc.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/defaults.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/device.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/device_ostream.hpp
@@ -42,6 +42,8 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/overloaded.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_device.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_error.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message_header.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message_type.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/read_devices.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/sensor.hpp

@@ -2,7 +2,6 @@
 
 #include "spymarine/sensor.hpp"
 
-#include <expected>
 #include <string>
 #include <variant>
 
