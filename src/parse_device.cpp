@@ -6,7 +6,7 @@
 
 namespace spymarine {
 
-uint8_t sensor_state_offset(const parsed_device& device) {
+uint8_t sensor_state_offset(const parsed_device& d) {
   return std::visit(
       overloaded{
           [](const pico_internal_device&) -> uint8_t { return 6; },
@@ -20,7 +20,7 @@ uint8_t sensor_state_offset(const parsed_device& device) {
           [](const null_device&) -> uint8_t { return 0; },
           [](const unknown_device&) -> uint8_t { return 1; },
       },
-      device);
+      d);
 }
 
 namespace {

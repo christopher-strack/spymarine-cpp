@@ -28,7 +28,7 @@ struct unknown_device {
 using parsed_device =
     detail::variant_extender<device, null_device, unknown_device>::type;
 
-uint8_t sensor_state_offset(const parsed_device& device);
+uint8_t sensor_state_offset(const parsed_device& d);
 
 std::expected<parsed_device, error>
 parse_device(const std::span<const uint8_t> bytes, uint8_t state_start_index);

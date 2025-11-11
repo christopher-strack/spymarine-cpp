@@ -17,9 +17,9 @@ auto origin_object() {
 
 TEST_CASE("make_home_assistant_device_discovery") {
   SECTION("pico_internal_device") {
-    const auto device = pico_internal_device{0, 12.1f};
+    const auto d = pico_internal_device{0, 12.1f};
     const auto discovery_message =
-        make_home_assistant_device_discovery_message(device);
+        make_home_assistant_device_discovery_message(d);
 
     CHECK(discovery_message.topic ==
           "homeassistant/device/simarine_pico_internal_0/config");
@@ -46,7 +46,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     CHECK(discovery_json["state_topic"] == "simarine_pico_internal_0/state");
     CHECK(discovery_json["qos"] == 1);
 
-    const auto state_message = make_home_assistant_state_message(device);
+    const auto state_message = make_home_assistant_state_message(d);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
     CHECK(state_message.topic ==
@@ -55,9 +55,9 @@ TEST_CASE("make_home_assistant_device_discovery") {
   }
 
   SECTION("voltage_device") {
-    const auto device = voltage_device{"Some Voltage", 3, 12.8f};
+    const auto d = voltage_device{"Some Voltage", 3, 12.8f};
     const auto discovery_message =
-        make_home_assistant_device_discovery_message(device);
+        make_home_assistant_device_discovery_message(d);
 
     CHECK(discovery_message.topic ==
           "homeassistant/device/simarine_voltage_3/config");
@@ -83,7 +83,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     CHECK(discovery_json["state_topic"] == "simarine_voltage_3/state");
     CHECK(discovery_json["qos"] == 1);
 
-    const auto state_message = make_home_assistant_state_message(device);
+    const auto state_message = make_home_assistant_state_message(d);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
     CHECK(state_message.topic ==
@@ -92,9 +92,9 @@ TEST_CASE("make_home_assistant_device_discovery") {
   }
 
   SECTION("current_device") {
-    const auto device = current_device{"Some Current", 28, 1.1f};
+    const auto d = current_device{"Some Current", 28, 1.1f};
     const auto discovery_message =
-        make_home_assistant_device_discovery_message(device);
+        make_home_assistant_device_discovery_message(d);
 
     CHECK(discovery_message.topic ==
           "homeassistant/device/simarine_current_28/config");
@@ -120,7 +120,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     CHECK(discovery_json["state_topic"] == "simarine_current_28/state");
     CHECK(discovery_json["qos"] == 1);
 
-    const auto state_message = make_home_assistant_state_message(device);
+    const auto state_message = make_home_assistant_state_message(d);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
     CHECK(state_message.topic ==
@@ -129,9 +129,9 @@ TEST_CASE("make_home_assistant_device_discovery") {
   }
 
   SECTION("temperature_device") {
-    const auto device = temperature_device{"Test Temperature", 7, 21.4f};
+    const auto d = temperature_device{"Test Temperature", 7, 21.4f};
     const auto discovery_message =
-        make_home_assistant_device_discovery_message(device);
+        make_home_assistant_device_discovery_message(d);
 
     CHECK(discovery_message.topic ==
           "homeassistant/device/simarine_temperature_7/config");
@@ -158,7 +158,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     CHECK(discovery_json["state_topic"] == "simarine_temperature_7/state");
     CHECK(discovery_json["qos"] == 1);
 
-    const auto state_message = make_home_assistant_state_message(device);
+    const auto state_message = make_home_assistant_state_message(d);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
     CHECK(state_message.topic ==
@@ -167,9 +167,9 @@ TEST_CASE("make_home_assistant_device_discovery") {
   }
 
   SECTION("barometer_device") {
-    const auto device = barometer_device{"Barometer", 14, 1134.5f};
+    const auto d = barometer_device{"Barometer", 14, 1134.5f};
     const auto discovery_message =
-        make_home_assistant_device_discovery_message(device);
+        make_home_assistant_device_discovery_message(d);
 
     CHECK(discovery_message.topic ==
           "homeassistant/device/simarine_barometer_14/config");
@@ -195,7 +195,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     CHECK(discovery_json["state_topic"] == "simarine_barometer_14/state");
     CHECK(discovery_json["qos"] == 1);
 
-    const auto state_message = make_home_assistant_state_message(device);
+    const auto state_message = make_home_assistant_state_message(d);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
     CHECK(state_message.topic ==
@@ -204,9 +204,9 @@ TEST_CASE("make_home_assistant_device_discovery") {
   }
 
   SECTION("resistive_device") {
-    const auto device = resistive_device{"Some Resistive Device", 17, 88.5f};
+    const auto d = resistive_device{"Some Resistive Device", 17, 88.5f};
     const auto discovery_message =
-        make_home_assistant_device_discovery_message(device);
+        make_home_assistant_device_discovery_message(d);
 
     CHECK(discovery_message.topic ==
           "homeassistant/device/simarine_resistive_17/config");
@@ -232,7 +232,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     CHECK(discovery_json["state_topic"] == "simarine_resistive_17/state");
     CHECK(discovery_json["qos"] == 1);
 
-    const auto state_message = make_home_assistant_state_message(device);
+    const auto state_message = make_home_assistant_state_message(d);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
     CHECK(state_message.topic ==
@@ -241,10 +241,10 @@ TEST_CASE("make_home_assistant_device_discovery") {
   }
 
   SECTION("tank_device") {
-    const auto device = tank_device{
+    const auto d = tank_device{
         "Some Tank", fluid_type::fresh_water, 100, 13, 34.5f, 20.1f};
     const auto discovery_message =
-        make_home_assistant_device_discovery_message(device);
+        make_home_assistant_device_discovery_message(d);
 
     CHECK(discovery_message.topic ==
           "homeassistant/device/simarine_tank_13/config");
@@ -276,7 +276,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     CHECK(discovery_json["state_topic"] == "simarine_tank_13/state");
     CHECK(discovery_json["qos"] == 1);
 
-    const auto state_message = make_home_assistant_state_message(device);
+    const auto state_message = make_home_assistant_state_message(d);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
     CHECK(state_message.topic ==
@@ -286,11 +286,11 @@ TEST_CASE("make_home_assistant_device_discovery") {
   }
 
   SECTION("battery_device") {
-    const auto device = battery_device{
+    const auto d = battery_device{
         "Some Battery", battery_type::lifepo4, 320, 8, 89.3f, 293.1f, 5.7f,
         13.1f};
     const auto discovery_message =
-        make_home_assistant_device_discovery_message(device);
+        make_home_assistant_device_discovery_message(d);
 
     CHECK(discovery_message.topic ==
           "homeassistant/device/simarine_battery_8/config");
@@ -330,7 +330,7 @@ TEST_CASE("make_home_assistant_device_discovery") {
     CHECK(discovery_json["state_topic"] == "simarine_battery_8/state");
     CHECK(discovery_json["qos"] == 1);
 
-    const auto state_message = make_home_assistant_state_message(device);
+    const auto state_message = make_home_assistant_state_message(d);
 
     const auto state_json = nlohmann::json::parse(state_message.payload);
     CHECK(state_message.topic ==

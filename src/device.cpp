@@ -7,51 +7,51 @@ pico_internal_device::pico_internal_device(const uint8_t state_start_index,
                                            const float sensor_value)
     : device_sensor{sensor_type::voltage, state_start_index, sensor_value} {}
 
-tank_device::tank_device(std::string name, fluid_type type, float capacity,
+tank_device::tank_device(std::string name_, fluid_type type_, float capacity_,
                          const uint8_t state_start_index, const float volume,
                          const float level)
-    : name{std::move(name)}, type{type}, capacity{capacity},
+    : name{std::move(name_)}, type{type_}, capacity{capacity_},
       volume_sensor{sensor_type::volume, state_start_index, volume},
       level_sensor{sensor_type::level, state_start_index, level} {}
 
-voltage_device::voltage_device(std::string name,
+voltage_device::voltage_device(std::string name_,
                                const uint8_t state_start_index,
                                const float sensor_value)
-    : name{std::move(name)},
+    : name{std::move(name_)},
       device_sensor{sensor_type::voltage, state_start_index, sensor_value} {}
 
-current_device::current_device(std::string name,
+current_device::current_device(std::string name_,
                                const uint8_t state_start_index,
                                const float sensor_value)
-    : name{std::move(name)},
+    : name{std::move(name_)},
       device_sensor{sensor_type::current, state_start_index, sensor_value} {}
 
-temperature_device::temperature_device(std::string name,
+temperature_device::temperature_device(std::string name_,
                                        const uint8_t state_start_index,
                                        const float sensor_value)
-    : name{std::move(name)},
+    : name{std::move(name_)},
       device_sensor{sensor_type::temperature, state_start_index, sensor_value} {
 }
 
-barometer_device::barometer_device(std::string name,
+barometer_device::barometer_device(std::string name_,
                                    const uint8_t state_start_index,
                                    const float sensor_value)
-    : name{std::move(name)},
+    : name{std::move(name_)},
       device_sensor{sensor_type::pressure, state_start_index, sensor_value} {}
 
-resistive_device::resistive_device(std::string name,
+resistive_device::resistive_device(std::string name_,
                                    const uint8_t state_start_index,
                                    const float sensor_value)
-    : name{std::move(name)},
+    : name{std::move(name_)},
       device_sensor{sensor_type::resistive, state_start_index, sensor_value} {}
 
-battery_device::battery_device(std::string name, const battery_type type,
-                               const float capacity,
+battery_device::battery_device(std::string name_, const battery_type type_,
+                               const float capacity_,
                                const uint8_t state_start_index,
                                const float charge,
                                const float remaining_capacity,
                                const float current, const float voltage)
-    : name{std::move(name)}, type{type}, capacity{capacity},
+    : name{std::move(name_)}, type{type_}, capacity{capacity_},
       charge_sensor{sensor_type::charge, state_start_index, charge},
       remaining_capacity_sensor{sensor_type::capacity, state_start_index,
                                 remaining_capacity},
@@ -60,7 +60,7 @@ battery_device::battery_device(std::string name, const battery_type type,
       voltage_sensor{sensor_type::voltage, uint8_t(state_start_index + 2),
                      voltage} {}
 
-std::string_view device_type(const device& device) {
+std::string_view device_type(const device& d) {
   return std::visit(
       overloaded{
           [](const pico_internal_device&) { return "pico_internal"; },
@@ -72,17 +72,17 @@ std::string_view device_type(const device& device) {
           [](const barometer_device&) { return "barometer"; },
           [](const resistive_device&) { return "resistive"; },
       },
-      device);
+      d);
 }
 
-uint8_t device_id(const device& device) {
+uint8_t device_id(const device& d_) {
   return std::visit(
       overloaded{
           [&](const battery_device& d) { return d.charge_sensor.state_index; },
           [](const tank_device& d) { return d.volume_sensor.state_index; },
           [](const auto& d) { return d.device_sensor.state_index; },
       },
-      device);
+      d_);
 }
 
 } // namespace spymarine

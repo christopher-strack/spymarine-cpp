@@ -15,7 +15,7 @@ sensor_map build_sensor_map(std::vector<device>& devices_range) {
     it->second.push_back(std::addressof(s));
   };
 
-  for (device& device : devices_range) {
+  for (device& d_ : devices_range) {
     std::visit(overloaded{
                    [&](auto& d) { insert_sensor(d.device_sensor); },
                    [&](tank_device& d) {
@@ -29,7 +29,7 @@ sensor_map build_sensor_map(std::vector<device>& devices_range) {
                      insert_sensor(d.voltage_sensor);
                    },
                },
-               device);
+               d_);
   }
 
   return result;

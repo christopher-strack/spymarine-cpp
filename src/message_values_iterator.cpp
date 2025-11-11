@@ -49,13 +49,13 @@ message_values_iterator& message_values_iterator::operator++() {
     return *this;
   }
 
-  const auto value_type = _bytes[1];
+  const auto type = _bytes[1];
 
-  if (value_type == 1) {
+  if (type == 1) {
     _bytes = advance_bytes(_bytes, 7);
-  } else if (value_type == 3) {
+  } else if (type == 3) {
     _bytes = advance_bytes(_bytes, 12);
-  } else if (value_type == 4) {
+  } else if (type == 4) {
     const auto string = std::get<std::string_view>(_data.value);
     _bytes = advance_bytes(_bytes, string.size() + 9);
   } else {
@@ -80,14 +80,14 @@ void message_values_iterator::update_data() {
 
   _data.id = _bytes[0];
 
-  const auto value_type = _bytes[1];
+  const auto type = _bytes[1];
   const auto payload = _bytes.subspan(2);
 
-  if (value_type == 1 && payload.size() >= 4) {
+  if (type == 1 && payload.size() >= 4) {
     _data.value = numeric_value{payload.subspan<0, 4>()};
-  } else if (value_type == 3 && payload.size() >= 9) {
+  } else if (type == 3 && payload.size() >= 9) {
     _data.value = numeric_value{payload.subspan<5, 4>()};
-  } else if (value_type == 4) {
+  } else if (type == 4) {
     const auto string = read_string(payload);
     _data.value = string ? message_value{*string} : invalid_value{};
   } else {

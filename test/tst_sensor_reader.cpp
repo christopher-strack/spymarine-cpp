@@ -30,10 +30,10 @@ public:
 
 TEST_CASE("sensor_reader") {
   auto devices = parsed_devices;
-  buffer buffer;
+  buffer buff;
 
   SECTION("valid message updates devices") {
-    sensor_reader<mock_udp_socket> reader{buffer, devices, mock_udp_socket{}};
+    sensor_reader<mock_udp_socket> reader{buff, devices, mock_udp_socket{}};
 
     REQUIRE(reader.read_and_update());
 
@@ -41,7 +41,7 @@ TEST_CASE("sensor_reader") {
   }
 
   SECTION("fails if udp socket fails") {
-    sensor_reader<failing_udp_socket> reader{buffer, devices,
+    sensor_reader<failing_udp_socket> reader{buff, devices,
                                              failing_udp_socket{}};
 
     const auto result = reader.read_and_update();

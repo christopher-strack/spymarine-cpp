@@ -22,8 +22,8 @@ void process_sensor_values(
     const auto result =
         sensor_reader.read_and_update().transform([&](bool window_completed) {
           if (window_completed) {
-            for (const auto& device : devices) {
-              std::println("{}", device_string(device));
+            for (const auto& d : devices) {
+              std::println("{}", device_string(d));
             }
           }
         });
