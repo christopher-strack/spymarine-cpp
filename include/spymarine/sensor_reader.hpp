@@ -63,7 +63,7 @@ protected:
 
     message_values_view state_values{state_message.data};
 
-    for (const auto& entry : state_values) {
+    for (const auto entry : state_values) {
       if (const auto value = std::get_if<numeric_value>(&entry.value)) {
         if (const auto it = map.find(entry.id); it != map.end()) {
           for (sensor* sensor : it->second) {
