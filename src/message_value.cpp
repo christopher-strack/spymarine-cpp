@@ -10,13 +10,13 @@ numeric_value::numeric_value(std::span<const uint8_t, 4> bytes) {
 }
 
 int16_t numeric_value::first() const {
-  return to_uint16(std::span{_bytes}.subspan<0, 2>());
+  return to_int16(std::span{_bytes}.subspan<0, 2>());
 }
 
 int16_t numeric_value::second() const {
-  return to_uint16(std::span{_bytes}.subspan<2, 2>());
+  return to_int16(std::span{_bytes}.subspan<2, 2>());
 }
 
-int32_t numeric_value::number() const { return to_uint32(std::span{_bytes}); }
+int32_t numeric_value::number() const { return to_int32(std::span{_bytes}); }
 
 } // namespace spymarine
