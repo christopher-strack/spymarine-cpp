@@ -24,9 +24,9 @@ std::ostream& operator<<(std::ostream& os, const sensor_type type) {
     return os << "charge";
   case sensor_type::capacity:
     return os << "capacity";
-  default:
-    return os << "invalid";
   }
+
+  return os << "invalid";
 }
 
 std::ostream& operator<<(std::ostream& os, const sensor& info) {
@@ -74,9 +74,8 @@ std::ostream& operator<<(std::ostream& os, const fluid_type type) {
     return os << "waste_water";
   case fluid_type::unknown:
     return os << "unknown";
-  default:
-    return os << "invalid";
   }
+  return os << "invalid";
 }
 
 std::ostream& operator<<(std::ostream& os, const tank_device& d) {
@@ -102,9 +101,8 @@ std::ostream& operator<<(std::ostream& os, const battery_type type) {
     return os << "lifepo4";
   case battery_type::unknown:
     return os << "unknown";
-  default:
-    return os << "invalid";
   }
+  return os << "invalid";
 }
 
 std::ostream& operator<<(std::ostream& os, const battery_device& d) {
