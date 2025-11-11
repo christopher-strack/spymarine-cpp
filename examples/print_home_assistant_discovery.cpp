@@ -5,7 +5,7 @@
 
 #include <print>
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   std::println("Discover Simarine device");
 
   spymarine::buffer buffer;

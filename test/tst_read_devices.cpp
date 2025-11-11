@@ -53,10 +53,12 @@ private:
 
 class failing_tcp_socket : public test_tcp_socket_base<failing_tcp_socket> {
 public:
-  std::expected<void, error> send(std::span<uint8_t> bytes) { return {}; }
+  std::expected<void, error> send([[maybe_unused]] std::span<uint8_t> bytes) {
+    return {};
+  }
 
   std::expected<std::span<const uint8_t>, error>
-  receive(std::span<uint8_t> buffer) {
+  receive([[maybe_unused]] std::span<uint8_t> buffer) {
     return std::unexpected{std::make_error_code(std::errc::connection_refused)};
   }
 };

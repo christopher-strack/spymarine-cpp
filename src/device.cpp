@@ -63,14 +63,14 @@ battery_device::battery_device(std::string name, const battery_type type,
 std::string_view device_type(const device& device) {
   return std::visit(
       overloaded{
-          [](const pico_internal_device& d) { return "pico_internal"; },
-          [](const battery_device& d) { return "battery"; },
-          [](const tank_device& d) { return "tank"; },
-          [](const temperature_device& d) { return "temperature"; },
-          [](const voltage_device& d) { return "voltage"; },
-          [](const current_device& d) { return "current"; },
-          [](const barometer_device& d) { return "barometer"; },
-          [](const resistive_device& d) { return "resistive"; },
+          [](const pico_internal_device&) { return "pico_internal"; },
+          [](const battery_device&) { return "battery"; },
+          [](const tank_device&) { return "tank"; },
+          [](const temperature_device&) { return "temperature"; },
+          [](const voltage_device&) { return "voltage"; },
+          [](const current_device&) { return "current"; },
+          [](const barometer_device&) { return "barometer"; },
+          [](const resistive_device&) { return "resistive"; },
       },
       device);
 }

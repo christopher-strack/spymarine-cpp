@@ -21,7 +21,7 @@
 namespace spymarine {
 
 struct do_not_filter_devices {
-  bool operator()(const device& devices) { return true; }
+  bool operator()(const device&) { return true; }
 };
 
 template <typename... DeviceTypes> struct filter_by_device_type {
