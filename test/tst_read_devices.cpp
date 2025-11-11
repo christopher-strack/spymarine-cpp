@@ -9,6 +9,7 @@
 
 #include <catch2/catch_all.hpp>
 
+#include <cstddef>
 #include <expected>
 #include <ranges>
 #include <system_error>
@@ -42,8 +43,9 @@ public:
   std::expected<std::span<const uint8_t>, error>
   receive(std::span<uint8_t> buffer) {
     const auto length = std::min(buffer.size(), _response.size());
-    std::ranges::copy_n(_response.begin(), length, buffer.begin());
-    _response.erase(_response.begin(), _response.begin() + length);
+    const auto diff = static_cast<std::ptrdiff_t>(length);
+    std::ranges::copy_n(_response.begin(), diff, buffer.begin());
+    _response.erase(_response.begin(), _response.begin() + diff);
     return buffer.subspan(0, length);
   }
 
