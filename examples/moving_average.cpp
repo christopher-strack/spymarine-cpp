@@ -12,7 +12,7 @@
 
 namespace {
 
-void process_sensor_values(
+[[noreturn]] void process_sensor_values(
     const std::vector<spymarine::device>& devices,
     spymarine::moving_average_sensor_reader<spymarine::udp_socket>&
         sensor_reader) {
