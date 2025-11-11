@@ -17,6 +17,9 @@ public:
   receive([[maybe_unused]] std::span<uint8_t> buffer) {
     return std::span<const uint8_t>{raw_state_response};
   }
+
+private:
+  const std::vector<uint8_t> raw_state_response = make_raw_state_response();
 };
 
 class failing_udp_socket {
@@ -29,7 +32,7 @@ public:
 } // namespace
 
 TEST_CASE("sensor_reader") {
-  auto devices = parsed_devices;
+  auto devices = make_parsed_devices();
   buffer buff;
 
   SECTION("valid message updates devices") {
@@ -37,7 +40,7 @@ TEST_CASE("sensor_reader") {
 
     REQUIRE(reader.read_and_update());
 
-    CHECK(devices == parsed_devices_with_values);
+    CHECK(devices == make_parsed_devices_with_values());
   }
 
   SECTION("fails if udp socket fails") {

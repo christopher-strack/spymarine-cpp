@@ -50,6 +50,10 @@ public:
   }
 
 private:
+  const std::vector<uint8_t> raw_device_count_response =
+      make_raw_device_count_response();
+  const std::vector<std::vector<uint8_t>> raw_device_info_response =
+      make_raw_device_info_response();
   std::vector<uint8_t> _response;
 };
 
@@ -74,7 +78,7 @@ TEST_CASE("read_devices") {
     const auto devices =
         read_devices<mock_tcp_socket>(buff, 0, 0, do_not_filter_devices{});
 
-    CHECK(devices == parsed_devices);
+    CHECK(devices == make_parsed_devices());
   }
 
   SECTION("return connection error") {
