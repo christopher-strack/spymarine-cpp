@@ -29,7 +29,7 @@ target_link_libraries(spymarine_tests PRIVATE Catch2::Catch2WithMain nlohmann_js
 
 target_compile_definitions(spymarine_tests PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
 
-target_compile_options(spymarine_tests PRIVATE -Wall -Werror)
+target_enable_warnings(spymarine_tests)
 
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 
