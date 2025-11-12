@@ -15,6 +15,7 @@ include(cmake/warnings.cmake)
 
 option(BUILD_TESTS "Build tests" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
+option(ENABLE_HOME_ASSISTANT_SUPPORT "Enable Home Assistant support" ON)
 
 add_subdirectory(src)
 

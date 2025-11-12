@@ -8,7 +8,6 @@ target_sources(
         discover.cpp
         error.cpp
         file_descriptor.cpp
-        home_assistant.cpp
         message_values_iterator.cpp
         message_values_view.cpp
         message_value.cpp
@@ -18,6 +17,7 @@ target_sources(
         sensor_reader.cpp
         tcp_socket.cpp
         udp_socket.cpp
+        $<$<BOOL:${ENABLE_HOME_ASSISTANT_SUPPORT}>:home_assistant.cpp>
 )
 
 target_sources(
@@ -34,7 +34,6 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/discover.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/file_descriptor.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/home_assistant.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_value.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_values_iterator.hpp
@@ -50,6 +49,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/sensor_reader.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/tcp_socket.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/udp_socket.hpp
+            $<$<BOOL:${ENABLE_HOME_ASSISTANT_SUPPORT}>:${PROJECT_SOURCE_DIR}/include/spymarine/home_assistant.hpp>
 )
 
 set_target_properties(spymarine PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)
