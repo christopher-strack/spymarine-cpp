@@ -41,9 +41,8 @@ constexpr std::string_view origin_object() {
          R"(","url":"https://github.com/christopher-strack/spymarine-cpp"})";
 }
 
-std::string make_home_assistant_state_topic(const device& device) {
-  return std::format("simarine_{}_{}/state", device_type(device),
-                     device_id(device));
+std::string make_home_assistant_state_topic(const device& d) {
+  return std::format("simarine_{}_{}/state", device_type(d), device_id(d));
 }
 
 std::string make_battery_discovery(const battery_device& battery) {
@@ -80,23 +79,23 @@ std::string make_tank_discovery(const tank_device& tank) {
       make_home_assistant_state_topic(tank));
 }
 
-std::string make_sensor_discovery(const auto& device, std::string_view type,
+std::string make_sensor_discovery(const auto& d, std::string_view type,
                                   std::string_view device_class,
                                   std::string_view unit) {
   constexpr auto format_string =
       R"({{"dev":{},"o":{},"cmps":{{{}}},"state_topic":"{}","qos":1}})";
 
-  const auto device_id = device.device_sensor.state_index;
+  const auto device_id = d.device_sensor.state_index;
 
-  return std::format(
-      format_string, make_device_object(device_id, type, device.name),
-      origin_object(),
-      make_sensor_component_entry(device.device_sensor.state_index, type,
-                                  device_class, unit, "value"),
-      make_home_assistant_state_topic(device));
+  return std::format(format_string, make_device_object(device_id, type, d.name),
+                     origin_object(),
+                     make_sensor_component_entry(d.device_sensor.state_index,
+                                                 type, device_class, unit,
+                                                 "value"),
+                     make_home_assistant_state_topic(d));
 }
 
-std::string make_home_assistant_device_discovery_payload(const device& device) {
+std::string make_home_assistant_device_discovery_payload(const device& d_) {
   return std::visit(
       overloaded{
           [](const pico_internal_device& d) {
@@ -121,26 +120,25 @@ std::string make_home_assistant_device_discovery_payload(const device& device) {
           [](const battery_device& d) { return make_battery_discovery(d); },
           [](const tank_device& d) { return make_tank_discovery(d); },
       },
-      device);
+      d_);
 }
 
-std::string make_home_assistant_device_discovery_topic(const device& device) {
+std::string make_home_assistant_device_discovery_topic(const device& d) {
   return std::format("homeassistant/device/simarine_{}_{}/config",
-                     device_type(device), device_id(device));
+                     device_type(d), device_id(d));
 }
 } // namespace
 
-mqtt_message
-make_home_assistant_device_discovery_message(const device& device) {
+mqtt_message make_home_assistant_device_discovery_message(const device& d) {
   return mqtt_message{
-      .topic = make_home_assistant_device_discovery_topic(device),
-      .payload = make_home_assistant_device_discovery_payload(device),
+      .topic = make_home_assistant_device_discovery_topic(d),
+      .payload = make_home_assistant_device_discovery_payload(d),
   };
 }
 
-mqtt_message make_home_assistant_state_message(const device& device) {
+mqtt_message make_home_assistant_state_message(const device& d_) {
   return mqtt_message{
-      .topic = make_home_assistant_state_topic(device),
+      .topic = make_home_assistant_state_topic(d_),
       .payload = std::visit(
           overloaded{
               [](const battery_device& battery) {
@@ -157,12 +155,12 @@ mqtt_message make_home_assistant_state_message(const device& device) {
                 return std::format(format_string, tank.volume_sensor.value,
                                    tank.level_sensor.value);
               },
-              [](const auto& device) {
+              [](const auto& d) {
                 constexpr auto format_string = R"({{"value":{}}})";
-                return std::format(format_string, device.device_sensor.value);
+                return std::format(format_string, d.device_sensor.value);
               },
           },
-          device),
+          d_),
   };
 }
 

@@ -11,8 +11,12 @@ project(
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+include(cmake/warnings.cmake)
+
 option(BUILD_TESTS "Build tests" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
+option(CLANG_ENABLE_ALL_WARNINGS "Enable almost all warnings" OFF)
+option(ENABLE_HOME_ASSISTANT_SUPPORT "Enable Home Assistant support" ON)
 
 add_subdirectory(src)
 

@@ -9,6 +9,7 @@
 
 #include <catch2/catch_all.hpp>
 
+#include <cstddef>
 #include <expected>
 #include <ranges>
 #include <system_error>
@@ -42,21 +43,28 @@ public:
   std::expected<std::span<const uint8_t>, error>
   receive(std::span<uint8_t> buffer) {
     const auto length = std::min(buffer.size(), _response.size());
-    std::ranges::copy_n(_response.begin(), length, buffer.begin());
-    _response.erase(_response.begin(), _response.begin() + length);
+    const auto diff = static_cast<std::ptrdiff_t>(length);
+    std::ranges::copy_n(_response.begin(), diff, buffer.begin());
+    _response.erase(_response.begin(), _response.begin() + diff);
     return buffer.subspan(0, length);
   }
 
 private:
+  const std::vector<uint8_t> raw_device_count_response =
+      make_raw_device_count_response();
+  const std::vector<std::vector<uint8_t>> raw_device_info_response =
+      make_raw_device_info_response();
   std::vector<uint8_t> _response;
 };
 
 class failing_tcp_socket : public test_tcp_socket_base<failing_tcp_socket> {
 public:
-  std::expected<void, error> send(std::span<uint8_t> bytes) { return {}; }
+  std::expected<void, error> send([[maybe_unused]] std::span<uint8_t> bytes) {
+    return {};
+  }
 
   std::expected<std::span<const uint8_t>, error>
-  receive(std::span<uint8_t> buffer) {
+  receive([[maybe_unused]] std::span<uint8_t> buffer) {
     return std::unexpected{std::make_error_code(std::errc::connection_refused)};
   }
 };
@@ -64,18 +72,18 @@ public:
 } // namespace
 
 TEST_CASE("read_devices") {
-  buffer buffer;
+  buffer buff;
 
   SECTION("return parsed devices") {
     const auto devices =
-        read_devices<mock_tcp_socket>(buffer, 0, 0, do_not_filter_devices{});
+        read_devices<mock_tcp_socket>(buff, 0, 0, do_not_filter_devices{});
 
-    CHECK(devices == parsed_devices);
+    CHECK(devices == make_parsed_devices());
   }
 
   SECTION("return connection error") {
     const auto devices =
-        read_devices<failing_tcp_socket>(buffer, 0, 0, do_not_filter_devices{});
+        read_devices<failing_tcp_socket>(buff, 0, 0, do_not_filter_devices{});
 
     REQUIRE_FALSE(devices);
     CHECK(std::holds_alternative<std::error_code>(devices.error()));

@@ -6,24 +6,25 @@
 
 namespace spymarine {
 
-uint8_t sensor_state_offset(const parsed_device& device) {
-  return std::visit(overloaded{
-                        [](const pico_internal_device&) { return 6; },
-                        [](const voltage_device&) { return 1; },
-                        [](const current_device&) { return 2; },
-                        [](const temperature_device&) { return 1; },
-                        [](const barometer_device&) { return 2; },
-                        [](const resistive_device&) { return 1; },
-                        [](const tank_device&) { return 1; },
-                        [](const battery_device&) { return 5; },
-                        [](const null_device&) { return 0; },
-                        [](const unknown_device&) { return 1; },
-                    },
-                    device);
+uint8_t sensor_state_offset(const parsed_device& d) {
+  return std::visit(
+      overloaded{
+          [](const pico_internal_device&) -> uint8_t { return 6; },
+          [](const voltage_device&) -> uint8_t { return 1; },
+          [](const current_device&) -> uint8_t { return 2; },
+          [](const temperature_device&) -> uint8_t { return 1; },
+          [](const barometer_device&) -> uint8_t { return 2; },
+          [](const resistive_device&) -> uint8_t { return 1; },
+          [](const tank_device&) -> uint8_t { return 1; },
+          [](const battery_device&) -> uint8_t { return 5; },
+          [](const null_device&) -> uint8_t { return 0; },
+          [](const unknown_device&) -> uint8_t { return 1; },
+      },
+      d);
 }
 
 namespace {
-fluid_type to_fluid_type(const uint16_t type) {
+fluid_type to_fluid_type(const int16_t type) {
   switch (type) {
   case 1:
     return fluid_type::fresh_water;
@@ -35,7 +36,7 @@ fluid_type to_fluid_type(const uint16_t type) {
   return fluid_type::unknown;
 }
 
-battery_type to_battery_type(const uint16_t battery_type) {
+battery_type to_battery_type(const int16_t battery_type) {
   switch (battery_type) {
   case 1:
     return battery_type::wet_low_maintenance;

@@ -5,7 +5,7 @@
 
 #include <print>
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   std::println("Discover Simarine device");
 
   spymarine::buffer buffer;
@@ -19,10 +19,9 @@ int main(int argc, char** argv) {
           .transform([](auto devices) {
             std::println("Found {} devices", devices.size());
 
-            for (const auto& device : devices) {
+            for (const auto& d : devices) {
               const auto message =
-                  spymarine::make_home_assistant_device_discovery_message(
-                      device);
+                  spymarine::make_home_assistant_device_discovery_message(d);
               std::println("{}: {}", message.topic, message.payload);
             }
           });

@@ -7,12 +7,17 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
     GIT_TAG v3.7.1
 )
-FetchContent_Declare(
-    nlohmann_json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.11.3
-)
-FetchContent_MakeAvailable(Catch2 nlohmann_json)
+FetchContent_MakeAvailable(Catch2)
+
+if (ENABLE_HOME_ASSISTANT_SUPPORT)
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.11.3
+    )
+    FetchContent_MakeAvailable(nlohmann_json)
+endif()
+
 
 add_executable(spymarine_tests)
 
@@ -22,14 +27,20 @@ target_sources(
         tst_parse_message.cpp
         tst_read_devices.cpp
         tst_sensor_reader.cpp
-        tst_home_assistant.cpp
+        $<$<BOOL:${ENABLE_HOME_ASSISTANT_SUPPORT}>:tst_home_assistant.cpp>
 )
 
-target_link_libraries(spymarine_tests PRIVATE Catch2::Catch2WithMain nlohmann_json spymarine)
+target_link_libraries(
+    spymarine_tests
+    PRIVATE
+        Catch2::Catch2WithMain
+        spymarine
+        $<$<BOOL:${ENABLE_HOME_ASSISTANT_SUPPORT}>:nlohmann_json>
+)
 
 target_compile_definitions(spymarine_tests PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
 
-target_compile_options(spymarine_tests PRIVATE -Wall -Werror)
+target_enable_warnings(spymarine_tests)
 
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 

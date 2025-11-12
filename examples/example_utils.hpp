@@ -5,8 +5,8 @@
 #include <sstream>
 #include <string>
 
-inline std::string device_string(const spymarine::device& device) {
+inline std::string device_string(const spymarine::device& d) {
   std::stringstream str;
-  str << device;
+  str << d;
   return str.str();
 }

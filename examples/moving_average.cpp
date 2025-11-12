@@ -12,7 +12,7 @@
 
 namespace {
 
-void process_sensor_values(
+[[noreturn]] void process_sensor_values(
     const std::vector<spymarine::device>& devices,
     spymarine::moving_average_sensor_reader<spymarine::udp_socket>&
         sensor_reader) {
@@ -22,8 +22,8 @@ void process_sensor_values(
     const auto result =
         sensor_reader.read_and_update().transform([&](bool window_completed) {
           if (window_completed) {
-            for (const auto& device : devices) {
-              std::println("{}", device_string(device));
+            for (const auto& d : devices) {
+              std::println("{}", device_string(d));
             }
           }
         });
@@ -37,7 +37,7 @@ void process_sensor_values(
 
 } // namespace
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   std::println("Discover Simarine device");
 
   spymarine::buffer buffer;

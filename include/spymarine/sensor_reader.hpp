@@ -29,9 +29,9 @@ concept udp_socket_concept =
 
 template <udp_socket_concept udp_socket_type> class sensor_reader_base {
 public:
-  sensor_reader_base(std::span<uint8_t> buffer, std::vector<device>& devices,
+  sensor_reader_base(std::span<uint8_t> buff, std::vector<device>& devices,
                      udp_socket_type udp_socket)
-      : _udp_socket{std::move(udp_socket)}, _buffer{buffer} {
+      : _udp_socket{std::move(udp_socket)}, _buffer{buff} {
     _sensor_map = build_sensor_map(devices);
   }
 
@@ -63,7 +63,7 @@ protected:
 
     message_values_view state_values{state_message.data};
 
-    for (const auto& entry : state_values) {
+    for (const auto entry : state_values) {
       if (const auto value = std::get_if<numeric_value>(&entry.value)) {
         if (const auto it = map.find(entry.id); it != map.end()) {
           for (sensor* sensor : it->second) {
@@ -97,10 +97,10 @@ class moving_average_sensor_reader
     : public sensor_reader_base<udp_socket_type> {
 public:
   moving_average_sensor_reader(
-      std::span<uint8_t> buffer,
+      std::span<uint8_t> buff,
       const std::chrono::steady_clock::duration moving_average_interval,
       std::vector<device>& devices, udp_socket_type udp_socket)
-      : sensor_reader_base<udp_socket_type>(buffer, devices,
+      : sensor_reader_base<udp_socket_type>(buff, devices,
                                             std::move(udp_socket)),
         _moving_average_interval{moving_average_interval} {}
 
@@ -128,8 +128,8 @@ public:
     } else {
       return this
           ->read_and_process_values([this](float last_value, float new_value) {
-            return (last_value * _average_count + new_value) /
-                   (_average_count + 1);
+            return (last_value * float(_average_count) + new_value) /
+                   float(_average_count + 1);
           })
           .transform([this]() {
             _average_count++;

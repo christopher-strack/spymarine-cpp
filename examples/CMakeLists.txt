@@ -1,15 +1,21 @@
 add_executable(print_devices_example)
 target_sources(print_devices_example PRIVATE print_devices.cpp)
 target_link_libraries(print_devices_example PRIVATE spymarine)
+target_enable_warnings(print_devices_example)
 
 add_executable(print_sensor_states)
 target_sources(print_sensor_states PRIVATE print_sensor_states.cpp)
 target_link_libraries(print_sensor_states PRIVATE spymarine)
-
-add_executable(print_home_assistant_discovery)
-target_sources(print_home_assistant_discovery PRIVATE print_home_assistant_discovery.cpp)
-target_link_libraries(print_home_assistant_discovery PRIVATE spymarine)
+target_enable_warnings(print_sensor_states)
 
 add_executable(moving_average)
 target_sources(moving_average PRIVATE moving_average.cpp)
 target_link_libraries(moving_average PRIVATE spymarine)
+target_enable_warnings(moving_average)
+
+if (ENABLE_HOME_ASSISTANT_SUPPORT)
+    add_executable(print_home_assistant_discovery)
+    target_sources(print_home_assistant_discovery PRIVATE print_home_assistant_discovery.cpp)
+    target_link_libraries(print_home_assistant_discovery PRIVATE spymarine)
+    target_enable_warnings(print_home_assistant_discovery)
+endif()

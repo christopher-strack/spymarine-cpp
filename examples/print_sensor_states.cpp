@@ -7,7 +7,7 @@
 
 #include <print>
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   std::println("Discover Simarine device");
 
   std::array<uint8_t, 2048> buffer;
@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
                   return sensor_reader.read_and_update();
                 })
                 .transform([&]() {
-                  for (const auto& device : devices) {
-                    std::println("{}", device_string(device));
+                  for (const auto& d : devices) {
+                    std::println("{}", device_string(d));
                   }
                 });
           });

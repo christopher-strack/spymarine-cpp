@@ -11,8 +11,8 @@ struct mqtt_message {
   std::string payload;
 };
 
-mqtt_message make_home_assistant_device_discovery_message(const device& device);
+mqtt_message make_home_assistant_device_discovery_message(const device& d);
 
-mqtt_message make_home_assistant_state_message(const device& device);
+mqtt_message make_home_assistant_state_message(const device& d);
 
 } // namespace spymarine
