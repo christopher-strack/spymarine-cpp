@@ -74,9 +74,10 @@ parse_device(const std::span<const uint8_t> bytes,
   }
 
   const auto type = type_value->second();
-  const auto name_value =
-      find_value_for_type<std::string_view>(3, values).transform(
-          replace_non_ascii);
+  auto name_value =
+      find_value_for_type<string_value>(3, values)
+          .transform([](const string_value& sv) { return std::string{sv}; })
+          .transform(replace_non_ascii);
 
   switch (type) {
   case 0:
@@ -84,27 +85,28 @@ parse_device(const std::span<const uint8_t> bytes,
   case 1:
     return name_value == "PICO INTERNAL"
                ? parsed_device{pico_internal_device{state_start_index}}
-               : parsed_device{voltage_device{*name_value, state_start_index}};
+               : parsed_device{
+                     voltage_device{std::move(*name_value), state_start_index}};
   case 2:
     if (name_value) {
-      return current_device{*name_value, state_start_index};
+      return current_device{std::move(*name_value), state_start_index};
     }
     break;
   case 3:
     if (name_value) {
-      return temperature_device{*name_value, state_start_index};
+      return temperature_device{std::move(*name_value), state_start_index};
     }
     break;
   case 4:
     return unknown_device{};
   case 5:
     if (name_value) {
-      return barometer_device{*name_value, state_start_index};
+      return barometer_device{std::move(*name_value), state_start_index};
     }
     break;
   case 6:
     if (name_value) {
-      return resistive_device{*name_value, state_start_index};
+      return resistive_device{std::move(*name_value), state_start_index};
     }
     break;
   case 7:

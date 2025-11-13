@@ -6,13 +6,13 @@
 namespace spymarine {
 namespace {
 
-std::optional<std::string_view> read_string(std::span<const uint8_t> bytes) {
+std::optional<string_value> read_string_value(std::span<const uint8_t> bytes) {
   if (bytes.size() >= 5) {
     const auto data = bytes.subspan(5);
     const auto it = std::ranges::find(data, 0);
     if (it != data.end()) {
       const auto size = static_cast<size_t>(std::distance(data.begin(), it));
-      return std::string_view{reinterpret_cast<const char*>(data.data()), size};
+      return string_value{data.subspan(0, size)};
     }
   }
   return std::nullopt;
@@ -56,8 +56,8 @@ message_values_iterator& message_values_iterator::operator++() {
   } else if (type == 3) {
     _bytes = advance_bytes(_bytes, 12);
   } else if (type == 4) {
-    const auto string = std::get<std::string_view>(_data.value);
-    _bytes = advance_bytes(_bytes, string.size() + 9);
+    const auto sv = std::get<string_value>(_data.value);
+    _bytes = advance_bytes(_bytes, sv.size() + 9);
   } else {
     _bytes = {};
   }
@@ -88,8 +88,8 @@ void message_values_iterator::update_data() {
   } else if (type == 3 && payload.size() >= 9) {
     _data.value = numeric_value{payload.subspan<5, 4>()};
   } else if (type == 4) {
-    const auto string = read_string(payload);
-    _data.value = string ? message_value{*string} : invalid_value{};
+    const auto sv = read_string_value(payload);
+    _data.value = sv ? message_value{*sv} : invalid_value{};
   } else {
     _data.value = invalid_value{};
   }
