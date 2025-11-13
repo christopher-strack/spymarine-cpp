@@ -10,7 +10,6 @@ target_sources(
         file_descriptor.cpp
         message_values_iterator.cpp
         message_values_view.cpp
-        message_value.cpp
         parse_device.cpp
         read_devices.cpp
         sensor.cpp

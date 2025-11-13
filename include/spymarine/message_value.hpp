@@ -1,5 +1,8 @@
 #pragma once
 
+#include "spymarine/byte_operations.hpp"
+
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <span>
@@ -10,11 +13,21 @@ namespace spymarine {
 
 class numeric_value {
 public:
-  explicit numeric_value(std::span<const uint8_t, 4> bytes);
+  constexpr explicit numeric_value(std::span<const uint8_t, 4> bytes) noexcept {
+    std::copy(bytes.begin(), bytes.end(), _bytes.begin());
+  }
 
-  int16_t first() const;
-  int16_t second() const;
-  int32_t number() const;
+  constexpr int16_t first() const noexcept {
+    return to_int16(std::span{_bytes}.subspan<0, 2>());
+  }
+
+  constexpr int16_t second() const noexcept {
+    return to_int16(std::span{_bytes}.subspan<2, 2>());
+  }
+
+  constexpr int32_t number() const noexcept {
+    return to_int32(std::span{_bytes});
+  }
 
 private:
   std::array<uint8_t, 4> _bytes;
