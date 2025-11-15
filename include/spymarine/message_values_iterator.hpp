@@ -44,6 +44,7 @@ public:
                                          _bytes, numeric_value3::size() + 1);
                                    },
                                    [this](const string_value& sv) {
+                                     // null terminator + delimiter
                                      return std::ranges::views::drop(
                                          _bytes, sv.raw_bytes().size() + 2);
                                    },
