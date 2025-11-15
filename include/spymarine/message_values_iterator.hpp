@@ -58,17 +58,18 @@ public:
       return *this;
     }
 
-    std::visit(
-        overloaded{[this](const numeric_value1&) {
-                     _bytes = advance_bytes(_bytes, numeric_value1::size() + 1);
-                   },
-                   [this](const numeric_value3&) {
-                     _bytes = advance_bytes(_bytes, numeric_value3::size() + 1);
-                   },
-                   [this](const string_value& sv) {
-                     _bytes = advance_bytes(_bytes, sv.size() + 9);
-                   },
-                   [this](const invalid_value&) { _bytes = {}; }},
+    _bytes = std::visit(
+        overloaded{
+            [this](const numeric_value1&) {
+              return advance_bytes(_bytes, numeric_value1::size() + 1);
+            },
+            [this](const numeric_value3&) {
+              return advance_bytes(_bytes, numeric_value3::size() + 1);
+            },
+            [this](const string_value& sv) {
+              return advance_bytes(_bytes, sv.size() + 9);
+            },
+            [](const invalid_value&) { return std::span<const uint8_t>{}; }},
         _data);
 
     update_data();
