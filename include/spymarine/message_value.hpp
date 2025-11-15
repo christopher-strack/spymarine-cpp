@@ -13,6 +13,20 @@ namespace spymarine {
 
 using message_value_id = uint8_t;
 
+class invalid_value {
+public:
+  constexpr invalid_value(message_value_id id) noexcept : _id{id} {}
+
+  constexpr message_value_id id() const noexcept { return _id; }
+
+  constexpr std::span<const uint8_t> raw_bytes() const noexcept { return {}; }
+
+  bool operator<=>(const invalid_value& other) const noexcept = default;
+
+private:
+  message_value_id _id{0};
+};
+
 template <size_t StartIndex, size_t Size> class numeric_value {
 public:
   constexpr explicit numeric_value(
@@ -86,20 +100,6 @@ public:
 
 private:
   std::span<const uint8_t> _bytes;
-};
-
-class invalid_value {
-public:
-  constexpr invalid_value(message_value_id id) noexcept : _id{id} {}
-
-  constexpr message_value_id id() const noexcept { return _id; }
-
-  constexpr std::span<const uint8_t> raw_bytes() const noexcept { return {}; }
-
-  bool operator<=>(const invalid_value& other) const noexcept = default;
-
-private:
-  message_value_id _id{0};
 };
 
 using message_value =
