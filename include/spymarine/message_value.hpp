@@ -18,6 +18,14 @@ public:
       std::span<const uint8_t, Size> bytes) noexcept
       : _bytes{bytes} {}
 
+  template <size_t S>
+  static constexpr numeric_value<StartIndex, Size>
+  from_bytes(std::span<const uint8_t, S> bytes) noexcept
+    requires(S >= Size)
+  {
+    return numeric_value<StartIndex, Size>{bytes.template subspan<0, Size>()};
+  }
+
   constexpr message_value_id id() const noexcept { return _bytes[0]; }
 
   constexpr int16_t first() const noexcept {

@@ -58,17 +58,18 @@ public:
       return *this;
     }
 
-    std::visit(overloaded{[this](const numeric_value1&) {
-                            _bytes = advance_bytes(_bytes, 7);
-                          },
-                          [this](const numeric_value3&) {
-                            _bytes = advance_bytes(_bytes, 12);
-                          },
-                          [this](const string_value& sv) {
-                            _bytes = advance_bytes(_bytes, sv.size() + 9);
-                          },
-                          [this](const invalid_value&) { _bytes = {}; }},
-               _data);
+    std::visit(
+        overloaded{[this](const numeric_value1&) {
+                     _bytes = advance_bytes(_bytes, numeric_value1::size() + 1);
+                   },
+                   [this](const numeric_value3&) {
+                     _bytes = advance_bytes(_bytes, numeric_value3::size() + 1);
+                   },
+                   [this](const string_value& sv) {
+                     _bytes = advance_bytes(_bytes, sv.size() + 9);
+                   },
+                   [this](const invalid_value&) { _bytes = {}; }},
+        _data);
 
     update_data();
 
@@ -101,10 +102,10 @@ private:
 
     const auto type = _bytes[1];
 
-    if (type == 1 && _bytes.size() >= 6) {
-      _data = numeric_value1{_bytes.subspan<0, 6>()};
-    } else if (type == 3 && _bytes.size() >= 11) {
-      _data = numeric_value3{_bytes.subspan<0, 11>()};
+    if (type == 1 && _bytes.size() >= numeric_value1::size()) {
+      _data = numeric_value1::from_bytes(_bytes);
+    } else if (type == 3 && _bytes.size() >= numeric_value3::size()) {
+      _data = numeric_value3::from_bytes(_bytes);
     } else if (type == 4) {
       const auto sv = read_string_value(_bytes);
       _data = sv ? message_value{*sv} : invalid_value{_bytes[0]};
