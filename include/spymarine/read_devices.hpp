@@ -98,8 +98,7 @@ private:
         .and_then([](const auto& message) -> std::expected<uint8_t, error> {
           if (message.type == message_type::device_count) {
             message_values_view values{message.data};
-            if (const auto count =
-                    find_value_for_type<numeric_value1>(1, values)) {
+            if (const auto count = values.find<numeric_value1>(1)) {
               return count->number() + 1;
             }
           }
