@@ -19,13 +19,13 @@ jobs:
         with:
           cmakeVersion: "~3.28.0"
           ninjaVersion: "^1.12.1"
-      - name: Install Clang 20
+      - name: Install Clang 18
         if: matrix.compiler == 'clang'
         run: |
             sudo apt-get update
-            sudo apt-get install -y clang-20 libc++-20-dev libc++abi-20-dev
-            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-20 100
-            sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100
+            sudo apt-get install -y clang-18 libc++-18-dev libc++abi-18-dev
+            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 100
+            sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100
       - name: Install GCC 14
         if: matrix.compiler == 'gcc'
         run: |
