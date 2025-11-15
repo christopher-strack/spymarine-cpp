@@ -143,14 +143,14 @@ namespace spymarine {
 
 template <detail::tcp_socket_concept tcp_socket_type = tcp_socket>
 std::expected<std::vector<device>, error>
-read_devices(std::span<uint8_t> buff, const uint32_t address,
+read_devices(std::span<uint8_t> buffer, const uint32_t address,
              const uint16_t port = simarine_default_tcp_port,
              std::function<bool(const device&)> filter_function =
                  do_not_filter_devices{}) {
   return tcp_socket_type::open().and_then([&](auto socket) {
     return socket.connect(address, port).and_then([&]() {
       detail::device_reader<tcp_socket_type> device_reader{
-          buff, std::move(socket), std::move(filter_function)};
+          buffer, std::move(socket), std::move(filter_function)};
       return device_reader.read_devices();
     });
   });

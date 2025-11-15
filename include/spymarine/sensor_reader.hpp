@@ -30,9 +30,9 @@ concept udp_socket_concept =
 
 template <udp_socket_concept udp_socket_type> class sensor_reader_base {
 public:
-  sensor_reader_base(std::span<uint8_t> buff, std::vector<device>& devices,
+  sensor_reader_base(std::span<uint8_t> buffer, std::vector<device>& devices,
                      udp_socket_type udp_socket)
-      : _udp_socket{std::move(udp_socket)}, _buffer{buff} {
+      : _udp_socket{std::move(udp_socket)}, _buffer{buffer} {
     _sensor_map = build_sensor_map(devices);
   }
 
@@ -98,10 +98,10 @@ class moving_average_sensor_reader
     : public sensor_reader_base<udp_socket_type> {
 public:
   moving_average_sensor_reader(
-      std::span<uint8_t> buff,
+      std::span<uint8_t> buffer,
       const std::chrono::steady_clock::duration moving_average_interval,
       std::vector<device>& devices, udp_socket_type udp_socket)
-      : sensor_reader_base<udp_socket_type>(buff, devices,
+      : sensor_reader_base<udp_socket_type>(buffer, devices,
                                             std::move(udp_socket)),
         _moving_average_interval{moving_average_interval} {}
 

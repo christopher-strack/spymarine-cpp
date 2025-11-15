@@ -73,18 +73,18 @@ public:
 } // namespace
 
 TEST_CASE("read_devices") {
-  static_buffer buff;
+  static_buffer buffer;
 
   SECTION("return parsed devices") {
     const auto devices =
-        read_devices<mock_tcp_socket>(buff, 0, 0, do_not_filter_devices{});
+        read_devices<mock_tcp_socket>(buffer, 0, 0, do_not_filter_devices{});
 
     CHECK(devices == make_parsed_devices());
   }
 
   SECTION("return connection error") {
     const auto devices =
-        read_devices<failing_tcp_socket>(buff, 0, 0, do_not_filter_devices{});
+        read_devices<failing_tcp_socket>(buffer, 0, 0, do_not_filter_devices{});
 
     REQUIRE_FALSE(devices);
     CHECK(std::holds_alternative<std::error_code>(devices.error()));
