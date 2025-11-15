@@ -26,7 +26,7 @@ public:
   constexpr message_values_iterator
   find(const message_value_id id) const noexcept {
     return std::ranges::find_if(*this, [id](const auto value) {
-      return get_message_value_id(value) == id;
+      return std::visit([](const auto& v) { return v.id(); }, value) == id;
     });
   }
 

@@ -105,9 +105,4 @@ private:
 using message_value =
     std::variant<numeric_value1, numeric_value3, string_value, invalid_value>;
 
-constexpr message_value_id
-get_message_value_id(const message_value& mv) noexcept {
-  return std::visit([](const auto& value) { return value.id(); }, mv);
-}
-
 } // namespace spymarine
