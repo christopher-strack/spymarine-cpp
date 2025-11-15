@@ -50,13 +50,16 @@ public:
   constexpr explicit string_value(std::span<const uint8_t> bytes) noexcept
       : _bytes(bytes) {}
 
+  constexpr message_value_id id() const noexcept { return _bytes[0]; }
+
   constexpr operator std::string() const noexcept {
-    return std::string{_bytes.begin(), _bytes.end()};
+    const auto data = _bytes.subspan(7);
+    return std::string{data.begin(), data.end()};
   }
 
   constexpr std::string str() const noexcept { return std::string{*this}; }
 
-  constexpr size_t size() const noexcept { return _bytes.size(); }
+  constexpr size_t size() const noexcept { return _bytes.size() - 7; }
 
 private:
   std::span<const uint8_t> _bytes;
