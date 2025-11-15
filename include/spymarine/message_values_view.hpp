@@ -16,11 +16,11 @@ public:
       : _buffer{buffer} {}
 
   constexpr message_values_iterator begin() const noexcept {
-    return message_values_iterator(_buffer);
+    return message_values_iterator{_buffer};
   }
 
   constexpr message_values_iterator end() const noexcept {
-    return message_values_iterator(std::span<const uint8_t>{});
+    return message_values_iterator{};
   }
 
 private:
