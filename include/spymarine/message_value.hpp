@@ -10,29 +10,36 @@
 
 namespace spymarine {
 
-template <size_t S> class numeric_value {
+template <size_t StartIndex, size_t Size> class numeric_value {
 public:
-  constexpr explicit numeric_value(std::span<const uint8_t, 4> bytes) noexcept
+  constexpr explicit numeric_value(
+      std::span<const uint8_t, Size> bytes) noexcept
       : _bytes{bytes} {}
 
   constexpr int16_t first() const noexcept {
-    return to_int16(_bytes.subspan<0, 2>());
+    return to_int16(_bytes.template subspan<start_index(), 2>());
   }
 
   constexpr int16_t second() const noexcept {
-    return to_int16(_bytes.subspan<2, 2>());
+    return to_int16(_bytes.template subspan<start_index() + 2, 2>());
   }
 
-  constexpr int32_t number() const noexcept { return to_int32(_bytes); }
+  constexpr int32_t number() const noexcept {
+    return to_int32(_bytes.template subspan<start_index(), 4>());
+  }
 
-  constexpr static size_t start_index() noexcept { return S; }
+  constexpr static size_t start_index() noexcept { return StartIndex; }
+  constexpr static size_t size() noexcept { return Size; }
+  constexpr std::span<const uint8_t, Size> raw_bytes() const noexcept {
+    return _bytes;
+  }
 
 private:
-  std::span<const uint8_t, 4> _bytes;
+  std::span<const uint8_t, Size> _bytes;
 };
 
-using numeric_value1 = numeric_value<0>;
-using numeric_value3 = numeric_value<5>;
+using numeric_value1 = numeric_value<0, 7>;
+using numeric_value3 = numeric_value<5, 12>;
 
 class string_value {
 public:

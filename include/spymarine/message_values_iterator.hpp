@@ -112,9 +112,9 @@ private:
     const auto payload = _bytes.subspan(2);
 
     if (type == 1 && payload.size() >= 4) {
-      _data.value = numeric_value1{payload.subspan<0, 4>()};
+      _data.value = numeric_value1{payload.subspan<0, 7>()};
     } else if (type == 3 && payload.size() >= 9) {
-      _data.value = numeric_value3{payload.subspan<5, 4>()};
+      _data.value = numeric_value3{payload.subspan<0, 12>()};
     } else if (type == 4) {
       const auto sv = read_string_value(payload);
       _data.value = sv ? message_value{*sv} : invalid_value{};
