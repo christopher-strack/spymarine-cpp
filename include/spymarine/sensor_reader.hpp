@@ -66,7 +66,7 @@ protected:
 
     for (const auto state_value : state_values) {
       if (const auto value = std::get_if<numeric_value1>(&state_value)) {
-        const auto id = get_message_value_id(*value);
+        const auto id = value->id();
         if (const auto it = map.find(id); it != map.end()) {
           for (sensor* sensor : it->second) {
             const auto new_value = sensor_value(*value, sensor->type);
