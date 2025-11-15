@@ -35,11 +35,6 @@ public:
   }
 
   constexpr message_values_iterator& operator++() noexcept {
-    if (_bytes.size() < 2) {
-      _bytes = {};
-      return *this;
-    }
-
     _bytes = std::visit(overloaded{[this](const numeric_value1&) {
                                      return std::ranges::views::drop(
                                          _bytes, numeric_value1::size() + 1);
