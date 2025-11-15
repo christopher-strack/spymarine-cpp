@@ -2,7 +2,6 @@
 
 #include "spymarine/byte_operations.hpp"
 
-#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <span>
