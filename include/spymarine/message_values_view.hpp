@@ -11,7 +11,7 @@ namespace spymarine {
 class message_values_view
     : public std::ranges::view_interface<message_values_view> {
 public:
-  message_values_view() = default;
+  constexpr message_values_view() noexcept = default;
   constexpr message_values_view(std::span<const uint8_t> buffer) noexcept
       : _buffer{buffer} {}
 

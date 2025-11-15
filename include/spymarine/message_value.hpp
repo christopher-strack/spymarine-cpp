@@ -2,6 +2,7 @@
 
 #include "spymarine/byte_operations.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <span>
@@ -47,6 +48,11 @@ public:
     return _bytes;
   }
 
+  constexpr bool
+  operator==(const numeric_value<StartIndex, Size>& other) const noexcept {
+    return std::ranges::equal(_bytes, other._bytes);
+  }
+
 private:
   std::span<const uint8_t, Size> _bytes;
 };
@@ -57,7 +63,9 @@ using numeric_value3 = numeric_value<7, 11>;
 class string_value {
 public:
   constexpr explicit string_value(std::span<const uint8_t> bytes) noexcept
-      : _bytes(bytes) {}
+      : _bytes(bytes) {
+    assert(bytes.size() >= 7);
+  }
 
   constexpr message_value_id id() const noexcept { return _bytes[0]; }
 
@@ -74,6 +82,10 @@ public:
     return _bytes;
   }
 
+  constexpr bool operator==(const string_value& other) const noexcept {
+    return std::ranges::equal(_bytes, other._bytes);
+  }
+
 private:
   std::span<const uint8_t> _bytes;
 };
@@ -83,6 +95,8 @@ public:
   constexpr invalid_value(message_value_id id) noexcept : _id{id} {}
 
   constexpr message_value_id id() const noexcept { return _id; }
+
+  constexpr std::span<const uint8_t> raw_bytes() const noexcept { return {}; }
 
   bool operator<=>(const invalid_value& other) const noexcept = default;
 
