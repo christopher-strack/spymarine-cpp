@@ -68,7 +68,7 @@ std::expected<parsed_device, error>
 parse_device(const std::span<const uint8_t> bytes,
              const uint8_t state_start_index) {
   const auto values = message_values_view{bytes};
-  const auto type_value = find_value_for_type<numeric_value>(1, values);
+  const auto type_value = find_value_for_type<numeric_value3>(1, values);
   if (!type_value) {
     return std::unexpected{parse_error::invalid_device_message};
   }
@@ -112,8 +112,8 @@ parse_device(const std::span<const uint8_t> bytes,
   case 7:
     return unknown_device{};
   case 8: {
-    const auto fluid_type = find_value_for_type<numeric_value>(6, bytes);
-    const auto capacity = find_value_for_type<numeric_value>(7, bytes);
+    const auto fluid_type = find_value_for_type<numeric_value3>(6, bytes);
+    const auto capacity = find_value_for_type<numeric_value3>(7, bytes);
     if (name_value && fluid_type && capacity) {
       return tank_device{
           *name_value,
@@ -125,8 +125,8 @@ parse_device(const std::span<const uint8_t> bytes,
     break;
   }
   case 9: {
-    const auto battery_type = find_value_for_type<numeric_value>(8, bytes);
-    const auto capacity = find_value_for_type<numeric_value>(5, bytes);
+    const auto battery_type = find_value_for_type<numeric_value3>(8, bytes);
+    const auto capacity = find_value_for_type<numeric_value3>(5, bytes);
     if (name_value && battery_type && capacity) {
       return battery_device{
           *name_value,

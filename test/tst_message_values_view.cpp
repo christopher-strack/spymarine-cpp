@@ -37,7 +37,12 @@ namespace spymarine {
 constexpr resolved_value to_resolved_value(message_value value) {
   return std::visit(
       overloaded{
-          [](const numeric_value& nv) -> resolved_value { return nv.number(); },
+          [](const numeric_value1& nv) -> resolved_value {
+            return nv.number();
+          },
+          [](const numeric_value3& nv) -> resolved_value {
+            return nv.number();
+          },
           [](const string_value& sv) -> resolved_value { return sv.str(); },
           [](const invalid_value& iv) -> resolved_value { return iv; }},
       value);

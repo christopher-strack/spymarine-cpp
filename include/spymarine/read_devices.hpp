@@ -99,7 +99,7 @@ private:
           if (message.type == message_type::device_count) {
             message_values_view values{message.data};
             if (const auto count =
-                    find_value_for_type<numeric_value>(1, values)) {
+                    find_value_for_type<numeric_value1>(1, values)) {
               return count->number() + 1;
             }
           }

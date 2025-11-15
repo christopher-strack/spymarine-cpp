@@ -10,7 +10,7 @@
 
 namespace spymarine {
 
-class numeric_value {
+template <size_t S> class numeric_value {
 public:
   constexpr explicit numeric_value(std::span<const uint8_t, 4> bytes) noexcept
       : _bytes{bytes} {}
@@ -25,9 +25,14 @@ public:
 
   constexpr int32_t number() const noexcept { return to_int32(_bytes); }
 
+  constexpr static size_t start_index() noexcept { return S; }
+
 private:
   std::span<const uint8_t, 4> _bytes;
 };
+
+using numeric_value1 = numeric_value<0>;
+using numeric_value3 = numeric_value<5>;
 
 class string_value {
 public:
@@ -50,6 +55,7 @@ struct invalid_value {
   bool operator<=>(const invalid_value& other) const noexcept = default;
 };
 
-using message_value = std::variant<numeric_value, string_value, invalid_value>;
+using message_value =
+    std::variant<numeric_value1, numeric_value3, string_value, invalid_value>;
 
 } // namespace spymarine

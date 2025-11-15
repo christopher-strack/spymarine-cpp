@@ -6,7 +6,7 @@ namespace spymarine {
 
 TEST_CASE("numeric_value") {
   static constexpr auto bytes = std::array<uint8_t, 4>{0x01, 0x02, 0x03, 0x04};
-  constexpr numeric_value value{std::span{bytes}};
+  constexpr numeric_value1 value{std::span{bytes}};
 
   STATIC_CHECK(value.first() == 0x0102);
   STATIC_CHECK(value.second() == 0x0304);

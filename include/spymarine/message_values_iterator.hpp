@@ -65,10 +65,11 @@ public:
       return *this;
     }
 
-    std::visit(overloaded{[this](const numeric_value&) {
-                            const auto type = _bytes[1];
-                            assert(type == 1 || type == 3);
-                            _bytes = advance_bytes(_bytes, type == 1 ? 7 : 12);
+    std::visit(overloaded{[this](const numeric_value1&) {
+                            _bytes = advance_bytes(_bytes, 7);
+                          },
+                          [this](const numeric_value3&) {
+                            _bytes = advance_bytes(_bytes, 12);
                           },
                           [this](const string_value& sv) {
                             _bytes = advance_bytes(_bytes, sv.size() + 9);
@@ -111,9 +112,9 @@ private:
     const auto payload = _bytes.subspan(2);
 
     if (type == 1 && payload.size() >= 4) {
-      _data.value = numeric_value{payload.subspan<0, 4>()};
+      _data.value = numeric_value1{payload.subspan<0, 4>()};
     } else if (type == 3 && payload.size() >= 9) {
-      _data.value = numeric_value{payload.subspan<5, 4>()};
+      _data.value = numeric_value3{payload.subspan<5, 4>()};
     } else if (type == 4) {
       const auto sv = read_string_value(payload);
       _data.value = sv ? message_value{*sv} : invalid_value{};
