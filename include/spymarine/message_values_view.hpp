@@ -12,21 +12,32 @@ class message_values_view
     : public std::ranges::view_interface<message_values_view> {
 public:
   message_values_view() = default;
-  message_values_view(std::span<const uint8_t> buffer);
+  constexpr message_values_view(std::span<const uint8_t> buffer) noexcept
+      : _buffer{buffer} {}
 
-  message_values_iterator begin() const;
-  message_values_iterator end() const;
+  constexpr message_values_iterator begin() const noexcept {
+    return message_values_iterator(_buffer);
+  }
+
+  constexpr message_values_iterator end() const noexcept {
+    return message_values_iterator(std::span<const uint8_t>{});
+  }
 
 private:
   std::span<const uint8_t> _buffer;
 };
 
-message_values_iterator find_value(const uint8_t id,
-                                   const message_values_view& values);
+constexpr message_values_iterator
+find_value(const message_value_id id,
+           const message_values_view& values) noexcept {
+  return std::ranges::find_if(
+      values, [id](const auto value) { return value.id == id; });
+}
 
 template <typename T>
-std::optional<T> find_value_for_type(const uint8_t id,
-                                     const message_values_view& values) {
+constexpr std::optional<T>
+find_value_for_type(const message_value_id id,
+                    const message_values_view& values) noexcept {
   if (const auto it = find_value(id, values); it != values.end()) {
     if (const auto* value = std::get_if<T>(&it->value); value) {
       return *value;

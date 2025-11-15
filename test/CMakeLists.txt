@@ -24,6 +24,8 @@ add_executable(spymarine_tests)
 target_sources(
     spymarine_tests
     PRIVATE
+        tst_message_values_view.cpp
+        tst_message_value.cpp
         tst_parse_message.cpp
         tst_read_devices.cpp
         tst_sensor_reader.cpp
@@ -38,7 +40,12 @@ target_link_libraries(
         $<$<BOOL:${ENABLE_HOME_ASSISTANT_SUPPORT}>:nlohmann_json>
 )
 
-target_compile_definitions(spymarine_tests PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(
+    spymarine_tests
+    PRIVATE
+        PROJECT_VERSION="${PROJECT_VERSION}"
+        CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER=1
+)
 
 target_enable_warnings(spymarine_tests)
 
