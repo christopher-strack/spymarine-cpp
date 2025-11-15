@@ -76,8 +76,6 @@ public:
 
   constexpr std::string str() const noexcept { return std::string{*this}; }
 
-  constexpr size_t size() const noexcept { return _bytes.size() - 7; }
-
   constexpr std::span<const uint8_t> raw_bytes() const noexcept {
     return _bytes;
   }
