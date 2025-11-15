@@ -10,11 +10,15 @@
 
 namespace spymarine {
 
+using message_value_id = uint8_t;
+
 template <size_t StartIndex, size_t Size> class numeric_value {
 public:
   constexpr explicit numeric_value(
       std::span<const uint8_t, Size> bytes) noexcept
       : _bytes{bytes} {}
+
+  constexpr message_value_id id() const noexcept { return _bytes[0]; }
 
   constexpr int16_t first() const noexcept {
     return to_int16(_bytes.template subspan<start_index(), 2>());
@@ -38,8 +42,8 @@ private:
   std::span<const uint8_t, Size> _bytes;
 };
 
-using numeric_value1 = numeric_value<0, 7>;
-using numeric_value3 = numeric_value<5, 12>;
+using numeric_value1 = numeric_value<2, 6>;
+using numeric_value3 = numeric_value<7, 11>;
 
 class string_value {
 public:

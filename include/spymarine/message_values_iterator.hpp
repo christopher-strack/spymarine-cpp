@@ -13,8 +13,6 @@
 
 namespace spymarine {
 
-using message_value_id = uint8_t;
-
 struct id_and_value {
   message_value_id id;
   message_value value;
@@ -111,10 +109,10 @@ private:
     const auto type = _bytes[1];
     const auto payload = _bytes.subspan(2);
 
-    if (type == 1 && payload.size() >= 4) {
-      _data.value = numeric_value1{payload.subspan<0, 7>()};
-    } else if (type == 3 && payload.size() >= 9) {
-      _data.value = numeric_value3{payload.subspan<0, 12>()};
+    if (type == 1 && _bytes.size() >= 6) {
+      _data.value = numeric_value1{_bytes.subspan<0, 6>()};
+    } else if (type == 3 && _bytes.size() >= 11) {
+      _data.value = numeric_value3{_bytes.subspan<0, 11>()};
     } else if (type == 4) {
       const auto sv = read_string_value(payload);
       _data.value = sv ? message_value{*sv} : invalid_value{};
