@@ -2,6 +2,7 @@
 #include "spymarine/device.hpp"
 #include "spymarine/overloaded.hpp"
 
+#include <cstdint>
 #include <format>
 #include <string>
 

@@ -8,6 +8,7 @@
 #include "spymarine/udp_socket.hpp"
 
 #include <chrono>
+#include <cstdint>
 #include <expected>
 #include <optional>
 #include <unordered_map>

@@ -5,6 +5,7 @@
 #include "spymarine/sensor_reader.hpp"
 #include "spymarine/tcp_socket.hpp"
 
+#include <cstdint>
 #include <print>
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {

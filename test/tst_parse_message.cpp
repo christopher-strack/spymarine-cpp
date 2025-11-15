@@ -1,6 +1,7 @@
 #include "spymarine/parse_message.hpp"
 
 #include <catch2/catch_all.hpp>
+#include <cstdint>
 
 namespace spymarine {
 namespace {

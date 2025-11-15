@@ -2,6 +2,7 @@
 
 #include "spymarine/sensor.hpp"
 
+#include <cstdint>
 #include <string>
 #include <variant>
 

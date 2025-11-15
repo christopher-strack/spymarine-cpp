@@ -2,6 +2,7 @@
 
 #include "spymarine/message.hpp"
 
+#include <cstdint>
 #include <optional>
 #include <utility>
 

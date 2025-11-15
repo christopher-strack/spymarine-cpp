@@ -10,6 +10,7 @@
 #include <catch2/catch_all.hpp>
 
 #include <cstddef>
+#include <cstdint>
 #include <expected>
 #include <ranges>
 #include <system_error>
