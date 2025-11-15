@@ -26,6 +26,6 @@ struct sensor {
   auto operator<=>(const sensor&) const = default;
 };
 
-float sensor_value(numeric_value value, sensor_type type);
+float sensor_value(numeric_value1 value, sensor_type type);
 
 } // namespace spymarine

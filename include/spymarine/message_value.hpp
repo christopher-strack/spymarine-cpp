@@ -2,8 +2,7 @@
 
 #include "spymarine/byte_operations.hpp"
 
-#include <algorithm>
-#include <array>
+#include <cassert>
 #include <cstdint>
 #include <span>
 #include <string>
@@ -11,49 +10,92 @@
 
 namespace spymarine {
 
-class numeric_value {
+using message_value_id = uint8_t;
+
+template <size_t StartIndex, size_t Size> class numeric_value {
 public:
-  constexpr explicit numeric_value(std::span<const uint8_t, 4> bytes) noexcept {
-    std::copy(bytes.begin(), bytes.end(), _bytes.begin());
+  constexpr explicit numeric_value(
+      std::span<const uint8_t, Size> bytes) noexcept
+      : _bytes{bytes} {}
+
+  template <size_t S>
+  static constexpr numeric_value<StartIndex, Size>
+  from_bytes(std::span<const uint8_t, S> bytes) noexcept
+    requires(S >= Size)
+  {
+    assert(bytes.size() >= Size); // for dynamic spans
+    return numeric_value<StartIndex, Size>{bytes.template subspan<0, Size>()};
   }
 
+  constexpr message_value_id id() const noexcept { return _bytes[0]; }
+
   constexpr int16_t first() const noexcept {
-    return to_int16(std::span{_bytes}.subspan<0, 2>());
+    return to_int16(_bytes.template subspan<start_index(), 2>());
   }
 
   constexpr int16_t second() const noexcept {
-    return to_int16(std::span{_bytes}.subspan<2, 2>());
+    return to_int16(_bytes.template subspan<start_index() + 2, 2>());
   }
 
   constexpr int32_t number() const noexcept {
-    return to_int32(std::span{_bytes});
+    return to_int32(_bytes.template subspan<start_index(), 4>());
+  }
+
+  constexpr static size_t start_index() noexcept { return StartIndex; }
+  constexpr static size_t size() noexcept { return Size; }
+  constexpr std::span<const uint8_t, Size> raw_bytes() const noexcept {
+    return _bytes;
   }
 
 private:
-  std::array<uint8_t, 4> _bytes;
+  std::span<const uint8_t, Size> _bytes;
 };
+
+using numeric_value1 = numeric_value<2, 6>;
+using numeric_value3 = numeric_value<7, 11>;
 
 class string_value {
 public:
   constexpr explicit string_value(std::span<const uint8_t> bytes) noexcept
       : _bytes(bytes) {}
 
+  constexpr message_value_id id() const noexcept { return _bytes[0]; }
+
   constexpr operator std::string() const noexcept {
-    return std::string{_bytes.begin(), _bytes.end()};
+    const auto data = _bytes.subspan(7);
+    return std::string{data.begin(), data.end()};
   }
 
   constexpr std::string str() const noexcept { return std::string{*this}; }
 
-  constexpr size_t size() const noexcept { return _bytes.size(); }
+  constexpr size_t size() const noexcept { return _bytes.size() - 7; }
+
+  constexpr std::span<const uint8_t> raw_bytes() const noexcept {
+    return _bytes;
+  }
 
 private:
   std::span<const uint8_t> _bytes;
 };
 
-struct invalid_value {
+class invalid_value {
+public:
+  constexpr invalid_value(message_value_id id) noexcept : _id{id} {}
+
+  constexpr message_value_id id() const noexcept { return _id; }
+
   bool operator<=>(const invalid_value& other) const noexcept = default;
+
+private:
+  message_value_id _id{0};
 };
 
-using message_value = std::variant<numeric_value, string_value, invalid_value>;
+using message_value =
+    std::variant<numeric_value1, numeric_value3, string_value, invalid_value>;
+
+constexpr message_value_id
+get_message_value_id(const message_value& mv) noexcept {
+  return std::visit([](const auto& value) { return value.id(); }, mv);
+}
 
 } // namespace spymarine

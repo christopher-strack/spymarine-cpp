@@ -7,49 +7,24 @@
 #include <cassert>
 #include <cstdint>
 #include <iterator>
-#include <optional>
+#include <ranges>
 #include <span>
 #include <type_traits>
 
 namespace spymarine {
 
-using message_value_id = uint8_t;
-
-struct id_and_value {
-  message_value_id id;
-  message_value value;
-};
-
-constexpr std::optional<string_value>
-read_string_value(std::span<const uint8_t> bytes) noexcept {
-  if (bytes.size() >= 5) {
-    const auto data = bytes.subspan(5);
-    const auto it = std::ranges::find(data, 0);
-    if (it != data.end()) {
-      const auto size = static_cast<size_t>(std::distance(data.begin(), it));
-      return string_value{data.subspan(0, size)};
-    }
-  }
-  return std::nullopt;
-}
-
-constexpr std::span<const uint8_t> advance_bytes(std::span<const uint8_t> bytes,
-                                                 size_t n) noexcept {
-  return bytes.size() >= n + 2 ? bytes.subspan(n) : std::span<const uint8_t>{};
-}
-
 class message_values_iterator {
 public:
   using iterator_category = std::input_iterator_tag;
-  using value_type = id_and_value;
+  using value_type = message_value;
   using difference_type = std::ptrdiff_t;
 
 public:
-  constexpr message_values_iterator() noexcept : _data{0, invalid_value{}} {}
+  constexpr message_values_iterator() noexcept : _data{invalid_value{0}} {}
 
   constexpr explicit message_values_iterator(
       std::span<const uint8_t> buffer) noexcept
-      : _data{0, invalid_value{}}, _bytes{buffer} {
+      : _data{invalid_value{0}}, _bytes{buffer} {
     update_data();
   }
 
@@ -60,21 +35,22 @@ public:
   }
 
   constexpr message_values_iterator& operator++() noexcept {
-    if (_bytes.size() < 2) {
-      _bytes = {};
-      return *this;
-    }
-
-    std::visit(overloaded{[this](const numeric_value&) {
-                            const auto type = _bytes[1];
-                            assert(type == 1 || type == 3);
-                            _bytes = advance_bytes(_bytes, type == 1 ? 7 : 12);
-                          },
-                          [this](const string_value& sv) {
-                            _bytes = advance_bytes(_bytes, sv.size() + 9);
-                          },
-                          [this](const invalid_value&) { _bytes = {}; }},
-               _data.value);
+    _bytes = std::visit(overloaded{[this](const numeric_value1&) {
+                                     return std::ranges::views::drop(
+                                         _bytes, numeric_value1::size() + 1);
+                                   },
+                                   [this](const numeric_value3&) {
+                                     return std::ranges::views::drop(
+                                         _bytes, numeric_value3::size() + 1);
+                                   },
+                                   [this](const string_value& sv) {
+                                     return std::ranges::views::drop(
+                                         _bytes, sv.raw_bytes().size() + 2);
+                                   },
+                                   [](const invalid_value&) {
+                                     return std::span<const uint8_t>{};
+                                   }},
+                        _data);
 
     update_data();
 
@@ -102,27 +78,32 @@ public:
 private:
   constexpr void update_data() noexcept {
     if (_bytes.size() < 2) {
+      _bytes = {};
+      _data = invalid_value{0};
       return;
     }
 
-    _data.id = _bytes[0];
-
     const auto type = _bytes[1];
-    const auto payload = _bytes.subspan(2);
 
-    if (type == 1 && payload.size() >= 4) {
-      _data.value = numeric_value{payload.subspan<0, 4>()};
-    } else if (type == 3 && payload.size() >= 9) {
-      _data.value = numeric_value{payload.subspan<5, 4>()};
+    if (type == 1 && _bytes.size() >= numeric_value1::size()) {
+      _data = numeric_value1::from_bytes(_bytes);
+    } else if (type == 3 && _bytes.size() >= numeric_value3::size()) {
+      _data = numeric_value3::from_bytes(_bytes);
     } else if (type == 4) {
-      const auto sv = read_string_value(payload);
-      _data.value = sv ? message_value{*sv} : invalid_value{};
+      const auto null_it =
+          std::ranges::find(std::ranges::views::drop(_bytes, 7), '\0');
+
+      if (null_it != _bytes.end()) {
+        _data = string_value{std::span{_bytes.begin(), null_it}};
+      } else {
+        _data = invalid_value{_bytes[0]};
+      }
     } else {
-      _data.value = invalid_value{};
+      _data = invalid_value{_bytes[0]};
     }
   }
 
-  id_and_value _data;
+  message_value _data;
   std::span<const uint8_t> _bytes;
 };
 

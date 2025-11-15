@@ -2,7 +2,7 @@
 
 namespace spymarine {
 
-float sensor_value(numeric_value value, sensor_type type) {
+float sensor_value(numeric_value1 value, sensor_type type) {
   switch (type) {
   case sensor_type::volume:
     return float(value.second()) / 10.0f;
