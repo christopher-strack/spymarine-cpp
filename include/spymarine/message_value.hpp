@@ -50,7 +50,9 @@ private:
   std::span<const uint8_t> _bytes;
 };
 
-struct invalid_value {};
+struct invalid_value {
+  bool operator<=>(const invalid_value& other) const noexcept = default;
+};
 
 using message_value = std::variant<numeric_value, string_value, invalid_value>;
 
