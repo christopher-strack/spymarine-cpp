@@ -40,7 +40,7 @@ namespace {
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   std::println("Discover Simarine device");
 
-  spymarine::buffer buffer;
+  spymarine::static_buffer buffer;
   const auto result =
       spymarine::discover()
           .and_then([&](const auto ip) {

@@ -3,6 +3,7 @@
 #include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 
+#include <cstdint>
 #include <expected>
 #include <span>
 #include <variant>

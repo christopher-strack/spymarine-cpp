@@ -6,6 +6,7 @@
 #include "spymarine/parse_message_header.hpp"
 #include "spymarine/parse_message_type.hpp"
 
+#include <cstdint>
 #include <expected>
 #include <span>
 

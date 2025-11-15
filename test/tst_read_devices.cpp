@@ -10,6 +10,7 @@
 #include <catch2/catch_all.hpp>
 
 #include <cstddef>
+#include <cstdint>
 #include <expected>
 #include <ranges>
 #include <system_error>
@@ -72,18 +73,18 @@ public:
 } // namespace
 
 TEST_CASE("read_devices") {
-  buffer buff;
+  static_buffer buffer;
 
   SECTION("return parsed devices") {
     const auto devices =
-        read_devices<mock_tcp_socket>(buff, 0, 0, do_not_filter_devices{});
+        read_devices<mock_tcp_socket>(buffer, 0, 0, do_not_filter_devices{});
 
     CHECK(devices == make_parsed_devices());
   }
 
   SECTION("return connection error") {
     const auto devices =
-        read_devices<failing_tcp_socket>(buff, 0, 0, do_not_filter_devices{});
+        read_devices<failing_tcp_socket>(buffer, 0, 0, do_not_filter_devices{});
 
     REQUIRE_FALSE(devices);
     CHECK(std::holds_alternative<std::error_code>(devices.error()));

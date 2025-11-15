@@ -2,6 +2,8 @@
 
 #include "spymarine/message_value.hpp"
 
+#include <cstdint>
+
 namespace spymarine {
 
 enum class sensor_type {

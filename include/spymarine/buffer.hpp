@@ -5,6 +5,6 @@
 
 namespace spymarine {
 
-using buffer = std::array<uint8_t, 2048>;
+using static_buffer = std::array<uint8_t, 2048>;
 
 }
