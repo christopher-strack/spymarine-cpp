@@ -1,8 +1,10 @@
 #pragma once
 
 #include "spymarine/message_value.hpp"
+#include "spymarine/overloaded.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <iterator>
 #include <optional>
@@ -63,18 +65,16 @@ public:
       return *this;
     }
 
-    const auto type = _bytes[1];
-
-    if (type == 1) {
-      _bytes = advance_bytes(_bytes, 7);
-    } else if (type == 3) {
-      _bytes = advance_bytes(_bytes, 12);
-    } else if (type == 4) {
-      const auto sv = std::get<string_value>(_data.value);
-      _bytes = advance_bytes(_bytes, sv.size() + 9);
-    } else {
-      _bytes = {};
-    }
+    std::visit(overloaded{[this](const numeric_value&) {
+                            const auto type = _bytes[1];
+                            assert(type == 1 || type == 3);
+                            _bytes = advance_bytes(_bytes, type == 1 ? 7 : 12);
+                          },
+                          [this](const string_value& sv) {
+                            _bytes = advance_bytes(_bytes, sv.size() + 9);
+                          },
+                          [this](const invalid_value&) { _bytes = {}; }},
+               _data.value);
 
     update_data();
 
