@@ -11,8 +11,10 @@
 
 namespace spymarine {
 
+using message_value_id = uint8_t;
+
 struct id_and_value {
-  uint8_t id;
+  message_value_id id;
   message_value value;
 };
 

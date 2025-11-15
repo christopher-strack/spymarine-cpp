@@ -28,14 +28,15 @@ private:
 };
 
 constexpr message_values_iterator
-find_value(const uint8_t id, const message_values_view& values) noexcept {
+find_value(const message_value_id id,
+           const message_values_view& values) noexcept {
   return std::ranges::find_if(
       values, [id](const auto value) { return value.id == id; });
 }
 
 template <typename T>
 constexpr std::optional<T>
-find_value_for_type(const uint8_t id,
+find_value_for_type(const message_value_id id,
                     const message_values_view& values) noexcept {
   if (const auto it = find_value(id, values); it != values.end()) {
     if (const auto* value = std::get_if<T>(&it->value); value) {
