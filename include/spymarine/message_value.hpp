@@ -3,6 +3,7 @@
 #include "spymarine/byte_operations.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <span>
 #include <string>
@@ -23,6 +24,7 @@ public:
   from_bytes(std::span<const uint8_t, S> bytes) noexcept
     requires(S >= Size)
   {
+    assert(bytes.size() >= Size); // for dynamic spans
     return numeric_value<StartIndex, Size>{bytes.template subspan<0, Size>()};
   }
 
