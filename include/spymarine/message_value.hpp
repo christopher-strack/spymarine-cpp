@@ -3,7 +3,6 @@
 #include "spymarine/byte_operations.hpp"
 
 #include <algorithm>
-#include <array>
 #include <cstdint>
 #include <span>
 #include <string>
@@ -13,24 +12,21 @@ namespace spymarine {
 
 class numeric_value {
 public:
-  constexpr explicit numeric_value(std::span<const uint8_t, 4> bytes) noexcept {
-    std::copy(bytes.begin(), bytes.end(), _bytes.begin());
-  }
+  constexpr explicit numeric_value(std::span<const uint8_t, 4> bytes) noexcept
+      : _bytes{bytes} {}
 
   constexpr int16_t first() const noexcept {
-    return to_int16(std::span{_bytes}.subspan<0, 2>());
+    return to_int16(_bytes.subspan<0, 2>());
   }
 
   constexpr int16_t second() const noexcept {
-    return to_int16(std::span{_bytes}.subspan<2, 2>());
+    return to_int16(_bytes.subspan<2, 2>());
   }
 
-  constexpr int32_t number() const noexcept {
-    return to_int32(std::span{_bytes});
-  }
+  constexpr int32_t number() const noexcept { return to_int32(_bytes); }
 
 private:
-  std::array<uint8_t, 4> _bytes;
+  std::span<const uint8_t, 4> _bytes;
 };
 
 class string_value {
