@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <optional>
+#include <ranges>
 #include <span>
 #include <string>
 #include <variant>
@@ -79,6 +81,18 @@ public:
   constexpr explicit string_value(std::span<const uint8_t> bytes) noexcept
       : _bytes(bytes) {
     assert(bytes.size() >= 7);
+  }
+
+  static constexpr std::optional<string_value>
+  from_bytes(std::span<const uint8_t> bytes) noexcept {
+    const auto null_it =
+        std::ranges::find(std::ranges::views::drop(bytes, 7), '\0');
+
+    if (null_it != bytes.end()) {
+      return string_value{std::span{bytes.begin(), null_it}};
+    }
+
+    return std::nullopt;
   }
 
   constexpr message_value_id id() const noexcept { return _bytes[0]; }
