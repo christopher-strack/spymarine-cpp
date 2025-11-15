@@ -7,29 +7,11 @@
 #include <cassert>
 #include <cstdint>
 #include <iterator>
-#include <optional>
+#include <ranges>
 #include <span>
 #include <type_traits>
 
 namespace spymarine {
-
-constexpr std::optional<string_value>
-read_string_value(std::span<const uint8_t> bytes) noexcept {
-  if (bytes.size() >= 7) {
-    const auto data = bytes.subspan(7);
-    const auto it = std::ranges::find(data, 0);
-    if (it != data.end()) {
-      const auto size = static_cast<size_t>(std::distance(data.begin(), it));
-      return string_value{bytes.subspan(0, 7 + size)};
-    }
-  }
-  return std::nullopt;
-}
-
-constexpr std::span<const uint8_t> advance_bytes(std::span<const uint8_t> bytes,
-                                                 size_t n) noexcept {
-  return bytes.size() >= n + 2 ? bytes.subspan(n) : std::span<const uint8_t>{};
-}
 
 class message_values_iterator {
 public:
@@ -58,19 +40,22 @@ public:
       return *this;
     }
 
-    _bytes = std::visit(
-        overloaded{
-            [this](const numeric_value1&) {
-              return advance_bytes(_bytes, numeric_value1::size() + 1);
-            },
-            [this](const numeric_value3&) {
-              return advance_bytes(_bytes, numeric_value3::size() + 1);
-            },
-            [this](const string_value& sv) {
-              return advance_bytes(_bytes, sv.size() + 9);
-            },
-            [](const invalid_value&) { return std::span<const uint8_t>{}; }},
-        _data);
+    _bytes = std::visit(overloaded{[this](const numeric_value1&) {
+                                     return std::ranges::views::drop(
+                                         _bytes, numeric_value1::size() + 1);
+                                   },
+                                   [this](const numeric_value3&) {
+                                     return std::ranges::views::drop(
+                                         _bytes, numeric_value3::size() + 1);
+                                   },
+                                   [this](const string_value& sv) {
+                                     return std::ranges::views::drop(
+                                         _bytes, sv.raw_bytes().size() + 2);
+                                   },
+                                   [](const invalid_value&) {
+                                     return std::span<const uint8_t>{};
+                                   }},
+                        _data);
 
     update_data();
 
@@ -98,6 +83,8 @@ public:
 private:
   constexpr void update_data() noexcept {
     if (_bytes.size() < 2) {
+      _bytes = {};
+      _data = invalid_value{0};
       return;
     }
 
@@ -108,8 +95,14 @@ private:
     } else if (type == 3 && _bytes.size() >= numeric_value3::size()) {
       _data = numeric_value3::from_bytes(_bytes);
     } else if (type == 4) {
-      const auto sv = read_string_value(_bytes);
-      _data = sv ? message_value{*sv} : invalid_value{_bytes[0]};
+      const auto null_it =
+          std::ranges::find(std::ranges::views::drop(_bytes, 7), '\0');
+
+      if (null_it != _bytes.end()) {
+        _data = string_value{std::span{_bytes.begin(), null_it}};
+      } else {
+        _data = invalid_value{_bytes[0]};
+      }
     } else {
       _data = invalid_value{_bytes[0]};
     }

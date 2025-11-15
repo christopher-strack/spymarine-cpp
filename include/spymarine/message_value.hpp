@@ -69,6 +69,10 @@ public:
 
   constexpr size_t size() const noexcept { return _bytes.size() - 7; }
 
+  constexpr std::span<const uint8_t> raw_bytes() const noexcept {
+    return _bytes;
+  }
+
 private:
   std::span<const uint8_t> _bytes;
 };

@@ -70,8 +70,7 @@ TEST_CASE("message_values_view") {
     // Buffer with only 1 byte (need at least 2 for id + type)
     static constexpr auto raw_data = std::to_array<uint8_t>({0x01});
 
-    STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                   resolved_values{{0, invalid_value{0}}});
+    STATIC_REQUIRE(resolved_values_view(raw_data) == resolved_values{});
   }
 
   SECTION("type 1 - insufficient payload") {
