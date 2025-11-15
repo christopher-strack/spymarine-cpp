@@ -44,6 +44,7 @@ public:
                                          _bytes, numeric_value3::size() + 1);
                                    },
                                    [this](const string_value& sv) {
+                                     // null terminator + delimiter
                                      return std::ranges::views::drop(
                                          _bytes, sv.raw_bytes().size() + 2);
                                    },
@@ -90,11 +91,8 @@ private:
     } else if (type == 3 && _bytes.size() >= numeric_value3::size()) {
       _data = numeric_value3::from_bytes(_bytes);
     } else if (type == 4) {
-      const auto null_it =
-          std::ranges::find(std::ranges::views::drop(_bytes, 7), '\0');
-
-      if (null_it != _bytes.end()) {
-        _data = string_value{std::span{_bytes.begin(), null_it}};
+      if (const auto sv = string_value::from_bytes(_bytes)) {
+        _data = *sv;
       } else {
         _data = invalid_value{_bytes[0]};
       }

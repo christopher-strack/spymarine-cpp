@@ -2,8 +2,11 @@
 
 #include "spymarine/byte_operations.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <optional>
+#include <ranges>
 #include <span>
 #include <string>
 #include <variant>
@@ -11,6 +14,20 @@
 namespace spymarine {
 
 using message_value_id = uint8_t;
+
+class invalid_value {
+public:
+  constexpr invalid_value(message_value_id id) noexcept : _id{id} {}
+
+  constexpr message_value_id id() const noexcept { return _id; }
+
+  constexpr std::span<const uint8_t> raw_bytes() const noexcept { return {}; }
+
+  bool operator<=>(const invalid_value& other) const noexcept = default;
+
+private:
+  message_value_id _id{0};
+};
 
 template <size_t StartIndex, size_t Size> class numeric_value {
 public:
@@ -47,6 +64,11 @@ public:
     return _bytes;
   }
 
+  constexpr bool
+  operator==(const numeric_value<StartIndex, Size>& other) const noexcept {
+    return std::ranges::equal(_bytes, other._bytes);
+  }
+
 private:
   std::span<const uint8_t, Size> _bytes;
 };
@@ -57,7 +79,21 @@ using numeric_value3 = numeric_value<7, 11>;
 class string_value {
 public:
   constexpr explicit string_value(std::span<const uint8_t> bytes) noexcept
-      : _bytes(bytes) {}
+      : _bytes(bytes) {
+    assert(bytes.size() >= 7);
+  }
+
+  static constexpr std::optional<string_value>
+  from_bytes(std::span<const uint8_t> bytes) noexcept {
+    const auto null_it =
+        std::ranges::find(std::ranges::views::drop(bytes, 7), '\0');
+
+    if (null_it != bytes.end()) {
+      return string_value{std::span{bytes.begin(), null_it}};
+    }
+
+    return std::nullopt;
+  }
 
   constexpr message_value_id id() const noexcept { return _bytes[0]; }
 
@@ -68,34 +104,19 @@ public:
 
   constexpr std::string str() const noexcept { return std::string{*this}; }
 
-  constexpr size_t size() const noexcept { return _bytes.size() - 7; }
-
   constexpr std::span<const uint8_t> raw_bytes() const noexcept {
     return _bytes;
+  }
+
+  constexpr bool operator==(const string_value& other) const noexcept {
+    return std::ranges::equal(_bytes, other._bytes);
   }
 
 private:
   std::span<const uint8_t> _bytes;
 };
 
-class invalid_value {
-public:
-  constexpr invalid_value(message_value_id id) noexcept : _id{id} {}
-
-  constexpr message_value_id id() const noexcept { return _id; }
-
-  bool operator<=>(const invalid_value& other) const noexcept = default;
-
-private:
-  message_value_id _id{0};
-};
-
 using message_value =
     std::variant<numeric_value1, numeric_value3, string_value, invalid_value>;
-
-constexpr message_value_id
-get_message_value_id(const message_value& mv) noexcept {
-  return std::visit([](const auto& value) { return value.id(); }, mv);
-}
 
 } // namespace spymarine
