@@ -50,7 +50,7 @@ constexpr resolved_value to_resolved_value(message_value value) {
 
 constexpr auto resolved_values_view(const std::span<const uint8_t>& bytes) {
   return message_values_view{bytes} | std::views::transform([](auto&& mv) {
-           return std::tuple{mv.id, to_resolved_value(mv.value)};
+           return std::tuple{get_message_value_id(mv), to_resolved_value(mv)};
          }) |
          std::ranges::to<std::vector>();
 }
@@ -71,7 +71,7 @@ TEST_CASE("message_values_view") {
     static constexpr auto raw_data = std::to_array<uint8_t>({0x01});
 
     STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                   resolved_values{{0, invalid_value{}}});
+                   resolved_values{{0, invalid_value{0}}});
   }
 
   SECTION("type 1 - insufficient payload") {
@@ -98,7 +98,7 @@ TEST_CASE("message_values_view") {
       // ID + type but no payload data
       static constexpr auto raw_data = std::to_array<uint8_t>({0x01, 0x01});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{1, invalid_value{}}});
+                     resolved_values{{1, invalid_value{1}}});
     }
 
     SECTION("partial payload") {
@@ -106,7 +106,7 @@ TEST_CASE("message_values_view") {
       static constexpr auto raw_data =
           std::to_array<uint8_t>({0x01, 0x01, 0x12, 0x34});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{1, invalid_value{}}});
+                     resolved_values{{1, invalid_value{1}}});
     }
   }
 
@@ -134,21 +134,21 @@ TEST_CASE("message_values_view") {
     SECTION("no payload") {
       static constexpr auto raw_data = std::to_array<uint8_t>({0x02, 0x03});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{2, invalid_value{}}});
+                     resolved_values{{2, invalid_value{2}}});
     }
 
     SECTION("partial payload - 5 bytes") {
       static constexpr auto raw_data =
           std::to_array<uint8_t>({0x02, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{2, invalid_value{}}});
+                     resolved_values{{2, invalid_value{2}}});
     }
 
     SECTION("partial payload - 8 bytes") {
       static constexpr auto raw_data = std::to_array<uint8_t>(
           {0x02, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0x34, 0x56});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{2, invalid_value{}}});
+                     resolved_values{{2, invalid_value{2}}});
     }
   }
 
@@ -174,7 +174,7 @@ TEST_CASE("message_values_view") {
     SECTION("no payload") {
       static constexpr auto raw_data = std::to_array<uint8_t>({0x03, 0x04});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{3, invalid_value{}}});
+                     resolved_values{{3, invalid_value{3}}});
     }
 
     SECTION("insufficient initial payload") {
@@ -182,7 +182,7 @@ TEST_CASE("message_values_view") {
       static constexpr auto raw_data =
           std::to_array<uint8_t>({0x03, 0x04, 0x00, 0x00});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{3, invalid_value{}}});
+                     resolved_values{{3, invalid_value{3}}});
     }
 
     SECTION("no null terminator") {
@@ -191,7 +191,7 @@ TEST_CASE("message_values_view") {
           std::to_array<uint8_t>({0x03, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
                                   0x48, 0x65, 0x6c, 0x6c, 0x6f});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{3, invalid_value{}}});
+                     resolved_values{{3, invalid_value{3}}});
     }
 
     SECTION("empty string") {
@@ -208,28 +208,28 @@ TEST_CASE("message_values_view") {
       static constexpr auto raw_data =
           std::to_array<uint8_t>({0x01, 0x00, 0x12, 0x34, 0x56, 0x78});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{1, invalid_value{}}});
+                     resolved_values{{1, invalid_value{1}}});
     }
 
     SECTION("type 2") {
       static constexpr auto raw_data =
           std::to_array<uint8_t>({0x01, 0x02, 0x12, 0x34, 0x56, 0x78});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{1, invalid_value{}}});
+                     resolved_values{{1, invalid_value{1}}});
     }
 
     SECTION("type 5") {
       static constexpr auto raw_data =
           std::to_array<uint8_t>({0x01, 0x05, 0x12, 0x34, 0x56, 0x78});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{1, invalid_value{}}});
+                     resolved_values{{1, invalid_value{1}}});
     }
 
     SECTION("type 255") {
       static constexpr auto raw_data =
           std::to_array<uint8_t>({0x01, 0xFF, 0x12, 0x34, 0x56, 0x78});
       STATIC_REQUIRE(resolved_values_view(raw_data) ==
-                     resolved_values{{1, invalid_value{}}});
+                     resolved_values{{1, invalid_value{1}}});
     }
   }
 
@@ -244,7 +244,7 @@ TEST_CASE("message_values_view") {
 
     STATIC_REQUIRE(resolved_values_view(raw_data) == resolved_values{
                                                          {1, 66},
-                                                         {2, invalid_value{}},
+                                                         {2, invalid_value{2}},
                                                      });
   }
 }

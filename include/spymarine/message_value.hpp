@@ -65,11 +65,24 @@ private:
   std::span<const uint8_t> _bytes;
 };
 
-struct invalid_value {
+class invalid_value {
+public:
+  constexpr invalid_value(message_value_id id) noexcept : _id{id} {}
+
+  constexpr message_value_id id() const noexcept { return _id; }
+
   bool operator<=>(const invalid_value& other) const noexcept = default;
+
+private:
+  message_value_id _id{0};
 };
 
 using message_value =
     std::variant<numeric_value1, numeric_value3, string_value, invalid_value>;
+
+constexpr message_value_id
+get_message_value_id(const message_value& mv) noexcept {
+  return std::visit([](const auto& value) { return value.id(); }, mv);
+}
 
 } // namespace spymarine

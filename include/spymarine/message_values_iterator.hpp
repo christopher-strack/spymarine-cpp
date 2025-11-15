@@ -13,11 +13,6 @@
 
 namespace spymarine {
 
-struct id_and_value {
-  message_value_id id;
-  message_value value;
-};
-
 constexpr std::optional<string_value>
 read_string_value(std::span<const uint8_t> bytes) noexcept {
   if (bytes.size() >= 7) {
@@ -39,15 +34,15 @@ constexpr std::span<const uint8_t> advance_bytes(std::span<const uint8_t> bytes,
 class message_values_iterator {
 public:
   using iterator_category = std::input_iterator_tag;
-  using value_type = id_and_value;
+  using value_type = message_value;
   using difference_type = std::ptrdiff_t;
 
 public:
-  constexpr message_values_iterator() noexcept : _data{0, invalid_value{}} {}
+  constexpr message_values_iterator() noexcept : _data{invalid_value{0}} {}
 
   constexpr explicit message_values_iterator(
       std::span<const uint8_t> buffer) noexcept
-      : _data{0, invalid_value{}}, _bytes{buffer} {
+      : _data{invalid_value{0}}, _bytes{buffer} {
     update_data();
   }
 
@@ -73,7 +68,7 @@ public:
                             _bytes = advance_bytes(_bytes, sv.size() + 9);
                           },
                           [this](const invalid_value&) { _bytes = {}; }},
-               _data.value);
+               _data);
 
     update_data();
 
@@ -104,23 +99,21 @@ private:
       return;
     }
 
-    _data.id = _bytes[0];
-
     const auto type = _bytes[1];
 
     if (type == 1 && _bytes.size() >= 6) {
-      _data.value = numeric_value1{_bytes.subspan<0, 6>()};
+      _data = numeric_value1{_bytes.subspan<0, 6>()};
     } else if (type == 3 && _bytes.size() >= 11) {
-      _data.value = numeric_value3{_bytes.subspan<0, 11>()};
+      _data = numeric_value3{_bytes.subspan<0, 11>()};
     } else if (type == 4) {
       const auto sv = read_string_value(_bytes);
-      _data.value = sv ? message_value{*sv} : invalid_value{};
+      _data = sv ? message_value{*sv} : invalid_value{_bytes[0]};
     } else {
-      _data.value = invalid_value{};
+      _data = invalid_value{_bytes[0]};
     }
   }
 
-  id_and_value _data;
+  message_value _data;
   std::span<const uint8_t> _bytes;
 };
 

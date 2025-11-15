@@ -64,9 +64,10 @@ protected:
 
     message_values_view state_values{state_message.data};
 
-    for (const auto entry : state_values) {
-      if (const auto value = std::get_if<numeric_value1>(&entry.value)) {
-        if (const auto it = map.find(entry.id); it != map.end()) {
+    for (const auto state_value : state_values) {
+      if (const auto value = std::get_if<numeric_value1>(&state_value)) {
+        const auto id = get_message_value_id(*value);
+        if (const auto it = map.find(id); it != map.end()) {
           for (sensor* sensor : it->second) {
             const auto new_value = sensor_value(*value, sensor->type);
             sensor->value = update_function(sensor->value, new_value);
