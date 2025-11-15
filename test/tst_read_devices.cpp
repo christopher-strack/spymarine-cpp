@@ -73,7 +73,7 @@ public:
 } // namespace
 
 TEST_CASE("read_devices") {
-  buffer buff;
+  static_buffer buff;
 
   SECTION("return parsed devices") {
     const auto devices =

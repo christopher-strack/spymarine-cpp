@@ -33,7 +33,7 @@ public:
 
 TEST_CASE("sensor_reader") {
   auto devices = make_parsed_devices();
-  buffer buff;
+  static_buffer buff;
 
   SECTION("valid message updates devices") {
     sensor_reader<mock_udp_socket> reader{buff, devices, mock_udp_socket{}};
