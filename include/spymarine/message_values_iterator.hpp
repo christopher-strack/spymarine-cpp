@@ -101,4 +101,6 @@ private:
   std::span<const uint8_t> _bytes;
 };
 
+static_assert(std::input_iterator<message_values_iterator>);
+
 } // namespace spymarine
