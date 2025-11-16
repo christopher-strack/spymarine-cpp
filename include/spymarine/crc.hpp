@@ -13,12 +13,12 @@ constexpr uint16_t crc(const std::span<const uint8_t> bytes) noexcept {
   uint16_t crc = 0;
 
   for (auto byte : bytes) {
-    crc ^= byte << 8;
+    crc ^= uint16_t(byte << 8);
     for (int i = 0; i < 8; i++) {
       if (crc & 0x8000) {
         crc = uint16_t(crc << 1) ^ poly;
       } else {
-        crc <<= 1;
+        crc = uint16_t(crc << 1);
       }
     }
   }
