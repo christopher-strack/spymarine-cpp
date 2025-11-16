@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         compiler: ["clang", "gcc"]
+        configuration: ["debug", "release"]
     steps:
       - uses: actions/checkout@v4
       - name: Setup cmake
@@ -37,6 +38,6 @@ jobs:
       - name: Run CMake
         uses: lukka/run-cmake@v10
         with:
-          configurePreset: ${{ matrix.compiler }}
-          buildPreset: ${{ matrix.compiler }}
-          testPreset: ${{ matrix.compiler }}
+          configurePreset: ${{ matrix.compiler }}-${{ matrix.configuration }}
+          buildPreset: ${{ matrix.compiler }}-${{ matrix.configuration }}
+          testPreset: ${{ matrix.compiler }}-${{ matrix.configuration }}
