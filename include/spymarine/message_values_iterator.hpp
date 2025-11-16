@@ -37,23 +37,23 @@ public:
   }
 
   constexpr message_values_iterator& operator++() noexcept {
-    _bytes = std::visit(overloaded{[this](const numeric_value1&) {
-                                     return std::ranges::views::drop(
-                                         _bytes, numeric_value1::size() + 1);
-                                   },
-                                   [this](const numeric_value3&) {
-                                     return std::ranges::views::drop(
-                                         _bytes, numeric_value3::size() + 1);
-                                   },
-                                   [this](const string_value& sv) {
-                                     // null terminator + delimiter
-                                     return std::ranges::views::drop(
-                                         _bytes, sv.raw_bytes().size() + 2);
-                                   },
-                                   [](const invalid_value&) {
-                                     return std::span<const uint8_t>{};
-                                   }},
-                        _value);
+    _bytes = std::visit(
+        overloaded{
+            [this](const numeric_value1&) {
+              return std::ranges::views::drop(
+                  _bytes, numeric_value1::raw_bytes_size() + 1);
+            },
+            [this](const numeric_value3&) {
+              return std::ranges::views::drop(
+                  _bytes, numeric_value3::raw_bytes_size() + 1);
+            },
+            [this](const string_value& sv) {
+              // null terminator + delimiter
+              return std::ranges::views::drop(_bytes,
+                                              sv.raw_bytes().size() + 2);
+            },
+            [](const invalid_value&) { return std::span<const uint8_t>{}; }},
+        _value);
 
     update_data();
 
@@ -82,9 +82,9 @@ private:
 
     const auto type = _bytes[1];
 
-    if (type == 1 && _bytes.size() >= numeric_value1::size()) {
+    if (type == 1 && _bytes.size() >= numeric_value1::raw_bytes_size()) {
       _value = numeric_value1::from_bytes(_bytes);
-    } else if (type == 3 && _bytes.size() >= numeric_value3::size()) {
+    } else if (type == 3 && _bytes.size() >= numeric_value3::raw_bytes_size()) {
       _value = numeric_value3::from_bytes(_bytes);
     } else if (type == 4) {
       if (const auto sv = string_value::from_bytes(_bytes)) {

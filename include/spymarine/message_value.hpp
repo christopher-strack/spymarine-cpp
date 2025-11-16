@@ -59,7 +59,7 @@ public:
   }
 
   constexpr static size_t start_index() noexcept { return StartIndex; }
-  constexpr static size_t size() noexcept { return Size; }
+  constexpr static size_t raw_bytes_size() noexcept { return Size; }
   constexpr std::span<const uint8_t, Size> raw_bytes() const noexcept {
     return _bytes;
   }
