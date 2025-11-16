@@ -44,6 +44,10 @@ public:
     return numeric_value<StartIndex, Size>{bytes.template subspan<0, Size>()};
   }
 
+  constexpr static size_t start_index() noexcept { return StartIndex; }
+
+  constexpr static size_t raw_bytes_size() noexcept { return Size; }
+
   constexpr message_value_id id() const noexcept { return _bytes[0]; }
 
   constexpr int16_t low_int16() const noexcept {
@@ -58,8 +62,6 @@ public:
     return to_int32(_bytes.template subspan<start_index(), 4>());
   }
 
-  constexpr static size_t start_index() noexcept { return StartIndex; }
-  constexpr static size_t raw_bytes_size() noexcept { return Size; }
   constexpr std::span<const uint8_t, Size> raw_bytes() const noexcept {
     return _bytes;
   }
