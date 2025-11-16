@@ -58,13 +58,11 @@ protected:
   void
   read_and_process_values(message state_message, sensor_map& map,
                           std::invocable<float, float> auto update_function) {
-    if (state_message.type != message_type::sensor_state) {
+    if (state_message.type() != message_type::sensor_state) {
       return;
     }
 
-    message_values_view state_values{state_message.data};
-
-    for (const auto state_value : state_values) {
+    for (const auto state_value : state_message.values()) {
       if (const auto value = std::get_if<numeric_value1>(&state_value)) {
         const auto id = value->id();
         if (const auto it = map.find(id); it != map.end()) {

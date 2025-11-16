@@ -28,10 +28,10 @@ class mock_tcp_socket : public test_tcp_socket_base<mock_tcp_socket> {
 public:
   std::expected<void, error> send(std::span<uint8_t> bytes) {
     if (const auto message = parse_message(bytes)) {
-      if (message->type == message_type::device_count) {
+      if (message->type() == message_type::device_count) {
         _response = raw_device_count_response;
-      } else if (message->type == message_type::device_info) {
-        const auto device_id = message->data[5];
+      } else if (message->type() == message_type::device_info) {
+        const auto device_id = message->data()[5];
         _response = raw_device_info_response[device_id];
       } else {
         return std::unexpected{

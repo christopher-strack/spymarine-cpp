@@ -12,7 +12,8 @@ std::array<uint8_t, 2> to_bytes(uint16_t value) {
 } // namespace
 
 std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
-  const auto payload_size = header_size + m.data.size();
+  const auto data = m.data();
+  const auto payload_size = header_size + data.size();
   const auto total_size = payload_size + 2;
 
   if (buffer.size() < total_size) {
@@ -20,18 +21,19 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
     std::abort();
   }
 
-  if (m.data.size() >= std::numeric_limits<uint16_t>::max()) {
+  if (data.size() >= std::numeric_limits<uint16_t>::max()) {
     // data size too large
     std::abort();
   }
 
-  const auto length = to_bytes(3 + uint16_t(m.data.size()));
+  const auto length = to_bytes(3 + uint16_t(data.size()));
+  const auto type = std::to_underlying(m.type());
   const auto header = std::array<uint8_t, header_size>{
-      0x00, 0x00, 0x00, 0x00, 0x00,      0xff,      std::to_underlying(m.type),
+      0x00, 0x00, 0x00, 0x00, 0x00,      0xff,      type,
       0x04, 0x8c, 0x55, 0x4b, length[0], length[1], 0xff};
 
   auto it = std::copy(header.begin(), header.end(), buffer.begin());
-  it = std::copy(m.data.begin(), m.data.end(), it);
+  it = std::copy(data.begin(), data.end(), it);
 
   const auto calculated_crc =
       to_bytes(crc(std::span{buffer.begin() + 1, payload_size - 2}));
