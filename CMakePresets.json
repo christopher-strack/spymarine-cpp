@@ -8,6 +8,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "SPYMARINE_BUILD_TESTS": "ON",
+                "SPYMARINE_BUILD_BENCHMARKS": "ON",
                 "SPYMARINE_BUILD_EXAMPLES": "ON",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
             }

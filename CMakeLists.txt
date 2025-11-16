@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 include(cmake/warnings.cmake)
 
 option(SPYMARINE_BUILD_TESTS "Build tests" OFF)
+option(SPYMARINE_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(SPYMARINE_BUILD_EXAMPLES "Build examples" OFF)
 option(SPYMARINE_ENABLE_ALL_WARNINGS "Enable almost all warnings" OFF)
 option(SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT "Enable Home Assistant support" ON)
@@ -24,6 +25,10 @@ add_subdirectory(src)
 if(SPYMARINE_BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
+endif()
+
+if (SPYMARINE_BUILD_BENCHMARKS)
+    add_subdirectory(benchmark)
 endif()
 
 if(SPYMARINE_BUILD_EXAMPLES)
