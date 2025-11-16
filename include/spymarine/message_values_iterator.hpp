@@ -22,18 +22,18 @@ public:
   using reference = const value_type&;
 
 public:
-  constexpr message_values_iterator() noexcept : _data{invalid_value{0}} {}
+  constexpr message_values_iterator() noexcept : _value{invalid_value{0}} {}
 
   constexpr explicit message_values_iterator(
       std::span<const uint8_t> buffer) noexcept
-      : _data{invalid_value{0}}, _bytes{buffer} {
+      : _value{invalid_value{0}}, _bytes{buffer} {
     update_data();
   }
 
-  constexpr value_type operator*() const noexcept { return _data; }
+  constexpr value_type operator*() const noexcept { return _value; }
 
   constexpr std::add_pointer_t<value_type const> operator->() const noexcept {
-    return std::addressof(_data);
+    return std::addressof(_value);
   }
 
   constexpr message_values_iterator& operator++() noexcept {
@@ -53,7 +53,7 @@ public:
                                    [](const invalid_value&) {
                                      return std::span<const uint8_t>{};
                                    }},
-                        _data);
+                        _value);
 
     update_data();
 
@@ -76,28 +76,28 @@ private:
   constexpr void update_data() noexcept {
     if (_bytes.size() < 2) {
       _bytes = {};
-      _data = invalid_value{0};
+      _value = invalid_value{0};
       return;
     }
 
     const auto type = _bytes[1];
 
     if (type == 1 && _bytes.size() >= numeric_value1::size()) {
-      _data = numeric_value1::from_bytes(_bytes);
+      _value = numeric_value1::from_bytes(_bytes);
     } else if (type == 3 && _bytes.size() >= numeric_value3::size()) {
-      _data = numeric_value3::from_bytes(_bytes);
+      _value = numeric_value3::from_bytes(_bytes);
     } else if (type == 4) {
       if (const auto sv = string_value::from_bytes(_bytes)) {
-        _data = *sv;
+        _value = *sv;
       } else {
-        _data = invalid_value{_bytes[0]};
+        _value = invalid_value{_bytes[0]};
       }
     } else {
-      _data = invalid_value{_bytes[0]};
+      _value = invalid_value{_bytes[0]};
     }
   }
 
-  message_value _data;
+  message_value _value;
   std::span<const uint8_t> _bytes;
 };
 
