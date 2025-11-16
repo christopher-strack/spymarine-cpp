@@ -9,22 +9,30 @@
             "cacheVariables": {
                 "BUILD_TESTS": "ON",
                 "BUILD_EXAMPLES": "ON",
-                "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
+            }
+        },
+        {
+            "name": "_debug",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
             "name": "default",
             "displayName": "Default",
             "inherits": [
-                "_base"
+                "_base",
+                "_debug"
             ]
         },
         {
             "name": "gcc",
             "displayName": "GCC Build",
             "inherits": [
-                "_base"
+                "_base",
+                "_debug"
             ],
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "g++"
@@ -34,7 +42,8 @@
             "name": "clang",
             "displayName": "Clang Build",
             "inherits": [
-                "_base"
+                "_base",
+                "_debug"
             ],
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "clang++",
