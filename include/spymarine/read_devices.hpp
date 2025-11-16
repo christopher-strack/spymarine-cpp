@@ -99,7 +99,7 @@ private:
           if (message.type == message_type::device_count) {
             message_values_view values{message.data};
             if (const auto count = values.find<numeric_value1>(1)) {
-              return count->number() + 1;
+              return count->int32() + 1;
             }
           }
           return std::unexpected{parse_error::invalid_device_count_message};

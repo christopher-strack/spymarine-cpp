@@ -130,7 +130,7 @@ TEST_CASE("message_values_view") {
     }
   }
 
-  SECTION("type 4 - string values corner cases") {
+  SECTION("type 4 - string values") {
     SECTION("valid string") {
       static constexpr auto raw_data = std::to_array<uint8_t>(
           {0x03, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x48, 0x69, 0x00});
