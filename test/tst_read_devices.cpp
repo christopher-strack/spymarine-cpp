@@ -5,6 +5,7 @@
 #include "spymarine/buffer.hpp"
 #include "spymarine/device.hpp"
 #include "spymarine/device_ostream.hpp"
+#include "spymarine/message_value.hpp"
 #include "spymarine/read_devices.hpp"
 
 #include <catch2/catch_all.hpp>
@@ -31,7 +32,9 @@ public:
       if (message->type() == message_type::device_count) {
         _response = raw_device_count_response;
       } else if (message->type() == message_type::device_info) {
-        const auto device_id = message->data()[5];
+        const auto value = message->values().find<numeric_value1>(0);
+        assert(value.has_value());
+        const auto device_id = size_t(value->int32());
         _response = raw_device_info_response[device_id];
       } else {
         return std::unexpected{

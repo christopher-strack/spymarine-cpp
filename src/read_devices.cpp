@@ -11,8 +11,9 @@ std::array<uint8_t, 2> to_bytes(uint16_t value) {
 
 } // namespace
 
-std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
-  const auto data = m.data();
+std::span<uint8_t> write_message_data(const message_type type,
+                                      const std::span<const uint8_t> data,
+                                      std::span<uint8_t> buffer) {
   const auto payload_size = header_size + data.size();
   const auto total_size = payload_size + 2;
 
@@ -27,9 +28,9 @@ std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer) {
   }
 
   const auto length = to_bytes(3 + uint16_t(data.size()));
-  const auto type = std::to_underlying(m.type());
+  const auto type_value = std::to_underlying(type);
   const auto header = std::array<uint8_t, header_size>{
-      0x00, 0x00, 0x00, 0x00, 0x00,      0xff,      type,
+      0x00, 0x00, 0x00, 0x00, 0x00,      0xff,      type_value,
       0x04, 0x8c, 0x55, 0x4b, length[0], length[1], 0xff};
 
   auto it = std::copy(header.begin(), header.end(), buffer.begin());

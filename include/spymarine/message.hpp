@@ -30,8 +30,6 @@ public:
     return message_values_view{_data};
   }
 
-  constexpr std::span<const uint8_t> data() const noexcept { return _data; }
-
   friend constexpr bool operator==(const message& lhs,
                                    const message& rhs) noexcept {
     return lhs._type == rhs._type && std::ranges::equal(lhs._data, rhs._data);
