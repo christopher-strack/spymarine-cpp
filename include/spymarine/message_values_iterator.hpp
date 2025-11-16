@@ -72,12 +72,6 @@ public:
     return std::ranges::equal(lhs._bytes, rhs._bytes);
   }
 
-  constexpr friend bool
-  operator!=(const message_values_iterator& lhs,
-             const message_values_iterator& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-
 private:
   constexpr void update_data() noexcept {
     if (_bytes.size() < 2) {
