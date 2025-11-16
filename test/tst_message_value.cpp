@@ -9,9 +9,9 @@ TEST_CASE("numeric_value") {
       std::to_array<uint8_t>({0x01, 0x01, 0x01, 0x02, 0x03, 0x04});
   constexpr numeric_value1 value{std::span<const uint8_t, 6>{bytes}};
 
-  STATIC_CHECK(value.first() == 0x0102);
-  STATIC_CHECK(value.second() == 0x0304);
-  STATIC_CHECK(value.number() == 0x01020304);
+  STATIC_CHECK(value.low_int16() == 0x0102);
+  STATIC_CHECK(value.high_int16() == 0x0304);
+  STATIC_CHECK(value.int32() == 0x01020304);
 }
 
 } // namespace spymarine

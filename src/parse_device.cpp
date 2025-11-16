@@ -73,7 +73,7 @@ parse_device(const std::span<const uint8_t> bytes,
     return std::unexpected{parse_error::invalid_device_message};
   }
 
-  const auto type = type_value->second();
+  const auto type = type_value->high_int16();
   auto name_value =
       values.find<string_value>(3)
           .transform([](const string_value& sv) { return std::string{sv}; })
@@ -117,8 +117,8 @@ parse_device(const std::span<const uint8_t> bytes,
     if (name_value && fluid_type && capacity) {
       return tank_device{
           *name_value,
-          to_fluid_type(fluid_type->second()),
-          capacity->second() / 10.0f,
+          to_fluid_type(fluid_type->high_int16()),
+          capacity->high_int16() / 10.0f,
           state_start_index,
       };
     }
@@ -130,8 +130,8 @@ parse_device(const std::span<const uint8_t> bytes,
     if (name_value && battery_type && capacity) {
       return battery_device{
           *name_value,
-          to_battery_type(battery_type->second()),
-          capacity->second() / 100.0f,
+          to_battery_type(battery_type->high_int16()),
+          capacity->high_int16() / 100.0f,
           state_start_index,
       };
     }

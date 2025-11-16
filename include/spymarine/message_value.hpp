@@ -46,15 +46,15 @@ public:
 
   constexpr message_value_id id() const noexcept { return _bytes[0]; }
 
-  constexpr int16_t first() const noexcept {
+  constexpr int16_t low_int16() const noexcept {
     return to_int16(_bytes.template subspan<start_index(), 2>());
   }
 
-  constexpr int16_t second() const noexcept {
+  constexpr int16_t high_int16() const noexcept {
     return to_int16(_bytes.template subspan<start_index() + 2, 2>());
   }
 
-  constexpr int32_t number() const noexcept {
+  constexpr int32_t int32() const noexcept {
     return to_int32(_bytes.template subspan<start_index(), 4>());
   }
 
