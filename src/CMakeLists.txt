@@ -14,7 +14,7 @@ target_sources(
         sensor_reader.cpp
         tcp_socket.cpp
         udp_socket.cpp
-        $<$<BOOL:${ENABLE_HOME_ASSISTANT_SUPPORT}>:home_assistant.cpp>
+        $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:home_assistant.cpp>
 )
 
 target_sources(
@@ -46,7 +46,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/sensor_reader.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/tcp_socket.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/udp_socket.hpp
-            $<$<BOOL:${ENABLE_HOME_ASSISTANT_SUPPORT}>:${PROJECT_SOURCE_DIR}/include/spymarine/home_assistant.hpp>
+            $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:${PROJECT_SOURCE_DIR}/include/spymarine/home_assistant.hpp>
 )
 
 set_target_properties(spymarine PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)

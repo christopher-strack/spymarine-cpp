@@ -7,8 +7,8 @@
             "binaryDir": "${sourceDir}/build/${presetName}",
             "generator": "Ninja",
             "cacheVariables": {
-                "BUILD_TESTS": "ON",
-                "BUILD_EXAMPLES": "ON",
+                "SPYMARINE_BUILD_TESTS": "ON",
+                "SPYMARINE_BUILD_EXAMPLES": "ON",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
             }
         },

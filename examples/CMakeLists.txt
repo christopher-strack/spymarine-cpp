@@ -13,7 +13,7 @@ target_sources(moving_average PRIVATE moving_average.cpp)
 target_link_libraries(moving_average PRIVATE spymarine)
 target_enable_warnings(moving_average)
 
-if (ENABLE_HOME_ASSISTANT_SUPPORT)
+if (SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT)
     add_executable(print_home_assistant_discovery)
     target_sources(print_home_assistant_discovery PRIVATE print_home_assistant_discovery.cpp)
     target_link_libraries(print_home_assistant_discovery PRIVATE spymarine)
