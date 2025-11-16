@@ -65,9 +65,8 @@ std::string replace_non_ascii(const std::string_view& input) {
 } // namespace
 
 std::expected<parsed_device, error>
-parse_device(const std::span<const uint8_t> bytes,
+parse_device(const message_values_view values,
              const uint8_t state_start_index) {
-  const auto values = message_values_view{bytes};
   const auto type_value = values.find<numeric_value3>(1);
   if (!type_value) {
     return std::unexpected{parse_error::invalid_device_message};

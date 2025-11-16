@@ -49,7 +49,9 @@ concept tcp_socket_concept =
       } -> std::same_as<std::expected<std::span<const uint8_t>, error>>;
     };
 
-std::span<uint8_t> write_message_data(message m, std::span<uint8_t> buffer);
+std::span<uint8_t> write_message_data(message_type type,
+                                      std::span<const uint8_t> data,
+                                      std::span<uint8_t> buffer);
 
 template <tcp_socket_concept tcp_socket_type> class device_reader {
 public:
@@ -94,11 +96,10 @@ private:
   }
 
   std::expected<uint8_t, error> request_device_count() {
-    return request_message({message_type::device_count, {}})
-        .and_then([](const auto& message) -> std::expected<uint8_t, error> {
-          if (message.type == message_type::device_count) {
-            message_values_view values{message.data};
-            if (const auto count = values.find<numeric_value1>(1)) {
+    return request_message(message_type::device_count, {})
+        .and_then([](const message& message) -> std::expected<uint8_t, error> {
+          if (message.type() == message_type::device_count) {
+            if (const auto count = message.values().find<numeric_value1>(1)) {
               return count->int32() + 1;
             }
           }
@@ -112,19 +113,20 @@ private:
         {0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00, 0x00,
          0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff});
 
-    return request_message({message_type::device_info, data})
-        .and_then([state_start_index](const auto& message)
+    return request_message(message_type::device_info, data)
+        .and_then([state_start_index](const message& message)
                       -> std::expected<parsed_device, error> {
-          if (message.type == message_type::device_info) {
-            return parse_device(message.data, state_start_index);
+          if (message.type() == message_type::device_info) {
+            return parse_device(message.values(), state_start_index);
           } else {
             return std::unexpected{parse_error::invalid_device_message};
           }
         });
   }
 
-  std::expected<message, error> request_message(const message& msg) {
-    return _socket.send(detail::write_message_data(msg, _buffer))
+  std::expected<message, error>
+  request_message(const message_type type, const std::span<const uint8_t> d) {
+    return _socket.send(detail::write_message_data(type, d, _buffer))
         .and_then([&, this]() { return _socket.receive(_buffer); })
         .and_then([](const std::span<const uint8_t> data) {
           return parse_message(data);

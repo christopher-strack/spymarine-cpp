@@ -2,10 +2,10 @@
 
 #include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
+#include "spymarine/message_values_view.hpp"
 
 #include <cstdint>
 #include <expected>
-#include <span>
 #include <variant>
 
 namespace spymarine {
@@ -32,6 +32,6 @@ using parsed_device =
 uint8_t sensor_state_offset(const parsed_device& d);
 
 std::expected<parsed_device, error>
-parse_device(const std::span<const uint8_t> bytes, uint8_t state_start_index);
+parse_device(const message_values_view values, uint8_t state_start_index);
 
 } // namespace spymarine

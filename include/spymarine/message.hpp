@@ -1,5 +1,7 @@
 #pragma once
 
+#include "spymarine/message_values_view.hpp"
+
 #include <algorithm>
 #include <cstdint>
 #include <span>
@@ -17,17 +19,25 @@ enum class message_type : uint8_t {
   sensor_state = 0xb0,
 };
 
-struct message {
-  message_type type;
-  std::span<const uint8_t> data;
+class message {
+public:
+  constexpr message(message_type type, std::span<const uint8_t> data) noexcept
+      : _type{type}, _data{data} {}
+
+  constexpr message_type type() const noexcept { return _type; }
+
+  constexpr message_values_view values() const noexcept {
+    return message_values_view{_data};
+  }
+
+  friend constexpr bool operator==(const message& lhs,
+                                   const message& rhs) noexcept {
+    return lhs._type == rhs._type && std::ranges::equal(lhs._data, rhs._data);
+  }
+
+private:
+  message_type _type;
+  std::span<const uint8_t> _data;
 };
-
-constexpr bool operator==(const message& lhs, const message& rhs) noexcept {
-  return lhs.type == rhs.type && std::ranges::equal(lhs.data, rhs.data);
-}
-
-constexpr bool operator!=(const message& lhs, const message& rhs) noexcept {
-  return !(lhs == rhs);
-}
 
 } // namespace spymarine
