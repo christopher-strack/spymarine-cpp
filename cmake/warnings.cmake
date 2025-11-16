@@ -2,7 +2,7 @@
 
 # Function to apply strict warning flags to targets
 function(target_enable_warnings target_name)
-    if (CLANG_ENABLE_ALL_WARNINGS AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (SPYMARINE_ENABLE_ALL_WARNINGS AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_compile_options(${target_name} PRIVATE
             -Weverything
 

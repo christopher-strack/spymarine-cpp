@@ -7,8 +7,8 @@
             "binaryDir": "${sourceDir}/build/${presetName}",
             "generator": "Ninja",
             "cacheVariables": {
-                "BUILD_TESTS": "ON",
-                "BUILD_EXAMPLES": "ON",
+                "SPYMARINE_BUILD_TESTS": "ON",
+                "SPYMARINE_BUILD_EXAMPLES": "ON",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
             }
         },
@@ -16,7 +16,8 @@
             "name": "_debug",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "SPYMARINE_ENABLE_SANITIZERS": "ON"
             }
         },
         {

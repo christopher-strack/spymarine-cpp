@@ -9,7 +9,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
-if (ENABLE_HOME_ASSISTANT_SUPPORT)
+if (SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT)
     FetchContent_Declare(
         nlohmann_json
         GIT_REPOSITORY https://github.com/nlohmann/json.git
@@ -29,7 +29,7 @@ target_sources(
         tst_parse_message.cpp
         tst_read_devices.cpp
         tst_sensor_reader.cpp
-        $<$<BOOL:${ENABLE_HOME_ASSISTANT_SUPPORT}>:tst_home_assistant.cpp>
+        $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:tst_home_assistant.cpp>
 )
 
 target_link_libraries(
@@ -37,7 +37,7 @@ target_link_libraries(
     PRIVATE
         Catch2::Catch2WithMain
         spymarine
-        $<$<BOOL:${ENABLE_HOME_ASSISTANT_SUPPORT}>:nlohmann_json>
+        $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:nlohmann_json>
 )
 
 target_compile_definitions(
