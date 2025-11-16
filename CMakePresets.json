@@ -50,7 +50,7 @@
                 "_debug"
             ],
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "g++"
+                "CMAKE_TOOLCHAIN_FILE": "cmake/gcc-toolchain.cmake"
             }
         },
         {
@@ -61,7 +61,7 @@
                 "_release"
             ],
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "g++"
+                "CMAKE_TOOLCHAIN_FILE": "cmake/gcc-toolchain.cmake"
             }
         },
         {
@@ -72,8 +72,7 @@
                 "_debug"
             ],
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "clang++",
-                "CMAKE_CXX_FLAGS": "-stdlib=libc++"
+                "CMAKE_TOOLCHAIN_FILE": "cmake/clang-toolchain.cmake"
             }
         },
         {
@@ -84,8 +83,7 @@
                 "_release"
             ],
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "clang++",
-                "CMAKE_CXX_FLAGS": "-stdlib=libc++"
+                "CMAKE_TOOLCHAIN_FILE": "cmake/clang-toolchain.cmake"
             }
         }
     ],
