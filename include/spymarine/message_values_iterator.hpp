@@ -18,6 +18,8 @@ public:
   using iterator_category = std::input_iterator_tag;
   using value_type = message_value;
   using difference_type = std::ptrdiff_t;
+  using pointer = const value_type*;
+  using reference = const value_type&;
 
 public:
   constexpr message_values_iterator() noexcept : _data{invalid_value{0}} {}
