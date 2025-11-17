@@ -4,7 +4,6 @@ target_sources(
     spymarine
     PRIVATE
         device_ostream.cpp
-        device.cpp
         discover.cpp
         error.cpp
         file_descriptor.cpp
