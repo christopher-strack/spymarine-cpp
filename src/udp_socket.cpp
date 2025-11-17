@@ -12,7 +12,7 @@ udp_socket::udp_socket(file_descriptor fd) : _fd{std::move(fd)} {}
 std::expected<udp_socket, error> udp_socket::open() {
   auto fd = ::socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
   if (fd == -1) {
-    return std::unexpected{std::error_code{errno, std::system_category()}};
+    return std::unexpected{std::errc{errno}};
   }
   return udp_socket{file_descriptor(fd)};
 }
@@ -25,7 +25,7 @@ std::expected<void, error> udp_socket::bind(uint32_t ip, uint16_t port) {
 
   if (::bind(_fd.get(), reinterpret_cast<sockaddr*>(&address),
              sizeof(address)) == -1) {
-    return std::unexpected{std::error_code{errno, std::system_category()}};
+    return std::unexpected{std::errc{errno}};
   }
   return {};
 }
@@ -40,7 +40,7 @@ std::expected<uint32_t, error> udp_socket::discover() {
       ::recvfrom(_fd.get(), buffer.data(), buffer.size(), MSG_PEEK,
                  reinterpret_cast<sockaddr*>(&address), &address_len);
   if (result == -1) {
-    return std::unexpected{std::error_code{errno, std::system_category()}};
+    return std::unexpected{std::errc{errno}};
   }
 
   return ntohl(address.sin_addr.s_addr);
@@ -50,7 +50,7 @@ std::expected<std::span<const uint8_t>, error>
 udp_socket::receive(std::span<uint8_t> buffer) {
   const auto result = ::recv(_fd.get(), buffer.data(), buffer.size(), 0);
   if (result == -1) {
-    return std::unexpected{std::error_code{errno, std::system_category()}};
+    return std::unexpected{std::errc{errno}};
   }
 
   if (result == 0) {

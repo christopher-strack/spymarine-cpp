@@ -37,8 +37,7 @@ public:
         const auto device_id = size_t(value->int32());
         _response = raw_device_info_response[device_id];
       } else {
-        return std::unexpected{
-            std::make_error_code(std::errc::connection_refused)};
+        return std::unexpected{std::errc::connection_refused};
       }
     }
     return {};
@@ -69,7 +68,7 @@ public:
 
   std::expected<std::span<const uint8_t>, error>
   receive([[maybe_unused]] std::span<uint8_t> buffer) {
-    return std::unexpected{std::make_error_code(std::errc::connection_refused)};
+    return std::unexpected{std::errc::connection_refused};
   }
 };
 
@@ -90,7 +89,7 @@ TEST_CASE("read_devices") {
         read_devices<failing_tcp_socket>(buffer, 0, 0, do_not_filter_devices{});
 
     REQUIRE_FALSE(devices);
-    CHECK(std::holds_alternative<std::error_code>(devices.error()));
+    CHECK(std::holds_alternative<std::errc>(devices.error()));
   }
 }
 

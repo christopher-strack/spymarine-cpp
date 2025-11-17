@@ -27,11 +27,12 @@ std::string to_string(parse_error e) {
 } // namespace
 
 std::string error_message(error err) {
-  return std::visit(overloaded{
-                        [](parse_error e) { return to_string(e); },
-                        [](std::error_code ec) { return ec.message(); },
-                    },
-                    err);
+  return std::visit(
+      overloaded{
+          [](parse_error e) { return to_string(e); },
+          [](std::errc ec) { return std::make_error_code(ec).message(); },
+      },
+      err);
 }
 
 } // namespace spymarine
