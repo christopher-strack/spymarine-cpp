@@ -4,25 +4,6 @@
 #include <catch2/catch_all.hpp>
 
 #include <ranges>
-#include <string>
-
-namespace Catch {
-
-using namespace spymarine;
-using namespace std::string_literals;
-
-template <> struct StringMaker<message_value> {
-  static std::string convert(const message_value& value) {
-    return std::visit(
-        [](const auto& v) {
-          const auto bytes = v.raw_bytes();
-          return StringMaker<decltype(bytes)>::convert(bytes);
-        },
-        value);
-  }
-};
-
-} // namespace Catch
 
 namespace spymarine {
 
