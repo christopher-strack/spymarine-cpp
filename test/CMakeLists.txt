@@ -26,6 +26,7 @@ target_sources(
     PRIVATE
         tst_message_values_view.cpp
         tst_message_value.cpp
+        tst_parse_device.cpp
         tst_parse_message.cpp
         tst_read_devices.cpp
         tst_sensor_reader.cpp
