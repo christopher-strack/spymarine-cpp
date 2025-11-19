@@ -35,7 +35,7 @@ public:
         const auto value = message->values().find<numeric_value1>(0);
         assert(value.has_value());
         const auto device_id = size_t(value->int32());
-        _response = raw_device_info_response[device_id];
+        _response = _raw_device_info_responses[device_id];
       } else {
         return std::unexpected{std::errc::connection_refused};
       }
@@ -53,8 +53,8 @@ public:
   }
 
 private:
-  const std::vector<std::vector<uint8_t>> raw_device_info_response =
-      make_raw_device_info_response();
+  const std::vector<std::vector<uint8_t>> _raw_device_info_responses =
+      make_raw_device_info_responses();
   std::vector<uint8_t> _response;
 };
 
