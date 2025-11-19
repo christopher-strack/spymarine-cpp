@@ -1,3 +1,13 @@
 {
-    "cmake.copyCompileCommands": "${workspaceFolder}/build/compile_commands.json"
+    "cmake.copyCompileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "testMate.cpp.test.advancedExecutables": [
+        {
+            "runTask": {
+                "before": [
+                    "CMake: build"
+                ]
+            },
+            "pattern": "${command:cmake.buildDirectory}/**/*{test,Test,TEST}*"
+        }
+    ]
 }
