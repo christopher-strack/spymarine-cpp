@@ -17,9 +17,6 @@ public:
   receive([[maybe_unused]] std::span<uint8_t> buffer) {
     return std::span<const uint8_t>{raw_state_response};
   }
-
-private:
-  const std::vector<uint8_t> raw_state_response = make_raw_state_response();
 };
 
 class failing_udp_socket {
