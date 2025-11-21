@@ -78,16 +78,6 @@ constexpr battery_type to_battery_type(const int16_t battery_type) noexcept {
   return battery_type::unknown;
 }
 
-constexpr std::string
-replace_non_ascii(const std::string_view& input) noexcept {
-  std::string output;
-  output.reserve(input.size());
-  std::transform(
-      input.begin(), input.end(), std::back_inserter(output),
-      [](char c) { return static_cast<unsigned char>(c) < 128 ? c : '?'; });
-  return output;
-}
-
 constexpr std::expected<parsed_device, error>
 parse_device(const message_values_view values,
              uint8_t state_start_index) noexcept {
@@ -97,10 +87,7 @@ parse_device(const message_values_view values,
   }
 
   const auto type = type_value->high_int16();
-  auto name_value =
-      values.find<string_value>(3)
-          .transform([](const string_value& sv) { return std::string{sv}; })
-          .transform(replace_non_ascii);
+  auto name_value = values.find<string_value>(3);
 
   switch (type) {
   case 0:
@@ -109,27 +96,27 @@ parse_device(const message_values_view values,
     return name_value == "PICO INTERNAL"
                ? parsed_device{pico_internal_device{state_start_index}}
                : parsed_device{
-                     voltage_device{std::move(*name_value), state_start_index}};
+                     voltage_device{name_value->str(), state_start_index}};
   case 2:
     if (name_value) {
-      return current_device{std::move(*name_value), state_start_index};
+      return current_device{name_value->str(), state_start_index};
     }
     break;
   case 3:
     if (name_value) {
-      return temperature_device{std::move(*name_value), state_start_index};
+      return temperature_device{name_value->str(), state_start_index};
     }
     break;
   case 4:
     return unknown_device{};
   case 5:
     if (name_value) {
-      return barometer_device{std::move(*name_value), state_start_index};
+      return barometer_device{name_value->str(), state_start_index};
     }
     break;
   case 6:
     if (name_value) {
-      return resistive_device{std::move(*name_value), state_start_index};
+      return resistive_device{name_value->str(), state_start_index};
     }
     break;
   case 7:
@@ -138,8 +125,7 @@ parse_device(const message_values_view values,
     const auto fluid_type = values.find<numeric_value3>(6);
     const auto capacity = values.find<numeric_value3>(7);
     if (name_value && fluid_type && capacity) {
-      return tank_device{
-          *name_value,
+      return tank_device{name_value->str(),
           to_fluid_type(fluid_type->high_int16()),
           capacity->high_int16() / 10.0f,
           state_start_index,
@@ -151,8 +137,7 @@ parse_device(const message_values_view values,
     const auto battery_type = values.find<numeric_value3>(8);
     const auto capacity = values.find<numeric_value3>(5);
     if (name_value && battery_type && capacity) {
-      return battery_device{
-          *name_value,
+      return battery_device{name_value->str(),
           to_battery_type(battery_type->high_int16()),
           capacity->high_int16() / 100.0f,
           state_start_index,

@@ -59,6 +59,15 @@ TEST_CASE("string_value") {
     STATIC_CHECK(value.str() == "Hi");
   }
 
+  SECTION("valid string with non-ascii") {
+    static constexpr auto bytes = std::to_array<uint8_t>(
+        {0x03, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x48, 0x69, 0xfe});
+    constexpr string_value value{std::span{bytes}};
+
+    STATIC_CHECK(value.id() == 0x03);
+    STATIC_CHECK(value.str() == "Hi?");
+  }
+
   SECTION("valid empty") {
     static constexpr auto bytes =
         std::to_array<uint8_t>({0x05, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00});
@@ -67,6 +76,7 @@ TEST_CASE("string_value") {
     STATIC_CHECK(value.id() == 0x05);
     STATIC_CHECK(value.str() == "");
   }
+
   SECTION("from_bytes") {
     static constexpr auto bytes = std::to_array<uint8_t>(
         {0x03, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x48, 0x69, 0x00, 0xff});
