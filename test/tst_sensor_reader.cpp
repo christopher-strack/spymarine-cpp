@@ -17,16 +17,13 @@ public:
   receive([[maybe_unused]] std::span<uint8_t> buffer) {
     return std::span<const uint8_t>{raw_state_response};
   }
-
-private:
-  const std::vector<uint8_t> raw_state_response = make_raw_state_response();
 };
 
 class failing_udp_socket {
 public:
   std::expected<std::span<const uint8_t>, error>
   receive([[maybe_unused]] std::span<uint8_t> buffer) {
-    return std::unexpected{std::make_error_code(std::errc::io_error)};
+    return std::unexpected{std::errc::io_error};
   }
 };
 } // namespace
@@ -50,7 +47,7 @@ TEST_CASE("sensor_reader") {
     const auto result = reader.read_and_update();
 
     REQUIRE_FALSE(result);
-    CHECK(std::holds_alternative<std::error_code>(result.error()));
+    CHECK(std::holds_alternative<std::errc>(result.error()));
   }
 }
 

@@ -78,6 +78,10 @@ private:
 using numeric_value1 = numeric_value<2, 6>;
 using numeric_value3 = numeric_value<7, 11>;
 
+constexpr uint8_t replace_non_ascii(uint8_t c) noexcept {
+  return c < 128 ? c : '?';
+}
+
 class string_value {
 public:
   constexpr explicit string_value(std::span<const uint8_t> bytes) noexcept
@@ -99,9 +103,13 @@ public:
 
   constexpr message_value_id id() const noexcept { return _bytes[0]; }
 
+  constexpr auto raw_string_bytes() const noexcept {
+    return _bytes.subspan(7) | std::ranges::views::transform(replace_non_ascii);
+  }
+
   constexpr operator std::string() const noexcept {
-    const auto data = _bytes.subspan(7);
-    return std::string{data.begin(), data.end()};
+    const auto bytes = raw_string_bytes();
+    return std::string{bytes.begin(), bytes.end()};
   }
 
   constexpr std::string str() const noexcept { return std::string{*this}; }
@@ -112,6 +120,10 @@ public:
 
   constexpr bool operator==(const string_value& other) const noexcept {
     return std::ranges::equal(_bytes, other._bytes);
+  }
+
+  constexpr bool operator==(const std::string_view& other) const noexcept {
+    return std::ranges::equal(raw_string_bytes(), other);
   }
 
 private:

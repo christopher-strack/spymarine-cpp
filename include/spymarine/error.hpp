@@ -8,7 +8,7 @@
 
 namespace spymarine {
 
-using error = std::variant<parse_error, std::error_code>;
+using error = std::variant<parse_error, std::errc>;
 
 std::string error_message(error error);
 

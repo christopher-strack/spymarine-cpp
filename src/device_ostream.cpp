@@ -119,4 +119,17 @@ std::ostream& operator<<(std::ostream& os, const device& d_) {
   return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const null_device&) {
+  return os << "null_device{}";
+}
+
+std::ostream& operator<<(std::ostream& os, const unknown_device&) {
+  return os << "unknown_device{}";
+}
+
+std::ostream& operator<<(std::ostream& os, const parsed_device& dev) {
+  std::visit([&](const auto& d) { os << d; }, dev);
+  return os;
+}
+
 } // namespace spymarine

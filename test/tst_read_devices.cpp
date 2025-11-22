@@ -30,15 +30,14 @@ public:
   std::expected<void, error> send(std::span<uint8_t> bytes) {
     if (const auto message = parse_message(bytes)) {
       if (message->type() == message_type::device_count) {
-        _response = raw_device_count_response;
+        _response = raw_device_count_response | std::ranges::to<std::vector>();
       } else if (message->type() == message_type::device_info) {
         const auto value = message->values().find<numeric_value1>(0);
         assert(value.has_value());
         const auto device_id = size_t(value->int32());
-        _response = raw_device_info_response[device_id];
+        _response = _raw_device_info_responses[device_id];
       } else {
-        return std::unexpected{
-            std::make_error_code(std::errc::connection_refused)};
+        return std::unexpected{std::errc::connection_refused};
       }
     }
     return {};
@@ -54,10 +53,8 @@ public:
   }
 
 private:
-  const std::vector<uint8_t> raw_device_count_response =
-      make_raw_device_count_response();
-  const std::vector<std::vector<uint8_t>> raw_device_info_response =
-      make_raw_device_info_response();
+  const std::vector<std::vector<uint8_t>> _raw_device_info_responses =
+      make_raw_device_info_responses();
   std::vector<uint8_t> _response;
 };
 
@@ -69,7 +66,7 @@ public:
 
   std::expected<std::span<const uint8_t>, error>
   receive([[maybe_unused]] std::span<uint8_t> buffer) {
-    return std::unexpected{std::make_error_code(std::errc::connection_refused)};
+    return std::unexpected{std::errc::connection_refused};
   }
 };
 
@@ -90,7 +87,7 @@ TEST_CASE("read_devices") {
         read_devices<failing_tcp_socket>(buffer, 0, 0, do_not_filter_devices{});
 
     REQUIRE_FALSE(devices);
-    CHECK(std::holds_alternative<std::error_code>(devices.error()));
+    CHECK(std::holds_alternative<std::errc>(devices.error()));
   }
 }
 

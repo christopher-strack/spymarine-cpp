@@ -1,6 +1,7 @@
 #pragma once
 
 #include "spymarine/device.hpp"
+#include "spymarine/parse_device.hpp"
 
 #include <iosfwd>
 
@@ -31,5 +32,11 @@ std::ostream& operator<<(std::ostream& os, const battery_type type);
 std::ostream& operator<<(std::ostream& os, const battery_device& d);
 
 std::ostream& operator<<(std::ostream& os, const device& d);
+
+std::ostream& operator<<(std::ostream& os, const null_device& d);
+
+std::ostream& operator<<(std::ostream& os, const unknown_device& d);
+
+std::ostream& operator<<(std::ostream& os, const parsed_device& d);
 
 } // namespace spymarine

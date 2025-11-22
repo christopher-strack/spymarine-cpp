@@ -4,13 +4,10 @@ target_sources(
     spymarine
     PRIVATE
         device_ostream.cpp
-        device.cpp
         discover.cpp
         error.cpp
         file_descriptor.cpp
-        parse_device.cpp
         read_devices.cpp
-        sensor.cpp
         sensor_reader.cpp
         tcp_socket.cpp
         udp_socket.cpp
