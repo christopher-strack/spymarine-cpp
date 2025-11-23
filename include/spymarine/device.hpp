@@ -179,7 +179,7 @@ constexpr std::string_view device_type(const device& d) noexcept {
       d);
 }
 
-constexpr uint8_t device_id(const device& d_) noexcept {
+constexpr uint8_t device_state_index(const device& d_) noexcept {
   return std::visit(overloaded{
                         [](const battery_device& d) constexpr noexcept {
                           return d.charge_sensor.state_index;

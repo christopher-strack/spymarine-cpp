@@ -43,7 +43,8 @@ constexpr std::string_view origin_object() {
 }
 
 std::string make_home_assistant_state_topic(const device& d) {
-  return std::format("simarine_{}_{}/state", device_type(d), device_id(d));
+  return std::format("simarine_{}_{}/state", device_type(d),
+                     device_state_index(d));
 }
 
 std::string make_battery_discovery(const battery_device& battery) {
@@ -126,7 +127,7 @@ std::string make_home_assistant_device_discovery_payload(const device& d_) {
 
 std::string make_home_assistant_device_discovery_topic(const device& d) {
   return std::format("homeassistant/device/simarine_{}_{}/config",
-                     device_type(d), device_id(d));
+                     device_type(d), device_state_index(d));
 }
 } // namespace
 
