@@ -71,6 +71,11 @@ public:
     return std::ranges::equal(_bytes, other._bytes);
   }
 
+  constexpr auto
+  operator<=>(const numeric_value<StartIndex, Size>& other) const noexcept {
+    return std::tuple{id(), int32()} <=> std::tuple{other.id(), other.int32()};
+  }
+
 private:
   std::span<const uint8_t, Size> _bytes;
 };
