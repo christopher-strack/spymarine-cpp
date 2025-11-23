@@ -62,6 +62,10 @@ public:
     return to_int32(_bytes.template subspan<start_index(), 4>());
   }
 
+  constexpr uint32_t uint32() const noexcept {
+    return to_uint32(_bytes.template subspan<start_index(), 4>());
+  }
+
   constexpr std::span<const uint8_t, Size> raw_bytes() const noexcept {
     return _bytes;
   }
