@@ -24,6 +24,7 @@ add_executable(spymarine_tests)
 target_sources(
     spymarine_tests
     PRIVATE
+        tst_client.cpp
         tst_message_values_view.cpp
         tst_message_value.cpp
         tst_parse_device.cpp

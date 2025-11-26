@@ -21,6 +21,7 @@ target_sources(
         BASE_DIRS ${PROJECT_SOURCE_DIR}/include
         FILES
             ${PROJECT_SOURCE_DIR}/include/spymarine/byte_operations.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/client.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/crc.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/defaults.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/device.hpp

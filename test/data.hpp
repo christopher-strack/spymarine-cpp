@@ -1,6 +1,7 @@
 #pragma once
 
 #include "spymarine/device.hpp"
+#include "spymarine/device_info.hpp"
 
 #include <vector>
 
@@ -63,6 +64,63 @@ inline auto make_parsed_devices_with_values() {
       temperature_device{"Au?en ", 40, 9.1f},
       temperature_device{"Boiler", 41, 39.4f},
   };
+}
+
+constexpr auto make_parsed_device_infos() {
+  return std::to_array<device_info>({
+      unknown_device_info{0},
+      unknown_device_info{1},
+      unknown_device_info{2},
+      null_device_info{3},
+      null_device_info{4},
+      barometer_device_info{5, "Barometer"},
+      pico_internal_device_info{6},
+      null_device_info{7},
+      null_device_info{8},
+      null_device_info{9},
+      voltage_device_info{10, "ST107 [5596] 1"},
+      voltage_device_info{11, "ST107 [5596] 2"},
+      voltage_device_info{12, "ST107 [5596] 3"},
+      resistive_device_info{13, "ST107 [5596] 1"},
+      resistive_device_info{14, "ST107 [5596] 2"},
+      resistive_device_info{15, "ST107 [5596] 3"},
+      resistive_device_info{16, "ST107 [5596] 4"},
+      unknown_device_info{17},
+      current_device_info{18, "SC303 [5499]"},
+      voltage_device_info{19, "SC303 [5499] 1"},
+      voltage_device_info{20, "SC303 [5499] 2"},
+      resistive_device_info{21, "SC303 [5499] 1"},
+      resistive_device_info{22, "SC303 [5499] 2"},
+      resistive_device_info{23, "SC303 [5499] 3"},
+      battery_device_info{
+          24,
+          "Bulltron",
+          battery_type::lifepo4,
+          battery_capacity{300'00},
+      },
+      temperature_device_info{25, "Batterie"},
+      tank_device_info{
+          26,
+          "Frischwasser",
+          fluid_type::fresh_water,
+          tank_capacity{100'0},
+      },
+      battery_device_info{
+          27,
+          "Starterbatterie",
+          battery_type::agm,
+          battery_capacity{100'00},
+      },
+      tank_device_info{
+          28,
+          "Abwasser",
+          fluid_type::waste_water,
+          tank_capacity{70'0},
+      },
+      temperature_device_info{29, "Innen"},
+      temperature_device_info{30, "Au?en "},
+      temperature_device_info{31, "Boiler"},
+  });
 }
 
 } // namespace spymarine
