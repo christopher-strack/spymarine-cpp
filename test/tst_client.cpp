@@ -12,6 +12,16 @@ namespace spymarine {
 TEST_CASE("client") {
   static constexpr auto infos = make_parsed_device_infos();
 
+  SECTION("request_device_infos") {
+    STATIC_CHECK(client{failing_tcp_socket{}}.request_device_infos() ==
+                 std::unexpected(error{std::errc::connection_refused}));
+  }
+
+  SECTION("request_device_infos fails if socket fails") {
+    STATIC_CHECK(client{failing_tcp_socket{}}.request_device_infos() ==
+                 std::unexpected(error{std::errc::connection_refused}));
+  }
+
   SECTION("request_device_info_count returns valid count") {
     STATIC_CHECK(client{mock_tcp_socket{}}.request_device_info_count() ==
                  infos.size());

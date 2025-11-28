@@ -77,7 +77,29 @@ concept tcp_socket_concept =
 template <tcp_socket_concept tcp_socket_type> class client {
 public:
   constexpr explicit client(tcp_socket_type&& socket) noexcept
-      : _socket{std::move(socket)}, _buffer(2048u) {}
+      : _socket{std::move(socket)} {}
+
+  constexpr std::expected<std::vector<device_info>, error>
+  request_device_infos() noexcept {
+    return request_device_info_count().and_then(
+        [this](const device_id count)
+            -> std::expected<std::vector<device_info>, error> {
+          std::vector<device_info> infos;
+          infos.reserve(count);
+
+          for (const auto id : std::views::iota(0u, count)) {
+            std::expected<device_info, error> info = request_device_info(id);
+
+            if (!info) {
+              return std::unexpected(info.error());
+            }
+
+            infos.emplace_back(std::move(*info));
+          }
+
+          return infos;
+        });
+  }
 
   constexpr std::expected<device_id, error>
   request_device_info_count() noexcept {
@@ -117,7 +139,7 @@ private:
   }
 
   tcp_socket_type _socket;
-  dynamic_buffer _buffer;
+  static_buffer _buffer;
 };
 
 } // namespace spymarine
