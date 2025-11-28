@@ -12,7 +12,7 @@ namespace spymarine {
 using device_id = uint32_t;
 
 struct pico_internal_device_info {
-  static constexpr sensor_id sensor_state_offset = 6;
+  static constexpr sensor_id sensor_id_offset = 6;
   static constexpr std::string_view name = "Pico internal";
 
   device_id id;
@@ -21,7 +21,7 @@ struct pico_internal_device_info {
 };
 
 struct voltage_device_info {
-  static constexpr sensor_id sensor_state_offset = 1;
+  static constexpr sensor_id sensor_id_offset = 1;
 
   device_id id;
   std::string name;
@@ -30,7 +30,7 @@ struct voltage_device_info {
 };
 
 struct current_device_info {
-  static constexpr sensor_id sensor_state_offset = 2;
+  static constexpr sensor_id sensor_id_offset = 2;
 
   device_id id;
   std::string name;
@@ -39,7 +39,7 @@ struct current_device_info {
 };
 
 struct temperature_device_info {
-  static constexpr sensor_id sensor_state_offset = 1;
+  static constexpr sensor_id sensor_id_offset = 1;
 
   device_id id;
   std::string name;
@@ -48,7 +48,7 @@ struct temperature_device_info {
 };
 
 struct barometer_device_info {
-  static constexpr sensor_id sensor_state_offset = 2;
+  static constexpr sensor_id sensor_id_offset = 2;
 
   device_id id;
   std::string name;
@@ -57,7 +57,7 @@ struct barometer_device_info {
 };
 
 struct resistive_device_info {
-  static constexpr sensor_id sensor_state_offset = 1;
+  static constexpr sensor_id sensor_id_offset = 1;
 
   device_id id;
   std::string name;
@@ -75,7 +75,7 @@ enum class fluid_type {
 using tank_capacity = rational<int16_t, 10>;
 
 struct tank_device_info {
-  static constexpr sensor_id sensor_state_offset = 1;
+  static constexpr sensor_id sensor_id_offset = 1;
 
   device_id id;
   std::string name;
@@ -98,7 +98,7 @@ enum class battery_type {
 using battery_capacity = rational<int16_t, 100>;
 
 struct battery_device_info {
-  static constexpr sensor_id sensor_state_offset = 5;
+  static constexpr sensor_id sensor_id_offset = 5;
 
   device_id id;
   std::string name;
@@ -109,7 +109,7 @@ struct battery_device_info {
 };
 
 struct null_device_info {
-  static constexpr sensor_id sensor_state_offset = 0;
+  static constexpr sensor_id sensor_id_offset = 0;
 
   device_id id;
 
@@ -117,7 +117,7 @@ struct null_device_info {
 };
 
 struct unknown_device_info {
-  static constexpr sensor_id sensor_state_offset = 1;
+  static constexpr sensor_id sensor_id_offset = 1;
 
   device_id id;
 
@@ -129,5 +129,9 @@ using device_info =
                  current_device_info, temperature_device_info,
                  barometer_device_info, resistive_device_info, tank_device_info,
                  battery_device_info, null_device_info, unknown_device_info>;
+
+constexpr sensor_id sensor_id_offset(const device_info& info) noexcept {
+  return std::visit([](const auto& i) { return i.sensor_id_offset; }, info);
+}
 
 } // namespace spymarine
