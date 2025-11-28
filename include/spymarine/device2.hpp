@@ -3,6 +3,8 @@
 #include "spymarine/device_info.hpp"
 #include "spymarine/sensor2.hpp"
 
+#include <variant>
+
 namespace spymarine {
 
 struct pico_internal_device2 {
@@ -99,5 +101,10 @@ struct battery_device2 {
 
   constexpr auto operator<=>(const battery_device2&) const noexcept = default;
 };
+
+using device2 =
+    std::variant<pico_internal_device2, voltage_device2, current_device2,
+                 temperature_device2, barometer_device2, resistive_device2,
+                 tank_device2, battery_device2>;
 
 } // namespace spymarine
