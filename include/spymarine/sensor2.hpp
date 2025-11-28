@@ -87,6 +87,10 @@ public:
     std::ranges::copy(value.raw_bytes(), _raw_bytes.begin());
   }
 
+  constexpr auto operator==(const sensor2& other) const noexcept {
+    return _raw_value == other._raw_value;
+  }
+
   constexpr auto operator<=>(const sensor2& other) const noexcept {
     return _raw_value <=> other._raw_value;
   }
