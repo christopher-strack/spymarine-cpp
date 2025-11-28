@@ -1,6 +1,7 @@
 #pragma once
 
 #include "spymarine/device_info.hpp"
+#include "spymarine/overloaded.hpp"
 #include "spymarine/sensor2.hpp"
 
 #include <variant>
@@ -106,5 +107,43 @@ using device2 =
     std::variant<pico_internal_device2, voltage_device2, current_device2,
                  temperature_device2, barometer_device2, resistive_device2,
                  tank_device2, battery_device2>;
+
+constexpr std::optional<device2> make_device(const device_info info,
+                                             const sensor_id offset) noexcept {
+  return std::visit(
+      overloaded{
+          [offset](pico_internal_device_info di) -> std::optional<device2> {
+            return pico_internal_device2{std::move(di), offset};
+          },
+          [offset](voltage_device_info di) -> std::optional<device2> {
+            return voltage_device2{std::move(di), offset};
+          },
+          [offset](current_device_info di) -> std::optional<device2> {
+            return current_device2{std::move(di), offset};
+          },
+          [offset](temperature_device_info di) -> std::optional<device2> {
+            return temperature_device2{std::move(di), offset};
+          },
+          [offset](barometer_device_info di) -> std::optional<device2> {
+            return barometer_device2{std::move(di), offset};
+          },
+          [offset](resistive_device_info di) -> std::optional<device2> {
+            return resistive_device2{std::move(di), offset};
+          },
+          [offset](tank_device_info di) -> std::optional<device2> {
+            return tank_device2{std::move(di), offset};
+          },
+          [offset](battery_device_info di) -> std::optional<device2> {
+            return battery_device2{std::move(di), offset};
+          },
+          [](null_device_info) -> std::optional<device2> {
+            return std::nullopt;
+          },
+          [](unknown_device_info) -> std::optional<device2> {
+            return std::nullopt;
+          },
+      },
+      std::move(info));
+}
 
 } // namespace spymarine
