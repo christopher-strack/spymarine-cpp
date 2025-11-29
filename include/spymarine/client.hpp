@@ -2,6 +2,7 @@
 
 #include "spymarine/buffer.hpp"
 #include "spymarine/crc.hpp"
+#include "spymarine/device2.hpp"
 #include "spymarine/device_info.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message.hpp"
@@ -78,6 +79,34 @@ template <tcp_socket_concept tcp_socket_type> class client {
 public:
   constexpr explicit client(tcp_socket_type&& socket) noexcept
       : _socket{std::move(socket)} {}
+
+  constexpr std::expected<std::vector<device2>, error>
+  request_devices() noexcept {
+    return request_device_info_count().and_then(
+        [this](const device_id count)
+            -> std::expected<std::vector<device2>, error> {
+          std::vector<device2> devices;
+          devices.reserve(count);
+
+          sensor_id cumulative_offset = 0;
+          for (const auto id : std::views::iota(0u, count)) {
+            std::expected<device_info, error> info = request_device_info(id);
+
+            if (!info) {
+              return std::unexpected(info.error());
+            }
+
+            cumulative_offset += sensor_id_offset(*info);
+
+            if (auto device =
+                    make_device(std::move(*info), cumulative_offset)) {
+              devices.push_back(std::move(*device));
+            }
+          }
+
+          return devices;
+        });
+  }
 
   constexpr std::expected<std::vector<device_info>, error>
   request_device_infos() noexcept {
