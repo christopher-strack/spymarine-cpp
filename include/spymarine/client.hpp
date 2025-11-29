@@ -6,6 +6,8 @@
 #include "spymarine/device_info.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message.hpp"
+#include "spymarine/message_value.hpp"
+#include "spymarine/message_values_view.hpp"
 #include "spymarine/parse_device_info.hpp"
 #include "spymarine/parse_message.hpp"
 
@@ -18,6 +20,7 @@
 #include <limits>
 #include <span>
 #include <utility>
+#include <variant>
 
 namespace spymarine {
 
@@ -75,38 +78,22 @@ concept tcp_socket_concept =
       } -> std::same_as<std::expected<std::span<const uint8_t>, error>>;
     };
 
-template <tcp_socket_concept tcp_socket_type> class client {
+template <typename udp_socket_type>
+concept udp_socket_concept =
+    requires(udp_socket_type socket, uint32_t ip, uint16_t port) {
+      {
+        socket.receive(std::span<uint8_t>{})
+      } -> std::same_as<std::expected<std::span<const uint8_t>, error>>;
+    };
+
+template <tcp_socket_concept tcp_socket_type,
+          udp_socket_concept udp_socket_type>
+class client {
 public:
-  constexpr explicit client(tcp_socket_type&& socket) noexcept
-      : _socket{std::move(socket)} {}
-
-  constexpr std::expected<std::vector<device2>, error>
-  request_devices() noexcept {
-    return request_device_info_count().and_then(
-        [this](const device_id count)
-            -> std::expected<std::vector<device2>, error> {
-          std::vector<device2> devices;
-          devices.reserve(count);
-
-          sensor_id cumulative_offset = 0;
-          for (const auto id : std::views::iota(0u, count)) {
-            std::expected<device_info, error> info = request_device_info(id);
-
-            if (!info) {
-              return std::unexpected(info.error());
-            }
-
-            cumulative_offset += sensor_id_offset(*info);
-
-            if (auto device =
-                    make_device(std::move(*info), cumulative_offset)) {
-              devices.push_back(std::move(*device));
-            }
-          }
-
-          return devices;
-        });
-  }
+  constexpr explicit client(tcp_socket_type&& tcp_socket_,
+                            udp_socket_type&& udp_socket_) noexcept
+      : _tcp_socket{std::move(tcp_socket_)},
+        _udp_socket{std::move(udp_socket_)} {}
 
   constexpr std::expected<std::vector<device_info>, error>
   request_device_infos() noexcept {
@@ -145,10 +132,10 @@ public:
          0x01, 0x03, 0x00, 0x00, 0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 0x00,
          0xff});
 
-    return request_message(message_type::device_info, data)
+    return request_message(message_type::device_information, data)
         .and_then(
             [](const message& message) -> std::expected<device_info, error> {
-              if (message.type() == message_type::device_info) {
+              if (message.type() == message_type::device_information) {
                 return parse_device_info(message.values());
               } else {
                 return std::unexpected{parse_error::invalid_device_message};
@@ -156,19 +143,50 @@ public:
             });
   }
 
+  constexpr auto read_sensor_values() noexcept {
+    // read messages until a sensor state message is found
+    auto msg = read_sensor_state();
+    while (msg == std::unexpected(error{parse_error::unknown_message})) {
+      msg = read_sensor_state();
+    }
+
+    return msg.transform([](const auto m) { return m.values(); })
+        .transform([](const auto& values) {
+          return values | std::views::filter([](const auto& val) {
+                   return std::holds_alternative<numeric_value1>(val);
+                 }) |
+                 std::views::transform([](const auto& val) {
+                   return std::get<numeric_value1>(val);
+                 });
+        });
+  }
+
 private:
+  constexpr std::expected<message, error> read_sensor_state() noexcept {
+    return _udp_socket.receive(_buffer)
+        .and_then([](const auto bytes) { return parse_message(bytes); })
+        .and_then([](const auto msg) -> std::expected<message, error> {
+          if (msg.type() == message_type::sensor_state) {
+            return std::expected<message, error>{msg};
+          } else {
+            return std::unexpected(error{parse_error::unknown_message});
+          }
+        });
+  }
+
   constexpr std::expected<message, error>
   request_message(const message_type type,
                   const std::span<const uint8_t> data) noexcept {
-    return _socket.send(write_message_data(type, data, _buffer))
-        .and_then([&, this]() { return _socket.receive(_buffer); })
+    return _tcp_socket.send(write_message_data(type, data, _buffer))
+        .and_then([&, this]() { return _tcp_socket.receive(_buffer); })
         .and_then([](const std::span<const uint8_t> dat) {
           return parse_message(dat);
         });
   }
 
-  tcp_socket_type _socket;
   static_buffer _buffer;
+  tcp_socket_type _tcp_socket;
+  udp_socket_type _udp_socket;
 };
 
 } // namespace spymarine

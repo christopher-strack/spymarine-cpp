@@ -1,5 +1,6 @@
 #pragma once
 
+#include "spymarine/device2.hpp"
 #include "spymarine/device_info.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message_value.hpp"
@@ -146,6 +147,129 @@ template <> struct StringMaker<spymarine::device_info> {
               return std::format("unknown_device_info {{ id = {} }}", info.id);
             },
         },
+        di);
+  }
+};
+
+template <> struct StringMaker<spymarine::unit> {
+  static std::string convert(spymarine::unit unit) {
+    switch (unit) {
+    case spymarine::unit::volts:
+      return "V";
+    case spymarine::unit::amps:
+      return "A";
+    case spymarine::unit::celsius:
+      return "°C";
+    case spymarine::unit::millibar:
+      return "mbar";
+    case spymarine::unit::ohms:
+      return "Ω";
+    case spymarine::unit::liters:
+      return "L";
+    case spymarine::unit::percent:
+      return "%";
+    case spymarine::unit::amp_hours:
+      return "Ah";
+    }
+
+    return "invalid_unit";
+  }
+};
+
+template <typename T, size_t Denominator, spymarine::unit Unit>
+struct StringMaker<spymarine::rational<T, Denominator, Unit>> {
+  static std::string
+  convert(const spymarine::rational<T, Denominator, Unit>& r) {
+    return std::format("{:.{}f} {}", r.to_float(),
+                       static_cast<int>(std::log10(Denominator)),
+                       StringMaker<spymarine::unit>::convert(r.unit));
+  }
+};
+
+template <> struct StringMaker<spymarine::tank_values> {
+  static std::string convert(const spymarine::tank_values& values) {
+    return std::format(
+        "tank_values {{ volume = {}, level = {} }}",
+        StringMaker<spymarine::tank_volume>::convert(values.volume),
+        StringMaker<spymarine::tank_level>::convert(values.level));
+  }
+};
+
+template <> struct StringMaker<spymarine::battery_charge_values> {
+  static std::string convert(const spymarine::battery_charge_values& values) {
+    return std::format(
+        "battery_charge_values {{ charge = {}, remaining_capacity = {} }}",
+        StringMaker<spymarine::battery_charge>::convert(values.charge),
+        StringMaker<spymarine::battery_capacity>::convert(
+            values.remaining_capacity));
+  }
+};
+
+template <typename T> struct StringMaker<spymarine::sensor2<T>> {
+  static std::string convert(const spymarine::sensor2<T>& sen) {
+    return std::format(
+        "sensor {{ id = {}, value = {} }}", sen.id(),
+        StringMaker<decltype(sen.value())>::convert(sen.value()));
+  }
+};
+
+template <> struct StringMaker<spymarine::device2> {
+  static std::string convert(const spymarine::device2& di) {
+    return std::visit(
+        spymarine::overloaded{
+            [](const spymarine::pico_internal_device2& device) {
+              return std::format(
+                  "pico_internal_device2 {{ info = {} }}\n",
+                  StringMaker<spymarine::device_info>::convert(device.info));
+            },
+            [](const spymarine::voltage_device2& device) {
+              return std::format(
+                  "voltage_device2 {{ info = {}, sensor = {} }}\n",
+                  StringMaker<spymarine::device_info>::convert(device.info),
+                  StringMaker<decltype(device.sensor)>::convert(device.sensor));
+            },
+            [](const spymarine::current_device2& device) {
+              return std::format(
+                  "current_device2 {{ info = {}, sensor = {} }}\n",
+                  StringMaker<spymarine::device_info>::convert(device.info),
+                  StringMaker<decltype(device.sensor)>::convert(device.sensor));
+            },
+            [](const spymarine::temperature_device2& device) {
+              return std::format(
+                  "temperature_device2 {{ info = {}, sensor = {} }}\n",
+                  StringMaker<spymarine::device_info>::convert(device.info),
+                  StringMaker<decltype(device.sensor)>::convert(device.sensor));
+            },
+            [](const spymarine::barometer_device2& device) {
+              return std::format(
+                  "barometer_device2 {{ info = {}, sensor = {} }}\n",
+                  StringMaker<spymarine::device_info>::convert(device.info),
+                  StringMaker<decltype(device.sensor)>::convert(device.sensor));
+            },
+            [](const spymarine::resistive_device2& device) {
+              return std::format(
+                  "resistive_device2 {{ info = {}, sensor = {} }}\n",
+                  StringMaker<spymarine::device_info>::convert(device.info),
+                  StringMaker<decltype(device.sensor)>::convert(device.sensor));
+            },
+            [](const spymarine::tank_device2& device) {
+              return std::format(
+                  "tank_device2 {{ info = {}, sensor = {} }}",
+                  StringMaker<spymarine::device_info>::convert(device.info),
+                  StringMaker<decltype(device.sensor)>::convert(device.sensor));
+            },
+            [](const spymarine::battery_device2& device) {
+              return std::format(
+                  "battery_device2 {{ info = {}, charge_sensor = {}, "
+                  "current_sensor = {}, voltage_sensor = {} }}\n",
+                  StringMaker<spymarine::device_info>::convert(device.info),
+                  StringMaker<decltype(device.charge_sensor)>::convert(
+                      device.charge_sensor),
+                  StringMaker<decltype(device.current_sensor)>::convert(
+                      device.current_sensor),
+                  StringMaker<decltype(device.voltage_sensor)>::convert(
+                      device.voltage_sensor));
+            }},
         di);
   }
 };

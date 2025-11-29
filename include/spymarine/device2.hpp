@@ -4,76 +4,87 @@
 #include "spymarine/overloaded.hpp"
 #include "spymarine/sensor2.hpp"
 
+#include <unordered_map>
 #include <variant>
 
 namespace spymarine {
 
 struct pico_internal_device2 {
-  pico_internal_device_info info;
+  using info_type = pico_internal_device_info;
 
-  sensor2<voltage_type> voltage_sensor;
+  info_type info;
 
-  constexpr pico_internal_device2(pico_internal_device_info info,
-                                  sensor_id id) noexcept
-      : info{info}, voltage_sensor{id} {}
+  sensor2<voltage_type> sensor;
+
+  constexpr pico_internal_device2(info_type info_, sensor_id id) noexcept
+      : info{info_}, sensor{id} {}
 
   constexpr auto
   operator<=>(const pico_internal_device2&) const noexcept = default;
 };
 
 struct voltage_device2 {
-  voltage_device_info info;
+  using info_type = voltage_device_info;
+
+  info_type info;
 
   sensor2<voltage_type> sensor;
 
-  constexpr voltage_device2(voltage_device_info info, sensor_id id) noexcept
-      : info{info}, sensor{id} {}
+  constexpr voltage_device2(info_type info_, sensor_id id) noexcept
+      : info{info_}, sensor{id} {}
 
   constexpr auto operator<=>(const voltage_device2&) const noexcept = default;
 };
 
 struct current_device2 {
-  current_device_info info;
+  using info_type = current_device_info;
+
+  info_type info;
 
   sensor2<current_type> sensor;
 
-  constexpr current_device2(current_device_info info, sensor_id id) noexcept
-      : info{info}, sensor{id} {}
+  constexpr current_device2(info_type info_, sensor_id id) noexcept
+      : info{info_}, sensor{id} {}
 
   constexpr auto operator<=>(const current_device2&) const noexcept = default;
 };
 
 struct temperature_device2 {
-  temperature_device_info info;
+  using info_type = temperature_device_info;
+
+  info_type info;
 
   sensor2<temperature_type> sensor;
 
-  constexpr temperature_device2(temperature_device_info info,
-                                sensor_id id) noexcept
-      : info{info}, sensor{id} {}
+  constexpr temperature_device2(info_type info_, sensor_id id) noexcept
+      : info{info_}, sensor{id} {}
 
   constexpr auto
   operator<=>(const temperature_device2&) const noexcept = default;
 };
 
 struct barometer_device2 {
-  barometer_device_info info;
+  using info_type = barometer_device_info;
+
+  info_type info;
 
   sensor2<barometer_type> sensor;
 
-  constexpr barometer_device2(barometer_device_info info, sensor_id id) noexcept
-      : info{info}, sensor{id} {}
+  constexpr barometer_device2(info_type info_, sensor_id id) noexcept
+      : info{info_}, sensor{id} {}
 
   constexpr auto operator<=>(const barometer_device2&) const noexcept = default;
 };
 
 struct resistive_device2 {
-  resistive_device_info info;
+  using info_type = resistive_device_info;
+
+  info_type info;
 
   sensor2<resistive_type> sensor;
 
-  constexpr resistive_device2(resistive_device_info info, sensor_id id) noexcept
-      : info{info}, sensor{id} {}
+  constexpr resistive_device2(info_type info_, sensor_id id) noexcept
+      : info{info_}, sensor{id} {}
 
   constexpr auto operator<=>(const resistive_device2&) const noexcept = default;
 };
@@ -83,22 +94,24 @@ struct tank_device2 {
 
   sensor2<tank_type> sensor;
 
-  constexpr tank_device2(tank_device_info info, sensor_id id) noexcept
-      : info{info}, sensor{id} {}
+  constexpr tank_device2(tank_device_info info_, sensor_id id) noexcept
+      : info{info_}, sensor{id} {}
 
   constexpr auto operator<=>(const tank_device2&) const noexcept = default;
 };
 
 struct battery_device2 {
-  battery_device_info info;
+  using info_type = battery_device_info;
+
+  info_type info;
 
   sensor2<battery_charge_type> charge_sensor;
   sensor2<current_type> current_sensor;
   sensor2<voltage_type> voltage_sensor;
 
-  constexpr battery_device2(battery_device_info info, sensor_id id) noexcept
-      : info{info}, charge_sensor{id}, current_sensor{id + 1},
-        voltage_sensor{id + 2} {}
+  constexpr battery_device2(info_type info_, sensor_id id) noexcept
+      : info{info_}, charge_sensor{id}, current_sensor{sensor_id(id + 1)},
+        voltage_sensor{sensor_id(id + 2)} {}
 
   constexpr auto operator<=>(const battery_device2&) const noexcept = default;
 };

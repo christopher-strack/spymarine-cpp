@@ -113,10 +113,10 @@ private:
         {0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00, 0x00,
          0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff});
 
-    return request_message(message_type::device_info, data)
+    return request_message(message_type::device_information, data)
         .and_then([state_start_index](const message& message)
                       -> std::expected<parsed_device, error> {
-          if (message.type() == message_type::device_info) {
+          if (message.type() == message_type::device_information) {
             return parse_device(message.values(), state_start_index);
           } else {
             return std::unexpected{parse_error::invalid_device_message};

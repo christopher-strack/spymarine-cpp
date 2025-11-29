@@ -72,7 +72,7 @@ enum class fluid_type {
   unknown,
 };
 
-using tank_capacity = rational<int16_t, 10>;
+using tank_capacity = rational<int16_t, 10, unit::liters>;
 
 struct tank_device_info {
   static constexpr sensor_id sensor_id_offset = 1;
@@ -95,7 +95,7 @@ enum class battery_type {
   unknown,
 };
 
-using battery_capacity = rational<int16_t, 100>;
+using battery_capacity = rational<int16_t, 100, unit::amp_hours>;
 
 struct battery_device_info {
   static constexpr sensor_id sensor_id_offset = 5;

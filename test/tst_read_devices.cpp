@@ -1,6 +1,6 @@
 #include "catch_string_maker.hpp" // IWYU pragma: keep
 #include "data.hpp"
-#include "test_tcp_socket.hpp"
+#include "test_sockets.hpp"
 
 #include "spymarine/buffer.hpp"
 #include "spymarine/device_ostream.hpp" // IWYU pragma: keep

@@ -27,11 +27,11 @@ public:
     if (const auto message = parse_message(bytes)) {
       if (message->type() == message_type::device_count) {
         _response = raw_device_count_response | std::ranges::to<std::vector>();
-      } else if (message->type() == message_type::device_info) {
+      } else if (message->type() == message_type::device_information) {
         const auto value = message->values().find<numeric_value1>(0);
         assert(value.has_value());
-        const auto device_id = size_t(value->int32());
-        _response = _raw_device_info_responses[device_id];
+        const auto id = size_t(value->int32());
+        _response = _raw_device_info_responses[id];
       } else {
         return std::unexpected{std::errc::connection_refused};
       }
@@ -64,6 +64,22 @@ public:
   constexpr std::expected<std::span<const uint8_t>, error>
   receive([[maybe_unused]] std::span<uint8_t> buffer) noexcept {
     return std::unexpected{std::errc::connection_refused};
+  }
+};
+
+class mock_udp_socket {
+public:
+  std::expected<std::span<const uint8_t>, error>
+  receive([[maybe_unused]] std::span<uint8_t> buffer) {
+    return std::span<const uint8_t>{raw_state_response};
+  }
+};
+
+class failing_udp_socket {
+public:
+  std::expected<std::span<const uint8_t>, error>
+  receive([[maybe_unused]] std::span<uint8_t> buffer) {
+    return std::unexpected{std::errc::io_error};
   }
 };
 

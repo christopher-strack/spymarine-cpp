@@ -49,6 +49,7 @@ target_compile_definitions(
     PRIVATE
         PROJECT_VERSION="${PROJECT_VERSION}"
         CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER=1
+        CATCH_CONFIG_RUNTIME_STATIC_REQUIRE=1
 )
 
 target_enable_warnings(spymarine_tests)
