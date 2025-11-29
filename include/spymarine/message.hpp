@@ -13,7 +13,7 @@ enum class message_type : uint8_t {
   device_count = 0x02,
 
   // Request information about a device
-  device_info = 0x41,
+  device_information = 0x41,
 
   // Sensor update message (UDP)
   sensor_state = 0xb0,

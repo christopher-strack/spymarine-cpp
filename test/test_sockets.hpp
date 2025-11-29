@@ -27,7 +27,7 @@ public:
     if (const auto message = parse_message(bytes)) {
       if (message->type() == message_type::device_count) {
         _response = raw_device_count_response | std::ranges::to<std::vector>();
-      } else if (message->type() == message_type::device_info) {
+      } else if (message->type() == message_type::device_information) {
         const auto value = message->values().find<numeric_value1>(0);
         assert(value.has_value());
         const auto id = size_t(value->int32());
