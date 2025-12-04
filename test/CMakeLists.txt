@@ -24,6 +24,12 @@ add_executable(spymarine_tests)
 target_sources(
     spymarine_tests
     PRIVATE
+        FILE_SET HEADERS
+        BASE_DIRS ${PROJECT_SOURCE_DIR}/test
+        FILES
+            ${PROJECT_SOURCE_DIR}/test/data.hpp
+            ${PROJECT_SOURCE_DIR}/test/raw_data.hpp
+    PRIVATE
         tst_message_values_view.cpp
         tst_message_value.cpp
         tst_parse_device.cpp
