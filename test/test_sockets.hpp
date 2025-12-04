@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <expected>
 #include <span>
+#include <vector>
 
 namespace spymarine {
 
@@ -24,6 +25,8 @@ public:
 class mock_tcp_socket : public test_tcp_socket_base<mock_tcp_socket> {
 public:
   constexpr std::expected<void, error> send(std::span<uint8_t> bytes) noexcept {
+    using std::ranges::to;
+
     if (const auto message = parse_message(bytes)) {
       if (message->type() == message_type::count_information) {
         _response = raw_device_count_response | std::ranges::to<std::vector>();
@@ -31,7 +34,7 @@ public:
         const auto value = message->values().find<numeric_value1>(0);
         assert(value.has_value());
         const auto id = size_t(value->int32());
-        _response = _raw_device_info_responses[id];
+        _response = raw_device_info_responses[id] | to<std::vector>();
       } else {
         return std::unexpected{std::errc::connection_refused};
       }
@@ -49,8 +52,6 @@ public:
   }
 
 private:
-  const std::vector<std::vector<uint8_t>> _raw_device_info_responses =
-      make_raw_device_info_responses();
   std::vector<uint8_t> _response;
 };
 

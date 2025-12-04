@@ -3,8 +3,7 @@
 #include <array>
 #include <cstdarg>
 #include <cstdint>
-#include <ranges>
-#include <vector>
+#include <span>
 
 namespace spymarine {
 
@@ -461,44 +460,41 @@ constexpr auto raw_temperature_device_4_response = std::to_array<uint8_t>(
      0x7a, 0xf8, 0xbf, 0xff, 0x00, 0x00, 0x00, 0x07, 0xff, 0x0e, 0x03, 0x64,
      0x7a, 0xf8, 0xbf, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0x79, 0x25});
 
-constexpr auto make_raw_device_info_responses() noexcept {
-  using std::ranges::to;
-
-  return std::vector<std::vector<uint8_t>>{
-      raw_unknown_device_1_response | to<std::vector>(),
-      raw_unknown_device_2_response | to<std::vector>(),
-      raw_unknown_device_3_response | to<std::vector>(),
-      raw_null_device_1_response | to<std::vector>(),
-      raw_null_device_2_response | to<std::vector>(),
-      raw_barometer_device_response | to<std::vector>(),
-      raw_pico_internal_device_response | to<std::vector>(),
-      raw_null_device_3_response | to<std::vector>(),
-      raw_null_device_4_response | to<std::vector>(),
-      raw_null_device_5_response | to<std::vector>(),
-      raw_st107_voltage_device_1_response | to<std::vector>(),
-      raw_st107_voltage_device_2_response | to<std::vector>(),
-      raw_st107_voltage_device_3_response | to<std::vector>(),
-      raw_st107_resistive_device_1_response | to<std::vector>(),
-      raw_st107_resistive_device_2_response | to<std::vector>(),
-      raw_st107_resistive_device_3_response | to<std::vector>(),
-      raw_st107_resistive_device_4_response | to<std::vector>(),
-      raw_unknown_device_4_response | to<std::vector>(),
-      raw_sc303_current_device_response | to<std::vector>(),
-      raw_sc303_voltage_device_1_response | to<std::vector>(),
-      raw_sc303_voltage_device_2_response | to<std::vector>(),
-      raw_sc303_resistive_device_1_response | to<std::vector>(),
-      raw_sc303_resistive_device_2_response | to<std::vector>(),
-      raw_sc303_resistive_device_3_response | to<std::vector>(),
-      raw_battery_device_1_response | to<std::vector>(),
-      raw_temperature_device_1_response | to<std::vector>(),
-      raw_tank_device_1_response | to<std::vector>(),
-      raw_battery_device_2_response | to<std::vector>(),
-      raw_tank_device_2_response | to<std::vector>(),
-      raw_temperature_device_2_response | to<std::vector>(),
-      raw_temperature_device_3_response | to<std::vector>(),
-      raw_temperature_device_4_response | to<std::vector>(),
-  };
-}
+constexpr auto raw_device_info_responses =
+    std::to_array<std::span<const uint8_t>>({
+        std::span{raw_unknown_device_1_response},
+        std::span{raw_unknown_device_2_response},
+        std::span{raw_unknown_device_3_response},
+        std::span{raw_null_device_1_response},
+        std::span{raw_null_device_2_response},
+        std::span{raw_barometer_device_response},
+        std::span{raw_pico_internal_device_response},
+        std::span{raw_null_device_3_response},
+        std::span{raw_null_device_4_response},
+        std::span{raw_null_device_5_response},
+        std::span{raw_st107_voltage_device_1_response},
+        std::span{raw_st107_voltage_device_2_response},
+        std::span{raw_st107_voltage_device_3_response},
+        std::span{raw_st107_resistive_device_1_response},
+        std::span{raw_st107_resistive_device_2_response},
+        std::span{raw_st107_resistive_device_3_response},
+        std::span{raw_st107_resistive_device_4_response},
+        std::span{raw_unknown_device_4_response},
+        std::span{raw_sc303_current_device_response},
+        std::span{raw_sc303_voltage_device_1_response},
+        std::span{raw_sc303_voltage_device_2_response},
+        std::span{raw_sc303_resistive_device_1_response},
+        std::span{raw_sc303_resistive_device_2_response},
+        std::span{raw_sc303_resistive_device_3_response},
+        std::span{raw_battery_device_1_response},
+        std::span{raw_temperature_device_1_response},
+        std::span{raw_tank_device_1_response},
+        std::span{raw_battery_device_2_response},
+        std::span{raw_tank_device_2_response},
+        std::span{raw_temperature_device_2_response},
+        std::span{raw_temperature_device_3_response},
+        std::span{raw_temperature_device_4_response},
+    });
 
 constexpr auto raw_state_response = std::to_array<uint8_t>(
     {0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xb0, 0x85, 0xde, 0xc3, 0x46, 0x01,
