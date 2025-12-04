@@ -96,14 +96,14 @@ private:
   }
 
   std::expected<uint8_t, error> request_device_count() {
-    return request_message(message_type::device_count, {})
+    return request_message(message_type::count_information, {})
         .and_then([](const message& message) -> std::expected<uint8_t, error> {
-          if (message.type() == message_type::device_count) {
+          if (message.type() == message_type::count_information) {
             if (const auto count = message.values().find<numeric_value1>(1)) {
               return count->int32() + 1;
             }
           }
-          return std::unexpected{parse_error::invalid_device_count_message};
+          return std::unexpected{parse_error::invalid_count_message};
         });
   }
 

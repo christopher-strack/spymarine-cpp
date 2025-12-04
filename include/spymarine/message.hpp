@@ -9,8 +9,8 @@
 namespace spymarine {
 
 enum class message_type : uint8_t {
-  // Request the number of connected devices
-  device_count = 0x02,
+  // Request the number of connected devices and sensors
+  count_information = 0x02,
 
   // Request information about a device
   device_information = 0x41,
