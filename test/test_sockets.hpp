@@ -1,6 +1,8 @@
 #pragma once
 
-#include "raw_data.hpp"
+#include "raw_data/count_info.hpp"
+#include "raw_data/devices.hpp"
+#include "raw_data/sensor_state.hpp"
 
 #include "spymarine/error.hpp"
 #include "spymarine/message.hpp"
@@ -29,7 +31,7 @@ public:
 
     if (const auto message = parse_message(bytes)) {
       if (message->type() == message_type::count_information) {
-        _response = raw_device_count_response | std::ranges::to<std::vector>();
+        _response = raw_count_info_response | std::ranges::to<std::vector>();
       } else if (message->type() == message_type::device_information) {
         const auto value = message->values().find<numeric_value1>(0);
         assert(value.has_value());
