@@ -1,5 +1,5 @@
 #include "catch_string_maker.hpp" // IWYU pragma: keep
-#include "raw_data.hpp"
+#include "raw_data/devices.hpp"
 
 #include "spymarine/device.hpp"
 #include "spymarine/device_ostream.hpp" // IWYU pragma: keep

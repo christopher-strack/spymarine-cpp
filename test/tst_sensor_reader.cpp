@@ -1,5 +1,5 @@
 #include "data.hpp"
-#include "raw_data.hpp"
+#include "raw_data/sensor_state.hpp"
 
 #include "spymarine/buffer.hpp"
 #include "spymarine/device_ostream.hpp"
