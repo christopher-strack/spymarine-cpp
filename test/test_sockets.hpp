@@ -3,6 +3,7 @@
 #include "raw_data/count_info.hpp"
 #include "raw_data/devices.hpp"
 #include "raw_data/sensor_state.hpp"
+#include "raw_data/sensors.hpp"
 
 #include "spymarine/error.hpp"
 #include "spymarine/message.hpp"
@@ -37,6 +38,11 @@ public:
         assert(value.has_value());
         const auto id = size_t(value->int32());
         _response = raw_device_info_responses[id] | to<std::vector>();
+      } else if (message->type() == message_type::sensor_information) {
+        const auto value = message->values().find<numeric_value1>(1);
+        assert(value.has_value());
+        const auto id = value->uint32();
+        _response = raw_sensor_info_responses[id] | to<std::vector>();
       } else {
         return std::unexpected{std::errc::connection_refused};
       }

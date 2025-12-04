@@ -10,6 +10,7 @@ enum class parse_error {
   invalid_count_message,
   invalid_device_message,
   invalid_device_type,
+  invalid_sensor_message,
 };
 
 }

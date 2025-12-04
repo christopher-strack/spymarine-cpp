@@ -1,5 +1,6 @@
 #pragma once
 
+#include "spymarine/device2.hpp"
 #include "spymarine/overloaded.hpp"
 #include "spymarine/sensor.hpp"
 
@@ -90,13 +91,6 @@ struct resistive_device {
   constexpr auto operator<=>(const resistive_device&) const noexcept = default;
 };
 
-enum class fluid_type {
-  fresh_water,
-  fuel,
-  waste_water,
-  unknown,
-};
-
 struct tank_device {
   std::string name;
   fluid_type type;
@@ -113,16 +107,6 @@ struct tank_device {
         level_sensor{sensor_type::level, state_start_index, level} {}
 
   constexpr auto operator<=>(const tank_device&) const noexcept = default;
-};
-
-enum class battery_type {
-  wet_low_maintenance,
-  wet_maintenance_free,
-  agm,
-  deep_cycle,
-  gel,
-  lifepo4,
-  unknown,
 };
 
 struct battery_device {
