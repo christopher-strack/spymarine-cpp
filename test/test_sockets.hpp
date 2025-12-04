@@ -25,7 +25,7 @@ class mock_tcp_socket : public test_tcp_socket_base<mock_tcp_socket> {
 public:
   constexpr std::expected<void, error> send(std::span<uint8_t> bytes) noexcept {
     if (const auto message = parse_message(bytes)) {
-      if (message->type() == message_type::device_count) {
+      if (message->type() == message_type::count_information) {
         _response = raw_device_count_response | std::ranges::to<std::vector>();
       } else if (message->type() == message_type::device_information) {
         const auto value = message->values().find<numeric_value1>(0);

@@ -14,10 +14,10 @@ std::string to_string(parse_error e) {
     return "invalid_data_length";
   case parse_error::invalid_crc:
     return "invalid_crc";
+  case parse_error::invalid_count_message:
+    return "invalid_count_message";
   case parse_error::invalid_device_message:
     return "invalid_device_message";
-  case parse_error::invalid_device_count_message:
-    return "invalid_device_count_message";
   case parse_error::invalid_device_type:
     return "invalid_device_type";
   }
