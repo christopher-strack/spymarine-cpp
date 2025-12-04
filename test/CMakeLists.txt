@@ -29,6 +29,7 @@ target_sources(
         FILES
             ${PROJECT_SOURCE_DIR}/test/data.hpp
             ${PROJECT_SOURCE_DIR}/test/raw_data.hpp
+            ${PROJECT_SOURCE_DIR}/test/test_sockets.hpp
     PRIVATE
         tst_message_values_view.cpp
         tst_message_value.cpp
