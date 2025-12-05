@@ -2,6 +2,8 @@
 
 #include "spymarine/device2.hpp"
 #include "spymarine/message_value.hpp"
+#include "spymarine/rational.hpp"
+#include "spymarine/unit.hpp"
 
 #include <optional>
 
