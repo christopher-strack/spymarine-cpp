@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <concepts>
 #include <cstdint>
 #include <expected>
 #include <limits>
@@ -24,32 +23,7 @@
 
 namespace spymarine {
 
-template <typename tcp_socket_type>
-concept tcp_socket_concept =
-    requires(tcp_socket_type socket, uint32_t ip, uint16_t port) {
-      {
-        tcp_socket_type::open()
-      } -> std::same_as<std::expected<tcp_socket_type, error>>;
-      { socket.connect(ip, port) } -> std::same_as<std::expected<void, error>>;
-      {
-        socket.send(std::span<uint8_t>{})
-      } -> std::same_as<std::expected<void, error>>;
-      {
-        socket.receive(std::span<uint8_t>{})
-      } -> std::same_as<std::expected<std::span<const uint8_t>, error>>;
-    };
-
-template <typename udp_socket_type>
-concept udp_socket_concept =
-    requires(udp_socket_type socket, uint32_t ip, uint16_t port) {
-      {
-        socket.receive(std::span<uint8_t>{})
-      } -> std::same_as<std::expected<std::span<const uint8_t>, error>>;
-    };
-
-template <tcp_socket_concept tcp_socket_type,
-          udp_socket_concept udp_socket_type>
-class client {
+template <typename tcp_socket_type, typename udp_socket_type> class client {
 public:
   constexpr explicit client(tcp_socket_type&& tcp_socket_,
                             udp_socket_type&& udp_socket_) noexcept
