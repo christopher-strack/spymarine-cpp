@@ -4,6 +4,7 @@
 #include "spymarine/error.hpp"
 #include "spymarine/message_values_view.hpp"
 #include "spymarine/overloaded.hpp"
+#include "spymarine/parse_device2.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -46,36 +47,6 @@ constexpr uint8_t sensor_state_offset(const parsed_device& d) noexcept {
           [](const unknown_device&) -> uint8_t { return 1; },
       },
       d);
-}
-
-constexpr fluid_type to_fluid_type(const int16_t type) noexcept {
-  switch (type) {
-  case 1:
-    return fluid_type::fresh_water;
-  case 2:
-    return fluid_type::fuel;
-  case 3:
-    return fluid_type::waste_water;
-  }
-  return fluid_type::unknown;
-}
-
-constexpr battery_type to_battery_type(const int16_t battery_type) noexcept {
-  switch (battery_type) {
-  case 1:
-    return battery_type::wet_low_maintenance;
-  case 2:
-    return battery_type::wet_maintenance_free;
-  case 3:
-    return battery_type::agm;
-  case 4:
-    return battery_type::deep_cycle;
-  case 5:
-    return battery_type::gel;
-  case 6:
-    return battery_type::lifepo4;
-  }
-  return battery_type::unknown;
 }
 
 constexpr std::expected<parsed_device, error>
@@ -125,8 +96,9 @@ parse_device(const message_values_view values,
     const auto fluid_type = values.find<numeric_value3>(6);
     const auto capacity = values.find<numeric_value3>(7);
     if (name_value && fluid_type && capacity) {
-      return tank_device{name_value->str(),
-          to_fluid_type(fluid_type->high_int16()),
+      return tank_device{
+          name_value->str(),
+          to_fluid_type(*fluid_type),
           capacity->high_int16() / 10.0f,
           state_start_index,
       };
@@ -137,8 +109,9 @@ parse_device(const message_values_view values,
     const auto battery_type = values.find<numeric_value3>(8);
     const auto capacity = values.find<numeric_value3>(5);
     if (name_value && battery_type && capacity) {
-      return battery_device{name_value->str(),
-          to_battery_type(battery_type->high_int16()),
+      return battery_device{
+          name_value->str(),
+          to_battery_type(*battery_type),
           capacity->high_int16() / 100.0f,
           state_start_index,
       };

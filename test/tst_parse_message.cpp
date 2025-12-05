@@ -75,7 +75,7 @@ TEST_CASE("parse_message") {
         std::to_array<uint8_t>({0x01, 0x01, 0x00, 0x00, 0x00, 0x1f, 0xff, 0x02,
                                 0x01, 0x00, 0x00, 0x00, 0x29, 0xff});
     constexpr auto expected_message = message{
-        message_type::device_count,
+        message_type::count_information,
         expected_data,
     };
     STATIC_CHECK(parse_message(valid_message) == expected_message);

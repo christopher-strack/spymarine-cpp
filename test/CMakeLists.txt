@@ -24,9 +24,20 @@ add_executable(spymarine_tests)
 target_sources(
     spymarine_tests
     PRIVATE
+        FILE_SET HEADERS
+        BASE_DIRS ${PROJECT_SOURCE_DIR}/test
+        FILES
+            ${PROJECT_SOURCE_DIR}/test/data.hpp
+            ${PROJECT_SOURCE_DIR}/test/raw_data/count_info.hpp
+            ${PROJECT_SOURCE_DIR}/test/raw_data/devices.hpp
+            ${PROJECT_SOURCE_DIR}/test/raw_data/sensor_state.hpp
+            ${PROJECT_SOURCE_DIR}/test/test_sockets.hpp
+    PRIVATE
+        tst_client.cpp
         tst_message_values_view.cpp
         tst_message_value.cpp
         tst_parse_device.cpp
+        tst_parse_device2.cpp
         tst_parse_message.cpp
         tst_read_devices.cpp
         tst_sensor_reader.cpp
@@ -46,6 +57,8 @@ target_compile_definitions(
     PRIVATE
         PROJECT_VERSION="${PROJECT_VERSION}"
         CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER=1
+        CATCH_CONFIG_ENABLE_OPTIONAL_STRINGMAKER=1
+        CATCH_CONFIG_ENABLE_VARIANT_STRINGMAKER=1
 )
 
 target_enable_warnings(spymarine_tests)

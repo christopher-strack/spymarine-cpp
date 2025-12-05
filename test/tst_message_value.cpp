@@ -26,7 +26,7 @@ TEST_CASE("numeric_value1") {
   }
 }
 
-TEST_CASE("numeric_value2") {
+TEST_CASE("numeric_value3") {
   SECTION("valid numeric_value3") {
     static constexpr auto bytes = std::to_array<uint8_t>(
         {0x02, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0x34, 0x56, 0x78});

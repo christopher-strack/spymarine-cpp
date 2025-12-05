@@ -1,76 +1,18 @@
-#include "catch_string_maker.hpp"
+#include "catch_string_maker.hpp" // IWYU pragma: keep
 #include "data.hpp"
-#include "raw_data.hpp"
+#include "test_sockets.hpp"
 
 #include "spymarine/buffer.hpp"
-#include "spymarine/device.hpp"
-#include "spymarine/device_ostream.hpp"
-#include "spymarine/message_value.hpp"
+#include "spymarine/device_ostream.hpp" // IWYU pragma: keep
 #include "spymarine/read_devices.hpp"
 
 #include <catch2/catch_all.hpp>
 
 #include <cstddef>
-#include <cstdint>
 #include <expected>
-#include <ranges>
 #include <system_error>
 
 namespace spymarine {
-namespace {
-template <typename T> class test_tcp_socket_base {
-public:
-  static std::expected<T, error> open() { return T{}; }
-
-  std::expected<void, error> connect(uint32_t, uint16_t) { return {}; }
-};
-
-class mock_tcp_socket : public test_tcp_socket_base<mock_tcp_socket> {
-public:
-  std::expected<void, error> send(std::span<uint8_t> bytes) {
-    if (const auto message = parse_message(bytes)) {
-      if (message->type() == message_type::device_count) {
-        _response = raw_device_count_response | std::ranges::to<std::vector>();
-      } else if (message->type() == message_type::device_info) {
-        const auto value = message->values().find<numeric_value1>(0);
-        assert(value.has_value());
-        const auto device_id = size_t(value->int32());
-        _response = _raw_device_info_responses[device_id];
-      } else {
-        return std::unexpected{std::errc::connection_refused};
-      }
-    }
-    return {};
-  }
-
-  std::expected<std::span<const uint8_t>, error>
-  receive(std::span<uint8_t> buffer) {
-    const auto length = std::min(buffer.size(), _response.size());
-    const auto diff = static_cast<std::ptrdiff_t>(length);
-    std::ranges::copy_n(_response.begin(), diff, buffer.begin());
-    _response.erase(_response.begin(), _response.begin() + diff);
-    return buffer.subspan(0, length);
-  }
-
-private:
-  const std::vector<std::vector<uint8_t>> _raw_device_info_responses =
-      make_raw_device_info_responses();
-  std::vector<uint8_t> _response;
-};
-
-class failing_tcp_socket : public test_tcp_socket_base<failing_tcp_socket> {
-public:
-  std::expected<void, error> send([[maybe_unused]] std::span<uint8_t> bytes) {
-    return {};
-  }
-
-  std::expected<std::span<const uint8_t>, error>
-  receive([[maybe_unused]] std::span<uint8_t> buffer) {
-    return std::unexpected{std::errc::connection_refused};
-  }
-};
-
-} // namespace
 
 TEST_CASE("read_devices") {
   static_buffer buffer;

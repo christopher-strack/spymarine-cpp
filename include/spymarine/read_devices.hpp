@@ -96,14 +96,14 @@ private:
   }
 
   std::expected<uint8_t, error> request_device_count() {
-    return request_message(message_type::device_count, {})
+    return request_message(message_type::count_information, {})
         .and_then([](const message& message) -> std::expected<uint8_t, error> {
-          if (message.type() == message_type::device_count) {
+          if (message.type() == message_type::count_information) {
             if (const auto count = message.values().find<numeric_value1>(1)) {
               return count->int32() + 1;
             }
           }
-          return std::unexpected{parse_error::invalid_device_count_message};
+          return std::unexpected{parse_error::invalid_count_message};
         });
   }
 
@@ -113,10 +113,10 @@ private:
         {0x00, 0x01, 0x00, 0x00, 0x00, device_id, 0xff, 0x01, 0x03, 0x00, 0x00,
          0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff});
 
-    return request_message(message_type::device_info, data)
+    return request_message(message_type::device_information, data)
         .and_then([state_start_index](const message& message)
                       -> std::expected<parsed_device, error> {
-          if (message.type() == message_type::device_info) {
+          if (message.type() == message_type::device_information) {
             return parse_device(message.values(), state_start_index);
           } else {
             return std::unexpected{parse_error::invalid_device_message};

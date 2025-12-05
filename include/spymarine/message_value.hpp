@@ -50,6 +50,8 @@ public:
 
   constexpr message_value_id id() const noexcept { return _bytes[0]; }
 
+  constexpr uint8_t uint8() const noexcept { return _bytes.back(); }
+
   constexpr int16_t low_int16() const noexcept {
     return to_int16(_bytes.template subspan<start_index(), 2>());
   }
@@ -62,6 +64,10 @@ public:
     return to_int32(_bytes.template subspan<start_index(), 4>());
   }
 
+  constexpr uint32_t uint32() const noexcept {
+    return to_uint32(_bytes.template subspan<start_index(), 4>());
+  }
+
   constexpr std::span<const uint8_t, Size> raw_bytes() const noexcept {
     return _bytes;
   }
@@ -69,6 +75,11 @@ public:
   constexpr bool
   operator==(const numeric_value<StartIndex, Size>& other) const noexcept {
     return std::ranges::equal(_bytes, other._bytes);
+  }
+
+  constexpr auto
+  operator<=>(const numeric_value<StartIndex, Size>& other) const noexcept {
+    return std::tuple{id(), int32()} <=> std::tuple{other.id(), other.int32()};
   }
 
 private:
