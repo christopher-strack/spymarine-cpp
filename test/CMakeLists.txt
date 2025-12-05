@@ -34,6 +34,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/test/test_sockets.hpp
     PRIVATE
         tst_client.cpp
+        tst_hub.cpp
         tst_message_values_view.cpp
         tst_message_value.cpp
         tst_parse_device.cpp
