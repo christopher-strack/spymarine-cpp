@@ -8,6 +8,7 @@
 #include <optional>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace spymarine {
 
@@ -26,36 +27,41 @@ template <typename T, size_t Denominator, unit Unit> struct device_property {
 struct voltage_device2 {
   device_id id;
   std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-  auto operator<=>(const voltage_device2&) const = default;
+  bool operator==(const voltage_device2&) const = default;
 };
 
 struct current_device2 {
   device_id id;
   std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-  auto operator<=>(const current_device2&) const = default;
+  bool operator==(const current_device2&) const = default;
 };
 
 struct temperature_device2 {
   device_id id;
   std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-  auto operator<=>(const temperature_device2&) const = default;
+  bool operator==(const temperature_device2&) const = default;
 };
 
 struct barometer_device2 {
   device_id id;
   std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-  auto operator<=>(const barometer_device2&) const = default;
+  bool operator==(const barometer_device2&) const = default;
 };
 
 struct resistive_device2 {
   device_id id;
   std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-  auto operator<=>(const resistive_device2&) const = default;
+  bool operator==(const resistive_device2&) const = default;
 };
 
 enum class fluid_type {
@@ -72,8 +78,9 @@ struct tank_device2 {
   std::optional<std::string> name;
   std::optional<fluid_type> type;
   std::optional<tank_capacity> capacity;
+  std::vector<sensor_id> sensor_ids = {};
 
-  auto operator<=>(const tank_device2&) const = default;
+  bool operator==(const tank_device2&) const = default;
 };
 
 enum class battery_type {
@@ -93,16 +100,18 @@ struct battery_device2 {
   std::optional<std::string> name;
   std::optional<battery_type> type;
   std::optional<battery_capacity> capacity;
+  std::vector<sensor_id> sensor_ids = {};
 
-  auto operator<=>(const battery_device2&) const = default;
+  bool operator==(const battery_device2&) const = default;
 };
 
 struct unsupported_device2 {
   device_id id;
   uint32_t raw_type;
   std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-  auto operator<=>(const unsupported_device2&) const = default;
+  bool operator==(const unsupported_device2&) const = default;
 };
 
 using device2 =

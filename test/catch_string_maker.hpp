@@ -13,6 +13,19 @@
 #include <format>
 
 namespace Catch {
+template <> struct StringMaker<std::vector<uint8_t>> {
+  static std::string convert(const std::vector<uint8_t>& v) {
+    std::string out;
+    out += "[";
+    for (size_t i = 0; i < v.size(); ++i) {
+      out += std::to_string(static_cast<unsigned int>(v[i]));
+      if (i + 1 < v.size())
+        out += ", ";
+    }
+    out += "]";
+    return out;
+  }
+};
 
 template <typename T> struct StringMaker<std::expected<T, spymarine::error>> {
   static std::string convert(const std::expected<T, spymarine::error>& value) {
@@ -144,36 +157,46 @@ struct StringMaker<spymarine::device_property<T, Denominator, Unit>> {
 
 template <> struct StringMaker<spymarine::voltage_device2> {
   static std::string convert(const spymarine::voltage_device2& dev) {
-    return std::format("voltage_device {{ id = {}, name = {} }}", dev.id,
-                       StringMaker<decltype(dev.name)>::convert(dev.name));
+    return std::format(
+        "voltage_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
+        StringMaker<decltype(dev.name)>::convert(dev.name),
+        StringMaker<decltype(dev.sensor_ids)>::convert(dev.sensor_ids));
   }
 };
 
 template <> struct StringMaker<spymarine::resistive_device2> {
   static std::string convert(const spymarine::resistive_device2& dev) {
-    return std::format("resistive_device {{ id = {}, name = {} }}", dev.id,
-                       StringMaker<decltype(dev.name)>::convert(dev.name));
+    return std::format(
+        "resistive_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
+        StringMaker<decltype(dev.name)>::convert(dev.name),
+        StringMaker<decltype(dev.sensor_ids)>::convert(dev.sensor_ids));
   }
 };
 
 template <> struct StringMaker<spymarine::barometer_device2> {
   static std::string convert(const spymarine::barometer_device2& dev) {
-    return std::format("resistive_device {{ id = {}, name = {} }}", dev.id,
-                       StringMaker<decltype(dev.name)>::convert(dev.name));
+    return std::format(
+        "barometer_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
+        StringMaker<decltype(dev.name)>::convert(dev.name),
+        StringMaker<decltype(dev.sensor_ids)>::convert(dev.sensor_ids));
   }
 };
 
 template <> struct StringMaker<spymarine::current_device2> {
   static std::string convert(const spymarine::current_device2& dev) {
-    return std::format("current_device {{ id = {}, name = {} }}", dev.id,
-                       StringMaker<decltype(dev.name)>::convert(dev.name));
+    return std::format(
+        "current_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
+        StringMaker<decltype(dev.name)>::convert(dev.name),
+        StringMaker<decltype(dev.sensor_ids)>::convert(dev.sensor_ids));
   }
 };
 
 template <> struct StringMaker<spymarine::temperature_device2> {
   static std::string convert(const spymarine::temperature_device2& dev) {
-    return std::format("temperature_device {{ id = {}, name = {} }}", dev.id,
-                       StringMaker<decltype(dev.name)>::convert(dev.name));
+    return std::format(
+        "temperature_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
+        StringMaker<decltype(dev.name)>::convert(dev.name),
+        StringMaker<decltype(dev.sensor_ids)>::convert(dev.sensor_ids));
   }
 };
 
@@ -181,10 +204,11 @@ template <> struct StringMaker<spymarine::battery_device2> {
   static std::string convert(const spymarine::battery_device2& dev) {
     return std::format(
         "battery_device {{ id = {}, name = {}, type = {}, "
-        "capacity = {} }}",
+        "capacity = {}, sensor_ids = {} }}",
         dev.id, StringMaker<decltype(dev.name)>::convert(dev.name),
         StringMaker<decltype(dev.type)>::convert(dev.type),
-        StringMaker<decltype(dev.capacity)>::convert(dev.capacity));
+        StringMaker<decltype(dev.capacity)>::convert(dev.capacity),
+        StringMaker<decltype(dev.sensor_ids)>::convert(dev.sensor_ids));
   }
 };
 
@@ -192,19 +216,22 @@ template <> struct StringMaker<spymarine::tank_device2> {
   static std::string convert(const spymarine::tank_device2& dev) {
     return std::format(
         "tank_device_info {{ id = {}, name = {}, type = {}, capacity "
-        "= {} }}",
+        "= {}, sensor_ids = {} }}",
         dev.id, StringMaker<decltype(dev.name)>::convert(dev.name),
         StringMaker<decltype(dev.type)>::convert(dev.type),
-        StringMaker<decltype(dev.capacity)>::convert(dev.capacity));
+        StringMaker<decltype(dev.capacity)>::convert(dev.capacity),
+        StringMaker<decltype(dev.sensor_ids)>::convert(dev.sensor_ids));
   }
 };
 
 template <> struct StringMaker<spymarine::unsupported_device2> {
   static std::string convert(const spymarine::unsupported_device2& dev) {
-    return std::format("unsupported_device_info {{ id = {}, type = "
-                       "{}, name = {} }}",
-                       dev.id, dev.raw_type,
-                       StringMaker<decltype(dev.name)>::convert(dev.name));
+    return std::format(
+        "unsupported_device {{ id = {}, type = {}, name = {}, sensor_ids "
+        "= {} }}",
+        dev.id, dev.raw_type,
+        StringMaker<decltype(dev.name)>::convert(dev.name),
+        StringMaker<decltype(dev.sensor_ids)>::convert(dev.sensor_ids));
   }
 };
 
