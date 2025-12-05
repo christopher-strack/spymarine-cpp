@@ -1,5 +1,6 @@
 #pragma once
 
+#include "spymarine/id.hpp"
 #include "spymarine/rational.hpp"
 #include "spymarine/unit.hpp"
 
@@ -9,9 +10,6 @@
 #include <variant>
 
 namespace spymarine {
-
-// sensor IDs can only be 8-bit and there cannot be more devices than sensors
-using device_id = uint8_t;
 
 template <typename T, size_t Denominator, unit Unit> struct device_property {
   static constexpr auto unit = Unit;
