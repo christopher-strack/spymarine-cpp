@@ -1,74 +1,67 @@
-#include "example_utils.hpp"
-
-#include "spymarine/buffer.hpp"
-#include "spymarine/discover.hpp"
-#include "spymarine/read_devices.hpp"
-#include "spymarine/sensor_reader.hpp"
-#include "spymarine/tcp_socket.hpp"
-#include "spymarine/udp_socket.hpp"
+#include "spymarine/client.hpp"
+#include "spymarine/hub.hpp"
+#include "spymarine/sensor2.hpp"
 
 #include <chrono>
 #include <print>
 
-namespace {
-
-[[noreturn]] void process_sensor_values(
-    const std::vector<spymarine::device>& devices,
-    spymarine::moving_average_sensor_reader<spymarine::udp_socket>&
-        sensor_reader) {
-  std::println("Start processing sensor values");
-
-  while (true) {
-    const auto result =
-        sensor_reader.read_and_update().transform([&](bool window_completed) {
-          if (window_completed) {
-            for (const auto& d : devices) {
-              std::println("{}", device_string(d));
-            }
-          }
-        });
-
-    if (!result) {
-      std::println("Failed to read sensor values: {}",
-                   spymarine::error_message(result.error()));
-    }
-  }
-}
-
-} // namespace
-
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
-  std::println("Discover Simarine device");
+  using clock = std::chrono::steady_clock;
 
-  spymarine::static_buffer buffer;
-  const auto result =
-      spymarine::discover()
-          .and_then([&](const auto ip) {
-            std::println("Read devices");
+  std::print("Discovering Simarine system... ");
+  const auto ip = spymarine::discover();
+  if (!ip) {
+    std::println("failed: {}", spymarine::error_message(ip.error()));
+    return 1;
+  }
+  std::println("done");
 
-            spymarine::filter_by_device_type<spymarine::temperature_device,
-                                             spymarine::tank_device,
-                                             spymarine::battery_device>
-                device_filter;
+  std::print("Connecting... ");
+  auto hub = spymarine::connect(*ip).and_then(spymarine::initialize_hub);
+  if (!hub) {
+    std::println("failed: {}", spymarine::error_message(hub.error()));
+    return 1;
+  }
+  std::println("done");
 
-            return spymarine::read_devices<spymarine::tcp_socket>(
-                buffer, ip, spymarine::simarine_default_tcp_port,
-                device_filter);
-          })
-          .and_then([&](auto devices) {
-            std::println("Found {} devices", devices.size());
-
-            return spymarine::make_moving_average_sensor_reader(
-                       buffer, std::chrono::seconds{10}, devices)
-                .transform([&](auto sensor_reader) {
-                  std::println("Reading sensor states");
-                  process_sensor_values(devices, sensor_reader);
-                });
+  const auto update_interval = std::chrono::seconds(10);
+  auto last_update_time = std::optional<clock::time_point>{};
+  auto current_sensors =
+      hub->sensors() | std::views::filter([](const auto& s) {
+        return std::holds_alternative<spymarine::current_sensor2>(s);
+      }) |
+      std::views::transform(
+          [](const auto& s) -> const spymarine::current_sensor2& {
+            return std::get<spymarine::current_sensor2>(s);
           });
 
-  if (!result) {
-    std::println("Failed to read sensor states: {}",
-                 spymarine::error_message(result.error()));
+  // print the moving average of current sensors every update_interval
+  while (true) {
+    const auto update_result = hub->update_sensor_values();
+
+    if (!update_result) {
+      std::println("Failed to update sensor values: {}",
+                   spymarine::error_message(update_result.error()));
+      return 1;
+    }
+
+    const auto last_update_time_elapsed =
+        last_update_time
+            .transform([=](auto& t) {
+              const auto elapsed = clock::now() - t;
+              return elapsed >= update_interval;
+            })
+            .value_or(true);
+
+    if (last_update_time_elapsed) {
+      for (const auto& sensor_ : current_sensors) {
+        std::println("Sensor #{}: {} A", sensor_.id,
+                     sensor_.value.average_value);
+      }
+
+      hub->start_new_average_window();
+      last_update_time = std::chrono::steady_clock::now();
+    }
   }
 
   return 0;
