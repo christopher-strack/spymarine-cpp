@@ -76,7 +76,19 @@ public:
   }
 };
 
-class mock_udp_socket {
+template <typename T> class test_udp_socket_base {
+public:
+  static std::expected<T, error> open() { return T{}; }
+
+  std::expected<void, error> bind([[maybe_unused]] uint32_t ip,
+                                  [[maybe_unused]] uint16_t port) {
+    return {};
+  }
+
+  std::expected<uint32_t, error> discover() { return 0x7f000001; }
+};
+
+class mock_udp_socket : public test_udp_socket_base<mock_udp_socket> {
 public:
   std::expected<std::span<const uint8_t>, error>
   receive([[maybe_unused]] std::span<uint8_t> buffer) {
@@ -84,7 +96,7 @@ public:
   }
 };
 
-class failing_udp_socket {
+class failing_udp_socket : public test_udp_socket_base<failing_udp_socket> {
 public:
   std::expected<std::span<const uint8_t>, error>
   receive([[maybe_unused]] std::span<uint8_t> buffer) {

@@ -2,20 +2,6 @@ add_library(spymarine)
 
 target_sources(
     spymarine
-    PRIVATE
-        device_ostream.cpp
-        discover.cpp
-        error.cpp
-        file_descriptor.cpp
-        read_devices.cpp
-        sensor_reader.cpp
-        tcp_socket.cpp
-        udp_socket.cpp
-        $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:home_assistant.cpp>
-)
-
-target_sources(
-    spymarine
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS ${PROJECT_SOURCE_DIR}/include
@@ -30,6 +16,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/discover.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/file_descriptor.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/hub.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_value.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_values_iterator.hpp
@@ -50,6 +37,16 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/udp_socket.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/unit.hpp
             $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:${PROJECT_SOURCE_DIR}/include/spymarine/home_assistant.hpp>
+    PRIVATE
+        device_ostream.cpp
+        discover.cpp
+        error.cpp
+        file_descriptor.cpp
+        read_devices.cpp
+        sensor_reader.cpp
+        tcp_socket.cpp
+        udp_socket.cpp
+        $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:home_assistant.cpp>
 )
 
 set_target_properties(spymarine PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)

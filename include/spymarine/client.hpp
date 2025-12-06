@@ -2,6 +2,7 @@
 
 #include "spymarine/buffer.hpp"
 #include "spymarine/crc.hpp"
+#include "spymarine/defaults.hpp"
 #include "spymarine/device2.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message.hpp"
@@ -15,7 +16,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <concepts>
 #include <cstdint>
 #include <expected>
 #include <limits>
@@ -24,36 +24,11 @@
 
 namespace spymarine {
 
-template <typename tcp_socket_type>
-concept tcp_socket_concept =
-    requires(tcp_socket_type socket, uint32_t ip, uint16_t port) {
-      {
-        tcp_socket_type::open()
-      } -> std::same_as<std::expected<tcp_socket_type, error>>;
-      { socket.connect(ip, port) } -> std::same_as<std::expected<void, error>>;
-      {
-        socket.send(std::span<uint8_t>{})
-      } -> std::same_as<std::expected<void, error>>;
-      {
-        socket.receive(std::span<uint8_t>{})
-      } -> std::same_as<std::expected<std::span<const uint8_t>, error>>;
-    };
-
-template <typename udp_socket_type>
-concept udp_socket_concept =
-    requires(udp_socket_type socket, uint32_t ip, uint16_t port) {
-      {
-        socket.receive(std::span<uint8_t>{})
-      } -> std::same_as<std::expected<std::span<const uint8_t>, error>>;
-    };
-
-template <tcp_socket_concept tcp_socket_type,
-          udp_socket_concept udp_socket_type>
-class client {
+template <typename tcp_socket_type, typename udp_socket_type> class client {
 public:
   constexpr explicit client(tcp_socket_type&& tcp_socket_,
                             udp_socket_type&& udp_socket_) noexcept
-      : _tcp_socket{std::move(tcp_socket_)},
+      : _buffer{}, _tcp_socket{std::move(tcp_socket_)},
         _udp_socket{std::move(udp_socket_)} {}
 
   constexpr std::expected<count_info, error> request_count_info() noexcept {
@@ -153,5 +128,34 @@ private:
   tcp_socket_type _tcp_socket;
   udp_socket_type _udp_socket;
 };
+
+template <typename tcp_socket_type, typename udp_socket_type>
+constexpr static std::expected<client<tcp_socket_type, udp_socket_type>, error>
+discover_and_connect(
+    const uint16_t udp_port = simarine_default_udp_port,
+    const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
+  auto udp_socket_ = udp_socket_type::open();
+  if (!udp_socket_) {
+    return std::unexpected{udp_socket_.error()};
+  }
+
+  auto tcp_socket_ = tcp_socket_type::open();
+  if (!tcp_socket_) {
+    return std::unexpected{tcp_socket_.error()};
+  }
+
+  const auto connect_result =
+      udp_socket_->bind(0, udp_port)
+          .and_then([&]() { return udp_socket_->discover(); })
+          .and_then([&](const auto ip) {
+            return tcp_socket_->connect(ip, tcp_port);
+          });
+
+  if (!connect_result) {
+    return std::unexpected{connect_result.error()};
+  }
+
+  return client{std::move(*tcp_socket_), std::move(*udp_socket_)};
+}
 
 } // namespace spymarine

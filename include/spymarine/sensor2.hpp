@@ -1,15 +1,13 @@
 #pragma once
 
-#include "spymarine/device2.hpp"
+#include "spymarine/id.hpp"
 #include "spymarine/message_value.hpp"
+#include "spymarine/rational.hpp"
+#include "spymarine/unit.hpp"
 
 #include <optional>
 
 namespace spymarine {
-
-// sensor IDs can only be 8-bit values. Each sensor corresponds to a message
-// value in the sensor state message.
-using sensor_id = message_value_id;
 
 template <typename T, size_t Denominator, unit Unit> struct sensor_value2 {
   static constexpr auto unit = Unit;
@@ -152,6 +150,10 @@ using sensor2 =
     std::variant<voltage_sensor2, current_sensor2, temperature_sensor2,
                  barometer_sensor2, resistive_sensor2, tank_sensor2,
                  battery_sensor2, unsupported_sensor2>;
+
+constexpr auto parent_device_id(const sensor2& sensor) noexcept {
+  return std::visit([&](auto& s) { return s.parent_device_id; }, sensor);
+}
 
 constexpr void update_sensor(sensor2& sensor, const numeric_value1& value,
                              const size_t average_count) noexcept {

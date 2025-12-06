@@ -67,6 +67,11 @@ TEST_CASE("client") {
 
     CHECK_THAT(sensors, Catch::Matchers::RangeEquals(parsed_sensors2));
   }
+
+  SECTION("discover_and_connect") {
+    auto client_ = discover_and_connect<mock_tcp_socket, mock_udp_socket>();
+    REQUIRE(client_.has_value());
+  }
 }
 
 } // namespace spymarine
