@@ -94,4 +94,9 @@ initialize_hub(client<tcp_socket_type, udp_socket_type> client_) noexcept {
   return hub{std::move(client_), std::move(devices), std::move(sensors)};
 }
 
+constexpr std::expected<hub<tcp_socket, udp_socket>, error>
+initialize_real_hub(client<tcp_socket, udp_socket> client_) noexcept {
+  return initialize_hub(std::move(client_));
+}
+
 } // namespace spymarine
