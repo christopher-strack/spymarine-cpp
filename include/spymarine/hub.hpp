@@ -3,6 +3,8 @@
 #include "spymarine/client.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message_value.hpp"
+#include "spymarine/tcp_socket.hpp"
+#include "spymarine/udp_socket.hpp"
 
 #include <expected>
 #include <vector>
@@ -54,7 +56,8 @@ private:
 
 template <typename tcp_socket_type, typename udp_socket_type>
 constexpr std::expected<hub<tcp_socket_type, udp_socket_type>, error>
-initialize_hub(client<tcp_socket_type, udp_socket_type> client_) noexcept {
+initialize_hub_with_sockets(
+    client<tcp_socket_type, udp_socket_type> client_) noexcept {
   const auto info = client_.request_count_info();
   if (!info) {
     return std::unexpected{info.error()};
@@ -93,5 +96,8 @@ initialize_hub(client<tcp_socket_type, udp_socket_type> client_) noexcept {
 
   return hub{std::move(client_), std::move(devices), std::move(sensors)};
 }
+
+std::expected<hub<tcp_socket, udp_socket>, error>
+initialize_hub(client<tcp_socket, udp_socket> client_);
 
 } // namespace spymarine

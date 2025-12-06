@@ -69,7 +69,8 @@ TEST_CASE("client") {
   }
 
   SECTION("discover_and_connect") {
-    auto client_ = discover_and_connect<mock_tcp_socket, mock_udp_socket>();
+    auto client_ =
+        discover_and_connect_with_sockets<mock_tcp_socket, mock_udp_socket>();
     REQUIRE(client_.has_value());
   }
 }

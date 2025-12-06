@@ -12,6 +12,8 @@
 #include "spymarine/parse_message.hpp"
 #include "spymarine/parse_sensor2.hpp"
 #include "spymarine/sensor2.hpp"
+#include "spymarine/tcp_socket.hpp"
+#include "spymarine/udp_socket.hpp"
 
 #include <algorithm>
 #include <array>
@@ -129,9 +131,10 @@ private:
   udp_socket_type _udp_socket;
 };
 
-template <typename tcp_socket_type, typename udp_socket_type>
+template <typename tcp_socket_type = tcp_socket,
+          typename udp_socket_type = udp_socket>
 constexpr static std::expected<client<tcp_socket_type, udp_socket_type>, error>
-discover_and_connect(
+discover_and_connect_with_sockets(
     const uint16_t udp_port = simarine_default_udp_port,
     const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
   auto udp_socket_ = udp_socket_type::open();
@@ -156,6 +159,14 @@ discover_and_connect(
   }
 
   return client{std::move(*tcp_socket_), std::move(*udp_socket_)};
+}
+
+constexpr static std::expected<client<tcp_socket, udp_socket>, error>
+discover_and_connect(
+    const uint16_t udp_port = simarine_default_udp_port,
+    const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
+  return discover_and_connect_with_sockets<tcp_socket, udp_socket>(udp_port,
+                                                                   tcp_port);
 }
 
 } // namespace spymarine
