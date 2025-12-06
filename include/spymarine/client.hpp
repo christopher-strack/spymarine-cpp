@@ -53,7 +53,7 @@ class client {
 public:
   constexpr explicit client(tcp_socket_type&& tcp_socket_,
                             udp_socket_type&& udp_socket_) noexcept
-      : _tcp_socket{std::move(tcp_socket_)},
+      : _buffer{}, _tcp_socket{std::move(tcp_socket_)},
         _udp_socket{std::move(udp_socket_)} {}
 
   constexpr std::expected<count_info, error> request_count_info() noexcept {
