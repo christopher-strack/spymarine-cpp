@@ -140,8 +140,7 @@ template <> struct StringMaker<spymarine::unit> {
 template <typename T, size_t Denominator>
 struct StringMaker<spymarine::rational<T, Denominator>> {
   static std::string convert(const spymarine::rational<T, Denominator>& r) {
-    return std::format("{:.{}f}", r.to_float(),
-                       static_cast<int>(std::log10(Denominator)));
+    return r.to_string();
   }
 };
 
