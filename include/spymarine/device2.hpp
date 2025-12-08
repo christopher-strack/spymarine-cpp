@@ -119,6 +119,10 @@ using device2 =
                  barometer_device2, resistive_device2, tank_device2,
                  battery_device2, unsupported_device2>;
 
+constexpr device_id get_device_id(const device2& device_) noexcept {
+  return std::visit([](const auto& dev) { return dev.id; }, device_);
+}
+
 constexpr void add_sensor_id(device2& device_, sensor_id id) noexcept {
   std::visit([id](auto& dev) { dev.sensor_ids.push_back(id); }, device_);
 }

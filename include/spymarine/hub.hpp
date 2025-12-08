@@ -1,8 +1,10 @@
 #pragma once
 
 #include "spymarine/client.hpp"
+#include "spymarine/device2.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message_value.hpp"
+#include "spymarine/parse_error.hpp"
 #include "spymarine/tcp_socket.hpp"
 #include "spymarine/udp_socket.hpp"
 
@@ -76,6 +78,10 @@ initialize_hub_with_sockets(
       return std::unexpected{device_.error()};
     }
 
+    if (get_device_id(*device_) != id) {
+      return std::unexpected{parse_error::invalid_device_message};
+    }
+
     devices.push_back(std::move(*device_));
   }
 
@@ -84,6 +90,10 @@ initialize_hub_with_sockets(
 
     if (!sensor_) {
       return std::unexpected{sensor_.error()};
+    }
+
+    if (get_sensor_id(*sensor_) != id) {
+      return std::unexpected{parse_error::invalid_sensor_message};
     }
 
     if (const auto dev_id = parent_device_id(*sensor_);
