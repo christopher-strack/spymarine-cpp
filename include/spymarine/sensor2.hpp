@@ -151,13 +151,13 @@ using sensor2 =
                  barometer_sensor2, resistive_sensor2, tank_sensor2,
                  battery_sensor2, unsupported_sensor2>;
 
-constexpr auto parent_device_id(const sensor2& sensor) noexcept {
-  return std::visit([&](auto& s) { return s.parent_device_id; }, sensor);
+constexpr auto parent_device_id(const sensor2& sensor_) noexcept {
+  return std::visit([&](auto& s) { return s.parent_device_id; }, sensor_);
 }
 
-constexpr void update_sensor(sensor2& sensor, const numeric_value1& value,
+constexpr void update_sensor(sensor2& sensor_, const numeric_value1& value,
                              const size_t average_count) noexcept {
-  std::visit([&](auto& s) { s.update(value, average_count); }, sensor);
+  std::visit([&](auto& s) { s.update(value, average_count); }, sensor_);
 }
 
 } // namespace spymarine
