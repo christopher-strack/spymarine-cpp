@@ -96,7 +96,7 @@ initialize_hub_with_sockets(
       return std::unexpected{parse_error::invalid_sensor_message};
     }
 
-    if (const auto dev_id = parent_device_id(*sensor_);
+    if (const auto dev_id = get_parent_device_id(*sensor_);
         dev_id.has_value() && *dev_id < devices.size()) {
       add_sensor_id(devices[*dev_id], id);
     }
