@@ -38,7 +38,7 @@ make_generic_sensor_component_entry(const uint8_t device_id,
 }
 
 constexpr std::string_view origin_object() {
-  return R"({"name":"spymarine","sw":")" PROJECT_VERSION
+  return R"({"name":"spymarine","sw":")" SPYMARINE_PROJECT_VERSION
          R"(","url":"https://github.com/christopher-strack/spymarine-cpp"})";
 }
 

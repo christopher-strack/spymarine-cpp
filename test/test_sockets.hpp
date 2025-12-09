@@ -52,15 +52,17 @@ public:
 
   constexpr std::expected<std::span<const uint8_t>, error>
   receive(std::span<uint8_t> buffer) noexcept {
-    const auto length = std::min(buffer.size(), _response.size());
-    const auto diff = static_cast<std::ptrdiff_t>(length);
-    std::ranges::copy_n(_response.begin(), diff, buffer.begin());
-    _response.erase(_response.begin(), _response.begin() + diff);
-    return buffer.subspan(0, length);
+    if (!_response) {
+      return std::unexpected(std::errc::io_error);
+    }
+
+    const auto copy_result = std::ranges::copy(*_response, buffer.begin());
+    _response.reset();
+    return std::span{buffer.begin(), copy_result.out};
   }
 
 private:
-  std::vector<uint8_t> _response;
+  std::optional<std::vector<uint8_t>> _response;
 };
 
 class failing_tcp_socket : public test_tcp_socket_base<failing_tcp_socket> {

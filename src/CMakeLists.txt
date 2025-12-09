@@ -42,6 +42,7 @@ target_sources(
         discover.cpp
         error.cpp
         file_descriptor.cpp
+        hub.cpp
         read_devices.cpp
         sensor_reader.cpp
         tcp_socket.cpp
@@ -51,6 +52,6 @@ target_sources(
 
 set_target_properties(spymarine PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)
 
-target_compile_definitions(spymarine PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(spymarine PUBLIC SPYMARINE_PROJECT_VERSION="${PROJECT_VERSION}")
 
 target_enable_warnings(spymarine)

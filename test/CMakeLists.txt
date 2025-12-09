@@ -56,7 +56,6 @@ target_link_libraries(
 target_compile_definitions(
     spymarine_tests
     PRIVATE
-        PROJECT_VERSION="${PROJECT_VERSION}"
         CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER=1
         CATCH_CONFIG_ENABLE_OPTIONAL_STRINGMAKER=1
         CATCH_CONFIG_ENABLE_VARIANT_STRINGMAKER=1
