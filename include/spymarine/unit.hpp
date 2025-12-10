@@ -6,6 +6,7 @@ enum class unit {
   volts,
   amps,
   celsius,
+  millibars_per_hour,
   millibar,
   ohms,
   liters,

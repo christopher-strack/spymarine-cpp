@@ -83,6 +83,19 @@ struct barometer_sensor2 {
   auto operator<=>(const barometer_sensor2&) const = default;
 };
 
+struct barometer_trend_sensor2 {
+  sensor_id id;
+  std::optional<device_id> parent_device_id;
+  sensor_value2<int32_t, 100, unit::millibars_per_hour> value{};
+
+  constexpr void update(const numeric_value1& numeric,
+                        const size_t average_count) noexcept {
+    value.update(numeric.int32(), average_count);
+  }
+
+  auto operator<=>(const barometer_trend_sensor2&) const = default;
+};
+
 struct resistive_sensor2 {
   sensor_id id;
   std::optional<device_id> parent_device_id;
@@ -148,8 +161,8 @@ struct unsupported_sensor2 {
 
 using sensor2 =
     std::variant<voltage_sensor2, current_sensor2, temperature_sensor2,
-                 barometer_sensor2, resistive_sensor2, tank_sensor2,
-                 battery_sensor2, unsupported_sensor2>;
+                 barometer_sensor2, barometer_trend_sensor2, resistive_sensor2,
+                 tank_sensor2, battery_sensor2, unsupported_sensor2>;
 
 constexpr sensor_id get_sensor_id(const sensor2& sensor_) noexcept {
   return std::visit([](const auto& s) { return s.id; }, sensor_);

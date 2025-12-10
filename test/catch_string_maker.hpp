@@ -123,6 +123,8 @@ template <> struct StringMaker<spymarine::unit> {
       return "°C";
     case spymarine::unit::millibar:
       return "mbar";
+    case spymarine::unit::millibars_per_hour:
+      return "mbar/h";
     case spymarine::unit::ohms:
       return "Ω";
     case spymarine::unit::liters:
