@@ -167,7 +167,7 @@ constexpr auto make_parsed_devices2_with_sensors() {
 constexpr auto parsed_sensors2 = std::to_array<sensor2>({
     unsupported_sensor2{.id = 0, .parent_device_id = 1, .raw_type = 10},
     unsupported_sensor2{.id = 1, .parent_device_id = 1, .raw_type = 10},
-    barometer_sensor2{.id = 2, .parent_device_id = 5},
+    barometer_trend_sensor2{.id = 2, .parent_device_id = 5},
     barometer_sensor2{.id = 3, .parent_device_id = 5},
     unsupported_sensor2{.id = 4, .parent_device_id = 5, .raw_type = 6},
     voltage_sensor2{.id = 5, .parent_device_id = 6},
@@ -178,7 +178,7 @@ constexpr auto parsed_sensors2 = std::to_array<sensor2>({
     unsupported_sensor2{
         .id = 8, .parent_device_id = std::nullopt, .raw_type = 0},
     unsupported_sensor2{.id = 9, .parent_device_id = 1, .raw_type = 10},
-    barometer_sensor2{.id = 10, .parent_device_id = 2},
+    barometer_trend_sensor2{.id = 10, .parent_device_id = 2},
     voltage_sensor2{.id = 11, .parent_device_id = 10},
     voltage_sensor2{.id = 12, .parent_device_id = 11},
     voltage_sensor2{.id = 13, .parent_device_id = 12},
@@ -225,7 +225,7 @@ constexpr auto parsed_sensors2_with_value = std::to_array<sensor2>({
         .raw_type = 10,
         .raw_value = 1699128031,
     },
-    barometer_sensor2{.id = 2, .parent_device_id = 5, .value = {-1002}},
+    barometer_trend_sensor2{.id = 2, .parent_device_id = 5, .value = {-1002}},
     barometer_sensor2{.id = 3, .parent_device_id = 5, .value = {97983}},
     unsupported_sensor2{
         .id = 4,
@@ -252,7 +252,7 @@ constexpr auto parsed_sensors2_with_value = std::to_array<sensor2>({
         .raw_type = 10,
         .raw_value = 1696226262,
     },
-    barometer_sensor2{.id = 10, .parent_device_id = 2, .value = {-1002}},
+    barometer_trend_sensor2{.id = 10, .parent_device_id = 2, .value = {-1002}},
     voltage_sensor2{.id = 11, .parent_device_id = 10, .value = {0}},
     voltage_sensor2{.id = 12, .parent_device_id = 11, .value = {35}},
     voltage_sensor2{.id = 13, .parent_device_id = 12, .value = {0}},

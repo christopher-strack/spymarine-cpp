@@ -19,6 +19,8 @@ parse_sensor2(const message_values_view values) noexcept {
   }
 
   const auto id = id_value->uint8();
+  const auto device_local_id = values.find<numeric_value1>(4).transform(
+      [](auto n) { return n.uint8(); });
   const auto parent_device_id = values.find<numeric_value1>(3).transform(
       [](auto n) { return n.uint32(); });
 
@@ -30,7 +32,11 @@ parse_sensor2(const message_values_view values) noexcept {
   case 4:
     return temperature_sensor2{.id = id, .parent_device_id = parent_device_id};
   case 5:
-    return barometer_sensor2{.id = id, .parent_device_id = parent_device_id};
+    return device_local_id == 0
+               ? sensor2{barometer_trend_sensor2{
+                     .id = id, .parent_device_id = parent_device_id}}
+               : sensor2{barometer_sensor2{
+                     .id = id, .parent_device_id = parent_device_id}};
   case 7:
     return resistive_sensor2{.id = id, .parent_device_id = parent_device_id};
   case 8:
