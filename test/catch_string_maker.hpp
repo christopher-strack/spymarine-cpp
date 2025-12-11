@@ -1,10 +1,10 @@
 #pragma once
 
+#include "spymarine/count_info.hpp"
 #include "spymarine/device2.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message_value.hpp"
 #include "spymarine/overloaded.hpp"
-#include "spymarine/parse_count_info.hpp"
 #include "spymarine/sensor2.hpp"
 #include "spymarine/system_info.hpp"
 
