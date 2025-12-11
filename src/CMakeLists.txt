@@ -40,7 +40,6 @@ target_sources(
         device_ostream.cpp
         error.cpp
         file_descriptor.cpp
-        hub.cpp
         read_devices.cpp
         sensor_reader.cpp
         tcp_socket.cpp

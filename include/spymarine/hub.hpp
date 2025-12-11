@@ -107,7 +107,9 @@ initialize_hub_with_sockets(
   return hub{std::move(client_), std::move(devices), std::move(sensors)};
 }
 
-std::expected<hub<tcp_socket, udp_socket>, error>
-initialize_hub(client<tcp_socket, udp_socket> client_);
+inline std::expected<hub<tcp_socket, udp_socket>, error>
+initialize_hub(client<tcp_socket, udp_socket> client_) {
+  return initialize_hub_with_sockets(std::move(client_));
+}
 
 } // namespace spymarine
