@@ -43,6 +43,8 @@ public:
         assert(value.has_value());
         const auto id = value->uint32();
         _response = raw_sensor_info_responses[id] | to<std::vector>();
+      } else if (message->type() == message_type::sensor_state) {
+        _response = raw_state_response | std::ranges::to<std::vector>();
       } else {
         return std::unexpected{std::errc::connection_refused};
       }

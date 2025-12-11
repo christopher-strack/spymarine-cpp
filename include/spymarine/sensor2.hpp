@@ -2,9 +2,12 @@
 
 #include "spymarine/id.hpp"
 #include "spymarine/message_value.hpp"
+#include "spymarine/message_values_view.hpp"
 #include "spymarine/rational.hpp"
 #include "spymarine/unit.hpp"
 
+#include <cassert>
+#include <concepts> // IWYU pragma: keep
 #include <optional>
 
 namespace spymarine {
@@ -164,6 +167,11 @@ using sensor2 =
                  barometer_sensor2, barometer_trend_sensor2, resistive_sensor2,
                  tank_sensor2, battery_sensor2, unsupported_sensor2>;
 
+template <typename T>
+concept sensor_range =
+    std::ranges::random_access_range<T> && std::ranges::sized_range<T> &&
+    std::same_as<std::ranges::range_value_t<T>, sensor2>;
+
 constexpr sensor_id get_sensor_id(const sensor2& sensor_) noexcept {
   return std::visit([](const auto& s) { return s.id; }, sensor_);
 }
@@ -175,6 +183,19 @@ constexpr auto get_parent_device_id(const sensor2& sensor_) noexcept {
 constexpr void update_sensor(sensor2& sensor_, const numeric_value1& value,
                              const size_t average_count) noexcept {
   std::visit([&](auto& s) { s.update(value, average_count); }, sensor_);
+}
+
+constexpr void update_sensor_values(sensor_range auto& sensors,
+                                    const message_values_view& values,
+                                    const size_t average_count) {
+  for (const auto& value : values) {
+    if (const auto num = std::get_if<numeric_value1>(&value);
+        num != nullptr && num->id() < sensors.size()) {
+      auto& sensor_ = sensors[num->id()];
+      assert(get_sensor_id(sensor_) == num->id());
+      update_sensor(sensor_, *num, average_count);
+    }
+  }
 }
 
 } // namespace spymarine

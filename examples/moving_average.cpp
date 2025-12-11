@@ -37,10 +37,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 
   // print the moving average of current sensors every update_interval
   while (true) {
-    const auto update_result = hub->update_sensor_values();
+    const auto update_result = hub->read_sensor_values();
 
     if (!update_result) {
-      std::println("Failed to update sensor values: {}",
+      std::println("Failed to read sensor values: {}",
                    spymarine::error_message(update_result.error()));
       return 1;
     }

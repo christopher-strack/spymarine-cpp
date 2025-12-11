@@ -71,6 +71,12 @@ public:
   }
 
   constexpr std::expected<message_values_view, error>
+  request_sensor_state() noexcept {
+    return request_message(message_type::sensor_state, {})
+        .transform([](const message& msg) { return msg.values(); });
+  }
+
+  constexpr std::expected<message_values_view, error>
   read_sensor_state() noexcept {
     // read messages until a sensor state message is found
     auto msg = read_message();

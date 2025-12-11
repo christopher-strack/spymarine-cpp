@@ -2,10 +2,10 @@
 
 #include "spymarine/id.hpp"
 #include "spymarine/rational.hpp"
+#include "spymarine/sensor2.hpp"
 #include "spymarine/unit.hpp"
 
 #include <cassert>
-#include <concepts> // IWYU pragma: keep
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -134,10 +134,6 @@ constexpr std::vector<sensor_id>
 get_sensor_ids(const device2& device_) noexcept {
   return std::visit([](const auto& dev) { return dev.sensor_ids; }, device_);
 }
-
-template <typename T>
-concept sensor_range =
-    std::ranges::random_access_range<T> && std::ranges::sized_range<T>;
 
 constexpr auto get_sensors(const device2& device_,
                            const sensor_range auto& sensors) {

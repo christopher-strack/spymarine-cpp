@@ -3,7 +3,6 @@
 #include "spymarine/client.hpp"
 #include "spymarine/device2.hpp"
 #include "spymarine/error.hpp"
-#include "spymarine/message_value.hpp"
 #include "spymarine/parse_error.hpp"
 #include "spymarine/tcp_socket.hpp"
 #include "spymarine/udp_socket.hpp"
@@ -16,25 +15,18 @@ namespace spymarine {
 template <typename tcp_socket_type, typename udp_socket_type> class hub {
 public:
   constexpr hub(client<tcp_socket_type, udp_socket_type> client_,
-                std::vector<device2> devices,
-                std::vector<sensor2> sensors) noexcept
+                std::vector<device2> devices, std::vector<sensor2> sensors,
+                message_values_view initial_sensor_values) noexcept
       : _client{std::move(client_)}, _devices{std::move(devices)},
-        _sensors{std::move(sensors)} {}
+        _sensors{std::move(sensors)} {
+    update_sensor_values(_sensors, initial_sensor_values, _average_count);
+  }
 
-  std::expected<void, error> update_sensor_values() {
-    if (const auto values = _client.read_sensor_state()) {
-      for (const auto value : *values) {
-        if (const auto n = std::get_if<numeric_value1>(&value)) {
-          update_sensor_value(*n);
-        }
-      }
-
+  std::expected<void, error> read_sensor_values() {
+    return _client.read_sensor_state().transform([this](const auto& values) {
+      update_sensor_values(_sensors, values, _average_count);
       _average_count++;
-
-      return std::expected<void, error>{};
-    } else {
-      return std::unexpected{values.error()};
-    }
+    });
   }
 
   void start_new_average_window() noexcept { _average_count = 0; }
@@ -48,12 +40,6 @@ public:
   }
 
 private:
-  void update_sensor_value(const numeric_value1& value) noexcept {
-    if (value.id() < _sensors.size()) {
-      update_sensor(_sensors[value.id()], value, _average_count);
-    }
-  }
-
   client<tcp_socket_type, udp_socket_type> _client;
   std::vector<device2> _devices;
   std::vector<sensor2> _sensors;
@@ -108,7 +94,13 @@ initialize_hub_with_sockets(
     sensors.push_back(std::move(*sensor_));
   }
 
-  return hub{std::move(client_), std::move(devices), std::move(sensors)};
+  const auto sensor_values = client_.request_sensor_state();
+  if (!sensor_values) {
+    return std::unexpected{sensor_values.error()};
+  }
+
+  return hub{std::move(client_), std::move(devices), std::move(sensors),
+             *sensor_values};
 }
 
 inline std::expected<hub<tcp_socket, udp_socket>, error>
