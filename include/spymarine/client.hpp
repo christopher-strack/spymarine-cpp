@@ -11,6 +11,7 @@
 #include "spymarine/parse_device2.hpp"
 #include "spymarine/parse_message.hpp"
 #include "spymarine/parse_sensor2.hpp"
+#include "spymarine/parse_system_info.hpp"
 #include "spymarine/sensor2.hpp"
 #include "spymarine/tcp_socket.hpp"
 #include "spymarine/udp_socket.hpp"
@@ -32,6 +33,11 @@ public:
                             udp_socket_type&& udp_socket_) noexcept
       : _buffer{}, _tcp_socket{std::move(tcp_socket_)},
         _udp_socket{std::move(udp_socket_)} {}
+
+  constexpr std::expected<system_info, error> request_system_info() noexcept {
+    return request_message(message_type::system_information, {})
+        .and_then(parse_system_info);
+  }
 
   constexpr std::expected<count_info, error> request_count_info() noexcept {
     return request_message(message_type::count_information, {})
@@ -76,8 +82,7 @@ public:
         .transform([](const message& msg) { return msg.values(); });
   }
 
-  constexpr std::expected<message_values_view, error>
-  read_sensor_state() noexcept {
+  constexpr message_values_view read_sensor_state() noexcept {
     // read messages until a sensor state message is found
     auto msg = read_message();
     while (msg.transform([](const auto& m) { return m.type(); }) !=
@@ -85,7 +90,7 @@ public:
       msg = read_message();
     }
 
-    return msg.transform([](const auto m) { return m.values(); });
+    return msg->values();
   }
 
 private:

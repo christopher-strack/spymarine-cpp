@@ -1,22 +1,14 @@
 #pragma once
 
-#include "spymarine/device2.hpp"
+#include "spymarine/count_info.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message.hpp"
 #include "spymarine/message_value.hpp"
-#include "spymarine/sensor2.hpp"
 
 #include <cstdint>
 #include <expected>
 
 namespace spymarine {
-
-struct count_info {
-  device_id device_count;
-  sensor_id sensor_count;
-
-  auto operator<=>(const count_info&) const = default;
-};
 
 constexpr std::expected<count_info, error>
 parse_count_info(const message& msg) noexcept {

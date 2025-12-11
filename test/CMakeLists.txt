@@ -28,7 +28,7 @@ target_sources(
         BASE_DIRS ${PROJECT_SOURCE_DIR}/test
         FILES
             ${PROJECT_SOURCE_DIR}/test/data.hpp
-            ${PROJECT_SOURCE_DIR}/test/raw_data/count_info.hpp
+            ${PROJECT_SOURCE_DIR}/test/raw_data/info.hpp
             ${PROJECT_SOURCE_DIR}/test/raw_data/devices.hpp
             ${PROJECT_SOURCE_DIR}/test/raw_data/sensor_state.hpp
             ${PROJECT_SOURCE_DIR}/test/test_sockets.hpp

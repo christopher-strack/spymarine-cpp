@@ -65,6 +65,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   }
   std::println("done");
 
+  std::println("System Information");
+  std::println("  Serial Number: {}", hub->system().serial_number);
+  std::println("  Firmware Version: {}.{}", hub->system().fw_version.major,
+               hub->system().fw_version.minor);
+
   for (const spymarine::device2& device_ : hub->devices()) {
     std::println("Device #{}: {}", get_device_id(device_),
                  get_device_name(device_).value_or("<unnamed>"));

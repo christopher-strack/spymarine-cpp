@@ -1,5 +1,6 @@
 #include "catch_string_maker.hpp" // IWYU pragma: keep
 #include "data.hpp"
+#include "spymarine/system_info.hpp"
 #include "test_sockets.hpp"
 
 #include "spymarine/hub.hpp"
@@ -13,7 +14,11 @@ TEST_CASE("initialize_hub") {
       initialize_hub_with_sockets(client{mock_tcp_socket{}, mock_udp_socket{}});
   REQUIRE(hub_.has_value());
 
-  static const auto parsed_devices2 = make_parsed_devices2_with_sensors();
+  const auto parsed_devices2 = make_parsed_devices2_with_sensors();
+  static constexpr auto expected_system_info = system_info{
+      .serial_number = 2245968710, .fw_version = firmware_version{1, 17}};
+
+  CHECK(hub_->system() == expected_system_info);
   CHECK_THAT(hub_->devices(), Catch::Matchers::RangeEquals(parsed_devices2));
   CHECK_THAT(hub_->sensors(),
              Catch::Matchers::RangeEquals(parsed_sensors2_with_value));
