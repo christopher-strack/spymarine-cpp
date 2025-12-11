@@ -2,9 +2,12 @@
 
 #include "spymarine/id.hpp"
 #include "spymarine/message_value.hpp"
+#include "spymarine/message_values_view.hpp"
 #include "spymarine/rational.hpp"
 #include "spymarine/unit.hpp"
 
+#include <cassert>
+#include <concepts> // IWYU pragma: keep
 #include <optional>
 
 namespace spymarine {
@@ -163,6 +166,11 @@ using sensor2 =
     std::variant<voltage_sensor2, current_sensor2, temperature_sensor2,
                  barometer_sensor2, barometer_trend_sensor2, resistive_sensor2,
                  tank_sensor2, battery_sensor2, unsupported_sensor2>;
+
+template <typename T>
+concept sensor_range =
+    std::ranges::random_access_range<T> && std::ranges::sized_range<T> &&
+    std::same_as<std::ranges::range_value_t<T>, sensor2>;
 
 constexpr sensor_id get_sensor_id(const sensor2& sensor_) noexcept {
   return std::visit([](const auto& s) { return s.id; }, sensor_);
