@@ -15,10 +15,12 @@ namespace spymarine {
 template <typename tcp_socket_type, typename udp_socket_type> class hub {
 public:
   constexpr hub(client<tcp_socket_type, udp_socket_type> client_,
-                std::vector<device2> devices,
-                std::vector<sensor2> sensors) noexcept
+                std::vector<device2> devices, std::vector<sensor2> sensors,
+                message_values_view initial_sensor_values) noexcept
       : _client{std::move(client_)}, _devices{std::move(devices)},
-        _sensors{std::move(sensors)} {}
+        _sensors{std::move(sensors)} {
+    update_sensor_values(_sensors, initial_sensor_values, _average_count);
+  }
 
   std::expected<void, error> read_sensor_values() {
     return _client.read_sensor_state().transform([this](const auto& values) {
@@ -92,7 +94,13 @@ initialize_hub_with_sockets(
     sensors.push_back(std::move(*sensor_));
   }
 
-  return hub{std::move(client_), std::move(devices), std::move(sensors)};
+  const auto sensor_values = client_.request_sensor_state();
+  if (!sensor_values) {
+    return std::unexpected{sensor_values.error()};
+  }
+
+  return hub{std::move(client_), std::move(devices), std::move(sensors),
+             *sensor_values};
 }
 
 inline std::expected<hub<tcp_socket, udp_socket>, error>
