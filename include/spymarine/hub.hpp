@@ -3,7 +3,6 @@
 #include "spymarine/client.hpp"
 #include "spymarine/device2.hpp"
 #include "spymarine/error.hpp"
-#include "spymarine/message_value.hpp"
 #include "spymarine/parse_error.hpp"
 #include "spymarine/tcp_socket.hpp"
 #include "spymarine/udp_socket.hpp"
@@ -21,20 +20,11 @@ public:
       : _client{std::move(client_)}, _devices{std::move(devices)},
         _sensors{std::move(sensors)} {}
 
-  std::expected<void, error> update_sensor_values() {
-    if (const auto values = _client.read_sensor_state()) {
-      for (const auto value : *values) {
-        if (const auto n = std::get_if<numeric_value1>(&value)) {
-          update_sensor_value(*n);
-        }
-      }
-
+  std::expected<void, error> read_sensor_values() {
+    return _client.read_sensor_state().transform([this](const auto& values) {
+      update_sensor_values(_sensors, values, _average_count);
       _average_count++;
-
-      return std::expected<void, error>{};
-    } else {
-      return std::unexpected{values.error()};
-    }
+    });
   }
 
   void start_new_average_window() noexcept { _average_count = 0; }
@@ -48,12 +38,6 @@ public:
   }
 
 private:
-  void update_sensor_value(const numeric_value1& value) noexcept {
-    if (value.id() < _sensors.size()) {
-      update_sensor(_sensors[value.id()], value, _average_count);
-    }
-  }
-
   client<tcp_socket_type, udp_socket_type> _client;
   std::vector<device2> _devices;
   std::vector<sensor2> _sensors;

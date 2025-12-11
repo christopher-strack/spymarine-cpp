@@ -185,4 +185,17 @@ constexpr void update_sensor(sensor2& sensor_, const numeric_value1& value,
   std::visit([&](auto& s) { s.update(value, average_count); }, sensor_);
 }
 
+constexpr void update_sensor_values(sensor_range auto& sensors,
+                                    const message_values_view& values,
+                                    const size_t average_count) {
+  for (const auto& value : values) {
+    if (const auto num = std::get_if<numeric_value1>(&value);
+        num != nullptr && num->id() < sensors.size()) {
+      auto& sensor_ = sensors[num->id()];
+      assert(get_sensor_id(sensor_) == num->id());
+      update_sensor(sensor_, *num, average_count);
+    }
+  }
+}
+
 } // namespace spymarine

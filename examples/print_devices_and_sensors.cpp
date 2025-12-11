@@ -66,7 +66,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   std::println("done");
 
   std::print("Updating sensor values... ");
-  const auto update_result = hub->update_sensor_values();
+  const auto update_result = hub->read_sensor_values();
   if (!update_result) {
     std::println("failed: {}", spymarine::error_message(update_result.error()));
     return 1;
