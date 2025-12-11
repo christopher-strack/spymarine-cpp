@@ -131,11 +131,24 @@ private:
   udp_socket_type _udp_socket;
 };
 
-template <typename tcp_socket_type = tcp_socket,
-          typename udp_socket_type = udp_socket>
+template <typename udp_socket_type>
+std::expected<uint32_t, error>
+discover_with_socket(uint16_t port = simarine_default_udp_port) {
+  return udp_socket_type::open().and_then([port](auto udp_socket) {
+    return udp_socket.bind(0, port).and_then(
+        [&]() { return udp_socket.discover(); });
+  });
+}
+
+inline std::expected<uint32_t, error>
+discover(uint16_t port = simarine_default_udp_port) {
+  return discover_with_socket<udp_socket>(port);
+}
+
+template <typename tcp_socket_type, typename udp_socket_type>
 constexpr static std::expected<client<tcp_socket_type, udp_socket_type>, error>
-discover_and_connect_with_sockets(
-    const uint16_t udp_port = simarine_default_udp_port,
+connect_with_sockets(
+    const uint32_t ip, const uint16_t udp_port = simarine_default_udp_port,
     const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
   auto udp_socket_ = udp_socket_type::open();
   if (!udp_socket_) {
@@ -147,12 +160,9 @@ discover_and_connect_with_sockets(
     return std::unexpected{tcp_socket_.error()};
   }
 
-  const auto connect_result =
-      udp_socket_->bind(0, udp_port)
-          .and_then([&]() { return udp_socket_->discover(); })
-          .and_then([&](const auto ip) {
-            return tcp_socket_->connect(ip, tcp_port);
-          });
+  const auto connect_result = udp_socket_->bind(0, udp_port).and_then([&]() {
+    return tcp_socket_->connect(ip, tcp_port);
+  });
 
   if (!connect_result) {
     return std::unexpected{connect_result.error()};
@@ -161,12 +171,10 @@ discover_and_connect_with_sockets(
   return client{std::move(*tcp_socket_), std::move(*udp_socket_)};
 }
 
-constexpr static std::expected<client<tcp_socket, udp_socket>, error>
-discover_and_connect(
-    const uint16_t udp_port = simarine_default_udp_port,
-    const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
-  return discover_and_connect_with_sockets<tcp_socket, udp_socket>(udp_port,
-                                                                   tcp_port);
+inline std::expected<client<tcp_socket, udp_socket>, error>
+connect(const uint32_t ip, const uint16_t udp_port = simarine_default_udp_port,
+        const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
+  return connect_with_sockets<tcp_socket, udp_socket>(ip, udp_port, tcp_port);
 }
 
 } // namespace spymarine

@@ -4,6 +4,8 @@
 #include "spymarine/rational.hpp"
 #include "spymarine/unit.hpp"
 
+#include <cassert>
+#include <concepts> // IWYU pragma: keep
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -121,6 +123,32 @@ using device2 =
 
 constexpr device_id get_device_id(const device2& device_) noexcept {
   return std::visit([](const auto& dev) { return dev.id; }, device_);
+}
+
+constexpr std::optional<std::string>
+get_device_name(const device2& device_) noexcept {
+  return std::visit([](const auto& dev) { return dev.name; }, device_);
+}
+
+constexpr std::vector<sensor_id>
+get_sensor_ids(const device2& device_) noexcept {
+  return std::visit([](const auto& dev) { return dev.sensor_ids; }, device_);
+}
+
+template <typename T>
+concept sensor_range =
+    std::ranges::random_access_range<T> && std::ranges::sized_range<T>;
+
+constexpr auto get_sensors(const device2& device_,
+                           const sensor_range auto& sensors) {
+  return get_sensor_ids(device_) | std::views::filter([&](const auto id) {
+           return id < std::ranges::size(sensors);
+         }) |
+         std::views::transform([&](const auto id) {
+           const auto& sensor = sensors[id];
+           assert(get_sensor_id(sensor) == id);
+           return sensor;
+         });
 }
 
 constexpr void add_sensor_id(device2& device_, sensor_id id) noexcept {

@@ -13,7 +13,6 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/device.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/device2.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/device_ostream.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/discover.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/file_descriptor.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/hub.hpp
@@ -39,10 +38,8 @@ target_sources(
             $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:${PROJECT_SOURCE_DIR}/include/spymarine/home_assistant.hpp>
     PRIVATE
         device_ostream.cpp
-        discover.cpp
         error.cpp
         file_descriptor.cpp
-        hub.cpp
         read_devices.cpp
         sensor_reader.cpp
         tcp_socket.cpp

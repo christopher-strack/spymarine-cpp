@@ -43,6 +43,10 @@ public:
 
   const std::vector<sensor2>& sensors() const noexcept { return _sensors; }
 
+  auto sensors(const device2& device_) const noexcept {
+    return get_sensors(device_, _sensors);
+  }
+
 private:
   void update_sensor_value(const numeric_value1& value) noexcept {
     if (value.id() < _sensors.size()) {
@@ -107,7 +111,9 @@ initialize_hub_with_sockets(
   return hub{std::move(client_), std::move(devices), std::move(sensors)};
 }
 
-std::expected<hub<tcp_socket, udp_socket>, error>
-initialize_hub(client<tcp_socket, udp_socket> client_);
+inline std::expected<hub<tcp_socket, udp_socket>, error>
+initialize_hub(client<tcp_socket, udp_socket> client_) {
+  return initialize_hub_with_sockets(std::move(client_));
+}
 
 } // namespace spymarine

@@ -68,9 +68,13 @@ TEST_CASE("client") {
     CHECK_THAT(sensors, Catch::Matchers::RangeEquals(parsed_sensors2));
   }
 
-  SECTION("discover_and_connect") {
-    auto client_ =
-        discover_and_connect_with_sockets<mock_tcp_socket, mock_udp_socket>();
+  SECTION("discover") {
+    auto ip = discover_with_socket<mock_udp_socket>(0);
+    REQUIRE(ip.has_value());
+  }
+
+  SECTION("connect") {
+    auto client_ = connect_with_sockets<mock_tcp_socket, mock_udp_socket>(0);
     REQUIRE(client_.has_value());
   }
 }
