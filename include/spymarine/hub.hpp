@@ -23,11 +23,10 @@ public:
     update_sensor_values(_sensors, initial_sensor_values, _average_count);
   }
 
-  std::expected<void, error> read_sensor_values() {
-    return _client.read_sensor_state().transform([this](const auto& values) {
-      update_sensor_values(_sensors, values, _average_count);
-      _average_count++;
-    });
+  void read_sensor_values() {
+    const auto values = _client.read_sensor_state();
+    update_sensor_values(_sensors, values, _average_count);
+    _average_count++;
   }
 
   void start_new_average_window() noexcept { _average_count = 0; }
