@@ -1,5 +1,5 @@
 #include "spymarine/buffer.hpp"
-#include "spymarine/discover.hpp"
+#include "spymarine/client.hpp"
 #include "spymarine/home_assistant.hpp"
 #include "spymarine/read_devices.hpp"
 
