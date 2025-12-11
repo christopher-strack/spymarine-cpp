@@ -3,6 +3,7 @@
 #include "spymarine/device.hpp"
 #include "spymarine/device2.hpp"
 #include "spymarine/sensor2.hpp"
+#include "spymarine/system_info.hpp"
 
 #include <vector>
 
@@ -66,6 +67,9 @@ inline auto make_parsed_devices_with_values() {
       temperature_device{"Boiler", 41, 39.4f},
   };
 }
+
+constexpr auto parsed_system_info = system_info{
+    .serial_number = 2245968710, .fw_version = firmware_version{1, 17}};
 
 constexpr auto make_parsed_devices2() {
   return std::to_array<device2>({

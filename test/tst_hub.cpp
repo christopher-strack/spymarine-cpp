@@ -15,10 +15,7 @@ TEST_CASE("initialize_hub") {
   REQUIRE(hub_.has_value());
 
   const auto parsed_devices2 = make_parsed_devices2_with_sensors();
-  static constexpr auto expected_system_info = system_info{
-      .serial_number = 2245968710, .fw_version = firmware_version{1, 17}};
-
-  CHECK(hub_->system() == expected_system_info);
+  CHECK(hub_->system() == parsed_system_info);
   CHECK_THAT(hub_->devices(), Catch::Matchers::RangeEquals(parsed_devices2));
   CHECK_THAT(hub_->sensors(),
              Catch::Matchers::RangeEquals(parsed_sensors2_with_value));
