@@ -43,6 +43,10 @@ public:
 
   const std::vector<sensor2>& sensors() const noexcept { return _sensors; }
 
+  auto sensors(const device2& device_) const noexcept {
+    return get_sensors(device_, _sensors);
+  }
+
 private:
   void update_sensor_value(const numeric_value1& value) noexcept {
     if (value.id() < _sensors.size()) {
