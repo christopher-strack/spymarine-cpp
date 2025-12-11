@@ -15,10 +15,11 @@ namespace spymarine {
 template <typename tcp_socket_type, typename udp_socket_type> class hub {
 public:
   constexpr hub(client<tcp_socket_type, udp_socket_type> client_,
-                std::vector<device2> devices, std::vector<sensor2> sensors,
+                system_info system_info_, std::vector<device2> devices,
+                std::vector<sensor2> sensors,
                 message_values_view initial_sensor_values) noexcept
-      : _client{std::move(client_)}, _devices{std::move(devices)},
-        _sensors{std::move(sensors)} {
+      : _client{std::move(client_)}, _system_info{std::move(system_info_)},
+        _devices{std::move(devices)}, _sensors{std::move(sensors)} {
     update_sensor_values(_sensors, initial_sensor_values, _average_count);
   }
 
@@ -31,6 +32,8 @@ public:
 
   void start_new_average_window() noexcept { _average_count = 0; }
 
+  const system_info& system() const noexcept { return _system_info; }
+
   const std::vector<device2>& devices() const noexcept { return _devices; }
 
   const std::vector<sensor2>& sensors() const noexcept { return _sensors; }
@@ -41,6 +44,7 @@ public:
 
 private:
   client<tcp_socket_type, udp_socket_type> _client;
+  system_info _system_info;
   std::vector<device2> _devices;
   std::vector<sensor2> _sensors;
   size_t _average_count{};
@@ -50,18 +54,24 @@ template <typename tcp_socket_type, typename udp_socket_type>
 constexpr std::expected<hub<tcp_socket_type, udp_socket_type>, error>
 initialize_hub_with_sockets(
     client<tcp_socket_type, udp_socket_type> client_) noexcept {
-  const auto info = client_.request_count_info();
-  if (!info) {
-    return std::unexpected{info.error()};
+  const auto system_response = client_.request_system_info();
+  if (!system_response) {
+    return std::unexpected{system_response.error()};
+  }
+
+  const auto count_response = client_.request_count_info();
+  if (!count_response) {
+    return std::unexpected{count_response.error()};
   }
 
   std::vector<device2> devices;
   std::vector<sensor2> sensors;
 
-  devices.reserve(info->device_count);
-  sensors.reserve(info->sensor_count);
+  devices.reserve(count_response->device_count);
+  sensors.reserve(count_response->sensor_count);
 
-  for (const auto id : std::views::iota(device_id(0), info->device_count)) {
+  for (const auto id :
+       std::views::iota(device_id(0), count_response->device_count)) {
     auto device_ = client_.request_device(id);
 
     if (!device_) {
@@ -75,7 +85,8 @@ initialize_hub_with_sockets(
     devices.push_back(std::move(*device_));
   }
 
-  for (const auto id : std::views::iota(sensor_id(0), info->sensor_count)) {
+  for (const auto id :
+       std::views::iota(sensor_id(0), count_response->sensor_count)) {
     auto sensor_ = client_.request_sensor(id);
 
     if (!sensor_) {
@@ -99,8 +110,8 @@ initialize_hub_with_sockets(
     return std::unexpected{sensor_values.error()};
   }
 
-  return hub{std::move(client_), std::move(devices), std::move(sensors),
-             *sensor_values};
+  return hub{std::move(client_), std::move(*system_response),
+             std::move(devices), std::move(sensors), *sensor_values};
 }
 
 inline std::expected<hub<tcp_socket, udp_socket>, error>

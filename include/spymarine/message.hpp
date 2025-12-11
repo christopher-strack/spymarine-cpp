@@ -9,6 +9,9 @@
 namespace spymarine {
 
 enum class message_type : uint8_t {
+  // Request information about the Simarine system
+  system_information = 0x01,
+
   // Request the number of connected devices and sensors
   count_information = 0x02,
 

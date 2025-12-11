@@ -1,7 +1,7 @@
 #pragma once
 
-#include "raw_data/count_info.hpp"
 #include "raw_data/devices.hpp"
+#include "raw_data/info.hpp"
 #include "raw_data/sensor_state.hpp"
 #include "raw_data/sensors.hpp"
 
@@ -31,7 +31,9 @@ public:
     using std::ranges::to;
 
     if (const auto message = parse_message(bytes)) {
-      if (message->type() == message_type::count_information) {
+      if (message->type() == message_type::system_information) {
+        _response = raw_system_info_response | std::ranges::to<std::vector>();
+      } else if (message->type() == message_type::count_information) {
         _response = raw_count_info_response | std::ranges::to<std::vector>();
       } else if (message->type() == message_type::device_information) {
         const auto value = message->values().find<numeric_value1>(0);

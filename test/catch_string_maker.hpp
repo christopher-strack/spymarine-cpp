@@ -6,6 +6,7 @@
 #include "spymarine/overloaded.hpp"
 #include "spymarine/parse_count_info.hpp"
 #include "spymarine/sensor2.hpp"
+#include "spymarine/system_info.hpp"
 
 #include <catch2/catch_all.hpp>
 
@@ -62,6 +63,21 @@ template <> struct StringMaker<spymarine::message_value> {
             },
         },
         value);
+  }
+};
+
+template <> struct StringMaker<spymarine::firmware_version> {
+  static std::string convert(const spymarine::firmware_version& fw) {
+    return std::format("{}.{}", fw.major, fw.minor);
+  }
+};
+
+template <> struct StringMaker<spymarine::system_info> {
+  static std::string convert(const spymarine::system_info& info) {
+    return std::format(
+        "system_info {{ serial_number = {}, firmware_version = {} }}",
+        info.serial_number,
+        StringMaker<decltype(info.fw_version)>::convert(info.fw_version));
   }
 };
 

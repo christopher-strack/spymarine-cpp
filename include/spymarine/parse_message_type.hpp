@@ -11,6 +11,8 @@ namespace spymarine {
 constexpr std::optional<message_type>
 parse_message_type(uint8_t type) noexcept {
   switch (type) {
+  case std::to_underlying(message_type::system_information):
+    return message_type::system_information;
   case std::to_underlying(message_type::count_information):
     return message_type::count_information;
   case std::to_underlying(message_type::device_information):
