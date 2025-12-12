@@ -15,6 +15,7 @@ function(target_enable_warnings target_name)
                 -Weverything
                 -Wno-c++98-compat
                 -Wno-c++98-compat-pedantic
+                -Wno-c++20-compat
                 -Wno-padded
                 -Wno-poison-system-directories
                 -Wno-switch-default
