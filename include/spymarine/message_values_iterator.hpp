@@ -30,7 +30,7 @@ public:
     update_data();
   }
 
-  constexpr value_type operator*() const noexcept { return _value; }
+  constexpr const value_type& operator*() const noexcept { return _value; }
 
   constexpr std::add_pointer_t<value_type const> operator->() const noexcept {
     return std::addressof(_value);
