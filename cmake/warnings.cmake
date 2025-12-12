@@ -20,8 +20,6 @@ function(target_enable_warnings target_name)
                 -Wno-poison-system-directories
                 -Wno-switch-default
                 -Wno-weak-vtables
-                # TOOD store sensor values in their native format
-                # and enable this warning again.
                 -Wno-float-equal
                 -Werror
         )
