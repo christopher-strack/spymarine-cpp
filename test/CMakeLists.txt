@@ -9,7 +9,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
-if (SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT)
+if(SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT)
     FetchContent_Declare(
         nlohmann_json
         GIT_REPOSITORY https://github.com/nlohmann/json.git
@@ -17,7 +17,6 @@ if (SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT)
     )
     FetchContent_MakeAvailable(nlohmann_json)
 endif()
-
 
 add_executable(spymarine_tests)
 

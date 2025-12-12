@@ -3,7 +3,7 @@ include_guard(GLOBAL)
 set(CMAKE_C_COMPILER clang)
 set(CMAKE_CXX_COMPILER clang++)
 
-if (SPYMARINE_ENABLE_SANITIZERS)
+if(SPYMARINE_ENABLE_SANITIZERS)
     set(SANITIZER_FLAGS
         "-fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=undefined"
     )
