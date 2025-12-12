@@ -35,6 +35,12 @@ public:
 
   const std::vector<device2>& devices() const noexcept { return _devices; }
 
+  auto supported_devices() const noexcept {
+    return _devices | std::views::filter([](const auto& device_) {
+             return !std::holds_alternative<unsupported_device2>(device_);
+           });
+  }
+
   const std::vector<sensor2>& sensors() const noexcept { return _sensors; }
 
   auto sensors(const device2& device_) const noexcept {
@@ -48,6 +54,10 @@ private:
   std::vector<sensor2> _sensors;
   size_t _average_count{};
 };
+
+template <typename tcp_socket_type, typename udp_socket_type>
+hub(tcp_socket_type&&, udp_socket_type&&)
+    -> hub<tcp_socket_type, udp_socket_type>;
 
 template <typename tcp_socket_type, typename udp_socket_type>
 constexpr std::expected<hub<tcp_socket_type, udp_socket_type>, error>

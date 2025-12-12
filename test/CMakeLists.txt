@@ -43,6 +43,7 @@ target_sources(
         tst_read_devices.cpp
         tst_sensor_reader.cpp
         $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:tst_home_assistant.cpp>
+        $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:tst_home_assistant2.cpp>
 )
 
 target_link_libraries(

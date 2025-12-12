@@ -29,7 +29,7 @@ cmake --build build --preset default
 See the examples directory on how to use the library:
 - `print_devices_and_sensors.cpp`: most basic example that prints all devices and sensors
 - `moving_average.cpp`: print the moving average of current sensors
-- `print_home_assistant_discovery.cpp`: prints JSON for discovering devices and updating sensor values
+- `print_home_assistant_discovery.cpp`: prints JSON for discovering devices
 
 ## Known Issues
 

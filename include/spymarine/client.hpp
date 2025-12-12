@@ -142,6 +142,10 @@ private:
   udp_socket_type _udp_socket;
 };
 
+template <typename tcp_socket_type, typename udp_socket_type>
+client(tcp_socket_type&&, udp_socket_type&&)
+    -> client<tcp_socket_type, udp_socket_type>;
+
 template <typename udp_socket_type>
 std::expected<uint32_t, error>
 discover_with_socket(uint16_t port = simarine_default_udp_port) {
