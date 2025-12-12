@@ -50,6 +50,10 @@ private:
 };
 
 template <typename tcp_socket_type, typename udp_socket_type>
+hub(tcp_socket_type&&, udp_socket_type&&)
+    -> hub<tcp_socket_type, udp_socket_type>;
+
+template <typename tcp_socket_type, typename udp_socket_type>
 constexpr std::expected<hub<tcp_socket_type, udp_socket_type>, error>
 initialize_hub_with_sockets(
     client<tcp_socket_type, udp_socket_type> client_) noexcept {
