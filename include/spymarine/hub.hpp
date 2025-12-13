@@ -43,6 +43,12 @@ public:
 
   const std::vector<sensor2>& all_sensors() const noexcept { return _sensors; }
 
+  auto sensors() const noexcept {
+    return _sensors | std::views::filter([](const auto& sensor_) {
+             return !std::holds_alternative<unsupported_sensor2>(sensor_);
+           });
+  }
+
   auto sensors(const device2& device_) const noexcept {
     return get_sensors(device_, _sensors);
   }

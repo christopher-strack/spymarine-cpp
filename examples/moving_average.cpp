@@ -27,7 +27,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   const auto update_interval = std::chrono::seconds(10);
   auto last_update_time = std::optional<clock::time_point>{};
   auto current_sensors =
-      hub->all_sensors() | std::views::filter([](const auto& s) {
+      hub->sensors() | std::views::filter([](const auto& s) {
         return std::holds_alternative<spymarine::current_sensor2>(s);
       }) |
       std::views::transform(
