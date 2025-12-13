@@ -12,12 +12,12 @@
 
 namespace spymarine {
 
-template <typename tcp_socket_type, typename udp_socket_type> class hub {
+template <typename tcp_socket_type, typename udp_socket_type> class basic_hub {
 public:
-  constexpr hub(client<tcp_socket_type, udp_socket_type> client_,
-                system_info system_info_, std::vector<device2> devices,
-                std::vector<sensor2> sensors,
-                message_values_view initial_sensor_values) noexcept
+  constexpr basic_hub(basic_client<tcp_socket_type, udp_socket_type> client_,
+                      system_info system_info_, std::vector<device2> devices,
+                      std::vector<sensor2> sensors,
+                      message_values_view initial_sensor_values) noexcept
       : _client{std::move(client_)}, _system_info{std::move(system_info_)},
         _devices{std::move(devices)}, _sensors{std::move(sensors)} {
     update_sensor_values(_sensors, initial_sensor_values, _average_count);
@@ -33,22 +33,35 @@ public:
 
   const system_info& system() const noexcept { return _system_info; }
 
-  const std::vector<device2>& devices() const noexcept { return _devices; }
+  const std::vector<device2>& all_devices() const noexcept { return _devices; }
 
-  auto supported_devices() const noexcept {
+  auto devices() const noexcept {
     return _devices | std::views::filter([](const auto& device_) {
              return !std::holds_alternative<unsupported_device2>(device_);
            });
   }
 
-  const std::vector<sensor2>& sensors() const noexcept { return _sensors; }
+  const std::vector<sensor2>& all_sensors() const noexcept { return _sensors; }
 
-  auto sensors(const device2& device_) const noexcept {
+  auto sensors() const noexcept {
+    return _sensors | std::views::filter([](const auto& sensor_) {
+             return !std::holds_alternative<unsupported_sensor2>(sensor_);
+           });
+  }
+
+  auto all_sensors(const device2& device_) const noexcept {
     return get_sensors(device_, _sensors);
   }
 
+  auto sensors(const device2& device_) const noexcept {
+    return get_sensors(device_, _sensors) |
+           std::views::filter([](const auto& sensor_) {
+             return !std::holds_alternative<unsupported_sensor2>(sensor_);
+           });
+  }
+
 private:
-  client<tcp_socket_type, udp_socket_type> _client;
+  basic_client<tcp_socket_type, udp_socket_type> _client;
   system_info _system_info;
   std::vector<device2> _devices;
   std::vector<sensor2> _sensors;
@@ -56,13 +69,15 @@ private:
 };
 
 template <typename tcp_socket_type, typename udp_socket_type>
-hub(tcp_socket_type&&, udp_socket_type&&)
-    -> hub<tcp_socket_type, udp_socket_type>;
+basic_hub(tcp_socket_type&&, udp_socket_type&&)
+    -> basic_hub<tcp_socket_type, udp_socket_type>;
+
+using hub = basic_hub<tcp_socket, udp_socket>;
 
 template <typename tcp_socket_type, typename udp_socket_type>
-constexpr std::expected<hub<tcp_socket_type, udp_socket_type>, error>
-initialize_hub_with_sockets(
-    client<tcp_socket_type, udp_socket_type> client_) noexcept {
+constexpr std::expected<basic_hub<tcp_socket_type, udp_socket_type>, error>
+initialize_basic_hub(
+    basic_client<tcp_socket_type, udp_socket_type> client_) noexcept {
   const auto system_response = client_.request_system_info();
   if (!system_response) {
     return std::unexpected{system_response.error()};
@@ -119,13 +134,12 @@ initialize_hub_with_sockets(
     return std::unexpected{sensor_values.error()};
   }
 
-  return hub{std::move(client_), std::move(*system_response),
-             std::move(devices), std::move(sensors), *sensor_values};
+  return basic_hub{std::move(client_), std::move(*system_response),
+                   std::move(devices), std::move(sensors), *sensor_values};
 }
 
-inline std::expected<hub<tcp_socket, udp_socket>, error>
-initialize_hub(client<tcp_socket, udp_socket> client_) {
-  return initialize_hub_with_sockets(std::move(client_));
+inline std::expected<hub, error> initialize_hub(client client_) {
+  return initialize_basic_hub(std::move(client_));
 }
 
 } // namespace spymarine

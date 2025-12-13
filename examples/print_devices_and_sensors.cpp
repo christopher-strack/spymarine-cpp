@@ -70,11 +70,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   std::println("  Firmware Version: {}.{}", hub->system().fw_version.major,
                hub->system().fw_version.minor);
 
-  for (const spymarine::device2& device_ : hub->devices()) {
+  for (const spymarine::device2& device_ : hub->all_devices()) {
     std::println("Device #{}: {}", get_device_id(device_),
                  get_device_name(device_).value_or("<unnamed>"));
 
-    for (const auto sensor : hub->sensors(device_)) {
+    for (const auto sensor : hub->all_sensors(device_)) {
       std::println("  Sensor #{}: {}", get_sensor_id(sensor),
                    sensor_current_value_string(sensor));
     }
