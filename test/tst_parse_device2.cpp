@@ -2,7 +2,6 @@
 #include "raw_data/devices.hpp"
 
 #include "spymarine/device2.hpp"
-#include "spymarine/device_ostream.hpp" // IWYU pragma: keep
 #include "spymarine/parse_device2.hpp"
 #include "spymarine/parse_message.hpp"
 

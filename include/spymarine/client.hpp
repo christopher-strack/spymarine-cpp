@@ -1,6 +1,5 @@
 #pragma once
 
-#include "spymarine/buffer.hpp"
 #include "spymarine/crc.hpp"
 #include "spymarine/defaults.hpp"
 #include "spymarine/device2.hpp"
