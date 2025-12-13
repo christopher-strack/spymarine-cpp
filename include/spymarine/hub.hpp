@@ -63,7 +63,7 @@ using hub = basic_hub<tcp_socket, udp_socket>;
 
 template <typename tcp_socket_type, typename udp_socket_type>
 constexpr std::expected<basic_hub<tcp_socket_type, udp_socket_type>, error>
-initialize_hub_with_sockets(
+initialize_basic_hub(
     client<tcp_socket_type, udp_socket_type> client_) noexcept {
   const auto system_response = client_.request_system_info();
   if (!system_response) {
@@ -127,7 +127,7 @@ initialize_hub_with_sockets(
 
 inline std::expected<basic_hub<tcp_socket, udp_socket>, error>
 initialize_hub(client<tcp_socket, udp_socket> client_) {
-  return initialize_hub_with_sockets(std::move(client_));
+  return initialize_basic_hub(std::move(client_));
 }
 
 } // namespace spymarine

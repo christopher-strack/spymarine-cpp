@@ -11,7 +11,7 @@ namespace spymarine {
 
 TEST_CASE("initialize_hub") {
   auto hub_ =
-      initialize_hub_with_sockets(client{mock_tcp_socket{}, mock_udp_socket{}});
+      initialize_basic_hub(client{mock_tcp_socket{}, mock_udp_socket{}});
   REQUIRE(hub_.has_value());
 
   const auto parsed_devices2 = make_parsed_devices2_with_sensors();
