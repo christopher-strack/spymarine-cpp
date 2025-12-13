@@ -48,6 +48,7 @@ struct home_assistant_device_component {
   std::string component_id;
   std::string_view platform;
   std::optional<std::string_view> device_class;
+  std::optional<std::string_view> name;
   std::string_view unit_of_measurement;
   std::string value_template;
   std::string unique_id;
@@ -101,10 +102,14 @@ to_json(const home_assistant_device_component& component) {
           ? std::format(R"("dev_cla":"{}",)", *component.device_class)
           : "";
 
+  const auto name_str =
+      component.name ? std::format(R"("name":"{}",)", *component.name) : "";
+
   return std::format(
-      R"({{"p":"{}",{}"unit_of_meas":"{}","val_tpl":"{}","uniq_id":"{}"}})",
-      component.platform, device_class_str, component.unit_of_measurement,
-      component.value_template, component.unique_id);
+      R"({{"p":"{}",{}{}"unit_of_meas":"{}","val_tpl":"{}","uniq_id":"{}"}})",
+      component.platform, device_class_str, name_str,
+      component.unit_of_measurement, component.value_template,
+      component.unique_id);
 }
 
 constexpr std::string
@@ -200,6 +205,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = id,
                 .platform = "sensor",
                 .device_class = "voltage",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.value.unit),
                 .value_template = "{{ value_json.volt }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
@@ -211,6 +217,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = id,
                 .platform = "sensor",
                 .device_class = "current",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.value.unit),
                 .value_template = "{{ value_json.cur }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
@@ -222,6 +229,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = id,
                 .platform = "sensor",
                 .device_class = "temperature",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.value.unit),
                 .value_template = "{{ value_json.temp }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
@@ -234,6 +242,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = id,
                 .platform = "sensor",
                 .device_class = "atmospheric_pressure",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.value.unit),
                 .value_template = "{{ value_json.baro }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
@@ -245,6 +254,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = id,
                 .platform = "sensor",
                 .device_class = std::nullopt,
+                .name = "Resistive Sensor",
                 .unit_of_measurement = to_home_assistant_unit(s.value.unit),
                 .value_template = "{{ value_json.res }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
@@ -257,6 +267,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = vol_id,
                 .platform = "sensor",
                 .device_class = "volume_storage",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.volume.unit),
                 .value_template = "{{ value_json.vol }}",
                 .unique_id = std::format("{}.{}", device_identifier, vol_id),
@@ -265,6 +276,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = lvl_id,
                 .platform = "sensor",
                 .device_class = std::nullopt,
+                .name = "Tank Level",
                 .unit_of_measurement = to_home_assistant_unit(s.level.unit),
                 .value_template = "{{ value_json.lvl }}",
                 .unique_id = std::format("{}.{}", device_identifier, lvl_id),
@@ -277,6 +289,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = batt_it,
                 .platform = "sensor",
                 .device_class = "battery",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.charge.unit),
                 .value_template = "{{ value_json.batt }}",
                 .unique_id = std::format("{}.{}", device_identifier, batt_it),
@@ -285,6 +298,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = cap_it,
                 .platform = "sensor",
                 .device_class = std::nullopt,
+                .name = "Remaining Capacity",
                 .unit_of_measurement =
                     to_home_assistant_unit(s.remaining_capacity.unit),
                 .value_template = "{{ value_json.cap }}",

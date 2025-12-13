@@ -147,6 +147,7 @@ TEST_CASE("make_home_assistant_device_discovery2") {
                     {
                         {"p", "sensor"},
                         {"unit_of_meas", "Ω"},
+                        {"name", "Resistive Sensor"},
                         {"val_tpl", "{{ value_json.res }}"},
                         {"uniq_id", "simarine.2245968710.res13.res14"},
                     },
@@ -308,6 +309,7 @@ TEST_CASE("make_home_assistant_device_discovery2") {
                     "cap26",
                     {
                         {"p", "sensor"},
+                        {"name", "Remaining Capacity"},
                         {"unit_of_meas", "Ah"},
                         {"val_tpl", "{{ value_json.cap }}"},
                         {"uniq_id", "simarine.2245968710.batt24.cap26"},
@@ -393,6 +395,7 @@ TEST_CASE("make_home_assistant_device_discovery2") {
                     "lvl38",
                     {
                         {"p", "sensor"},
+                        {"name", "Tank Level"},
                         {"unit_of_meas", "%"},
                         {"val_tpl", "{{ value_json.lvl }}"},
                         {"uniq_id", "simarine.2245968710.tank28.lvl38"},
