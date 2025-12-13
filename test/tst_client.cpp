@@ -15,30 +15,30 @@ TEST_CASE("client") {
   static const auto parsed_devices2 = make_parsed_devices2();
 
   SECTION("request_count_info") {
-    STATIC_CHECK(
-        client{mock_tcp_socket{}, mock_udp_socket{}}.request_count_info() ==
-        count_info{.device_count = 32, .sensor_count = 42});
+    STATIC_CHECK(basic_client{mock_tcp_socket{}, mock_udp_socket{}}
+                     .request_count_info() ==
+                 count_info{.device_count = 32, .sensor_count = 42});
   }
 
   SECTION("request_count_info fails if socket fails") {
-    STATIC_CHECK(client{failing_tcp_socket{}, failing_udp_socket{}}
+    STATIC_CHECK(basic_client{failing_tcp_socket{}, failing_udp_socket{}}
                      .request_count_info() ==
                  std::unexpected(error{std::errc::connection_refused}));
   }
 
   SECTION("request_device") {
-    CHECK(client{mock_tcp_socket{}, mock_udp_socket{}}.request_device(0) ==
-          parsed_devices2[0]);
+    CHECK(basic_client{mock_tcp_socket{}, mock_udp_socket{}}.request_device(
+              0) == parsed_devices2[0]);
   }
 
   SECTION("request_device fails if socket fails") {
     STATIC_CHECK(
-        client{failing_tcp_socket{}, failing_udp_socket{}}.request_device(0) ==
-        std::unexpected(error{std::errc::connection_refused}));
+        basic_client{failing_tcp_socket{}, failing_udp_socket{}}.request_device(
+            0) == std::unexpected(error{std::errc::connection_refused}));
   }
 
   SECTION("request_device integration") {
-    client cli{mock_tcp_socket{}, mock_udp_socket{}};
+    basic_client cli{mock_tcp_socket{}, mock_udp_socket{}};
     const auto devices =
         std::views::iota(uint8_t(0), uint8_t(parsed_devices2.size())) |
         std::views::transform(
@@ -48,18 +48,19 @@ TEST_CASE("client") {
   }
 
   SECTION("request_sensor") {
-    STATIC_CHECK(client{mock_tcp_socket{}, mock_udp_socket{}}.request_sensor(
-                     0) == parsed_sensors2[0]);
+    STATIC_CHECK(
+        basic_client{mock_tcp_socket{}, mock_udp_socket{}}.request_sensor(0) ==
+        parsed_sensors2[0]);
   }
 
   SECTION("request_sensor fails if socket fails") {
     STATIC_CHECK(
-        client{failing_tcp_socket{}, failing_udp_socket{}}.request_sensor(0) ==
-        std::unexpected(error{std::errc::connection_refused}));
+        basic_client{failing_tcp_socket{}, failing_udp_socket{}}.request_sensor(
+            0) == std::unexpected(error{std::errc::connection_refused}));
   }
 
   SECTION("request_sensor integration") {
-    client cli{mock_tcp_socket{}, mock_udp_socket{}};
+    basic_client cli{mock_tcp_socket{}, mock_udp_socket{}};
     const auto sensors =
         std::views::iota(sensor_id(0), sensor_id(parsed_sensors2.size())) |
         std::views::transform(

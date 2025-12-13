@@ -14,7 +14,7 @@ namespace spymarine {
 
 template <typename tcp_socket_type, typename udp_socket_type> class basic_hub {
 public:
-  constexpr basic_hub(client<tcp_socket_type, udp_socket_type> client_,
+  constexpr basic_hub(basic_client<tcp_socket_type, udp_socket_type> client_,
                       system_info system_info_, std::vector<device2> devices,
                       std::vector<sensor2> sensors,
                       message_values_view initial_sensor_values) noexcept
@@ -48,7 +48,7 @@ public:
   }
 
 private:
-  client<tcp_socket_type, udp_socket_type> _client;
+  basic_client<tcp_socket_type, udp_socket_type> _client;
   system_info _system_info;
   std::vector<device2> _devices;
   std::vector<sensor2> _sensors;
@@ -64,7 +64,7 @@ using hub = basic_hub<tcp_socket, udp_socket>;
 template <typename tcp_socket_type, typename udp_socket_type>
 constexpr std::expected<basic_hub<tcp_socket_type, udp_socket_type>, error>
 initialize_basic_hub(
-    client<tcp_socket_type, udp_socket_type> client_) noexcept {
+    basic_client<tcp_socket_type, udp_socket_type> client_) noexcept {
   const auto system_response = client_.request_system_info();
   if (!system_response) {
     return std::unexpected{system_response.error()};
@@ -126,7 +126,7 @@ initialize_basic_hub(
 }
 
 inline std::expected<basic_hub<tcp_socket, udp_socket>, error>
-initialize_hub(client<tcp_socket, udp_socket> client_) {
+initialize_hub(basic_client<tcp_socket, udp_socket> client_) {
   return initialize_basic_hub(std::move(client_));
 }
 

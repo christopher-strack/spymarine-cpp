@@ -27,10 +27,11 @@
 
 namespace spymarine {
 
-template <typename tcp_socket_type, typename udp_socket_type> class client {
+template <typename tcp_socket_type, typename udp_socket_type>
+class basic_client {
 public:
-  constexpr explicit client(tcp_socket_type&& tcp_socket_,
-                            udp_socket_type&& udp_socket_) noexcept
+  constexpr explicit basic_client(tcp_socket_type&& tcp_socket_,
+                                  udp_socket_type&& udp_socket_) noexcept
       : _buffer{}, _tcp_socket{std::move(tcp_socket_)},
         _udp_socket{std::move(udp_socket_)} {}
 
@@ -143,8 +144,8 @@ private:
 };
 
 template <typename tcp_socket_type, typename udp_socket_type>
-client(tcp_socket_type&&, udp_socket_type&&)
-    -> client<tcp_socket_type, udp_socket_type>;
+basic_client(tcp_socket_type&&, udp_socket_type&&)
+    -> basic_client<tcp_socket_type, udp_socket_type>;
 
 template <typename udp_socket_type>
 std::expected<uint32_t, error>
@@ -161,7 +162,8 @@ discover(uint16_t port = simarine_default_udp_port) {
 }
 
 template <typename tcp_socket_type, typename udp_socket_type>
-constexpr static std::expected<client<tcp_socket_type, udp_socket_type>, error>
+constexpr static std::expected<basic_client<tcp_socket_type, udp_socket_type>,
+                               error>
 connect_with_sockets(
     const uint32_t ip, const uint16_t udp_port = simarine_default_udp_port,
     const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
@@ -183,10 +185,10 @@ connect_with_sockets(
     return std::unexpected{connect_result.error()};
   }
 
-  return client{std::move(*tcp_socket_), std::move(*udp_socket_)};
+  return basic_client{std::move(*tcp_socket_), std::move(*udp_socket_)};
 }
 
-inline std::expected<client<tcp_socket, udp_socket>, error>
+inline std::expected<basic_client<tcp_socket, udp_socket>, error>
 connect(const uint32_t ip, const uint16_t udp_port = simarine_default_udp_port,
         const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
   return connect_with_sockets<tcp_socket, udp_socket>(ip, udp_port, tcp_port);
