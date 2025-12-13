@@ -156,6 +156,8 @@ discover_with_socket(uint16_t port = simarine_default_udp_port) {
   });
 }
 
+using client = basic_client<tcp_socket, udp_socket>;
+
 inline std::expected<uint32_t, error>
 discover(uint16_t port = simarine_default_udp_port) {
   return discover_with_socket<udp_socket>(port);
@@ -188,7 +190,7 @@ connect_with_sockets(
   return basic_client{std::move(*tcp_socket_), std::move(*udp_socket_)};
 }
 
-inline std::expected<basic_client<tcp_socket, udp_socket>, error>
+inline std::expected<client, error>
 connect(const uint32_t ip, const uint16_t udp_port = simarine_default_udp_port,
         const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
   return connect_with_sockets<tcp_socket, udp_socket>(ip, udp_port, tcp_port);
