@@ -5,6 +5,17 @@
 #include <chrono>
 #include <print>
 
+namespace {
+
+void print_current_sensors(const spymarine::hub& hub) {
+  for (const auto& sensor_ :
+       hub.sensors_by_type<spymarine::current_sensor2>()) {
+    std::println("Sensor #{}: {} A", sensor_.id, sensor_.value.average_value);
+  }
+}
+
+} // namespace
+
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   using clock = std::chrono::steady_clock;
 
@@ -24,37 +35,20 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   }
   std::println("done");
 
+  print_current_sensors(*hub);
+
   const auto update_interval = std::chrono::seconds(10);
-  auto last_update_time = std::optional<clock::time_point>{};
-  auto current_sensors =
-      hub->sensors() | std::views::filter([](const auto& s) {
-        return std::holds_alternative<spymarine::current_sensor2>(s);
-      }) |
-      std::views::transform(
-          [](const auto& s) -> const spymarine::current_sensor2& {
-            return std::get<spymarine::current_sensor2>(s);
-          });
+  auto last_update_time = clock::now();
 
   // print the moving average of current sensors every update_interval
   while (true) {
     hub->read_sensor_values();
 
-    const auto last_update_time_elapsed =
-        last_update_time
-            .transform([=](auto& t) {
-              const auto elapsed = clock::now() - t;
-              return elapsed >= update_interval;
-            })
-            .value_or(true);
-
-    if (last_update_time_elapsed) {
-      for (const auto& sensor_ : current_sensors) {
-        std::println("Sensor #{}: {} A", sensor_.id,
-                     sensor_.value.average_value);
-      }
+    if ((clock::now() - last_update_time) >= update_interval) {
+      print_current_sensors(*hub);
 
       hub->start_new_average_window();
-      last_update_time = std::chrono::steady_clock::now();
+      last_update_time = clock::now();
     }
   }
 
