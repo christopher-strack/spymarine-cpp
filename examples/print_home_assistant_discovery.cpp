@@ -22,17 +22,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   }
   std::println("done");
 
-  for (const spymarine::device& device_ : hub->devices()) {
-    std::println("Device #{}", spymarine::get_device_id(device_));
+  for (const auto& dev : hub->devices()) {
+    std::println("Device #{}", spymarine::get_device_id(dev));
 
     const auto discovery_msg =
-        make_home_assistant_device_discovery_message(device_, *hub);
+        make_home_assistant_device_discovery_message(dev, *hub);
     std::println("Discovery Topic: {}", discovery_msg.topic);
     std::println("Discovery Payload: {}", discovery_msg.payload);
 
     const auto config = spymarine::home_assistant_state_config{};
-    const auto state_msg =
-        make_home_assistant_state_message(device_, *hub, config);
+    const auto state_msg = make_home_assistant_state_message(dev, *hub, config);
     std::println("State Topic: {}", state_msg.topic);
     std::println("State Payload: {}", state_msg.payload);
     std::println();

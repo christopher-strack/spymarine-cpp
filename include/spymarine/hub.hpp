@@ -14,11 +14,11 @@ namespace spymarine {
 
 template <typename tcp_socket_type, typename udp_socket_type> class basic_hub {
 public:
-  constexpr basic_hub(basic_client<tcp_socket_type, udp_socket_type> client_,
-                      system_info system_info_, std::vector<device> devices,
+  constexpr basic_hub(basic_client<tcp_socket_type, udp_socket_type> cli,
+                      system_info sys_info, std::vector<device> devices,
                       std::vector<sensor> sensors,
                       message_values_view initial_sensor_values) noexcept
-      : _client{std::move(client_)}, _system_info{std::move(system_info_)},
+      : _client{std::move(cli)}, _system_info{std::move(sys_info)},
         _devices{std::move(devices)}, _sensors{std::move(sensors)} {
     update_sensor_values(_sensors, initial_sensor_values, _average_count);
   }
@@ -36,16 +36,16 @@ public:
   const std::vector<device>& all_devices() const noexcept { return _devices; }
 
   auto devices() const noexcept {
-    return _devices | std::views::filter([](const auto& device_) {
-             return !std::holds_alternative<unsupported_device>(device_);
+    return _devices | std::views::filter([](const auto& dev) {
+             return !std::holds_alternative<unsupported_device>(dev);
            });
   }
 
   const std::vector<sensor>& all_sensors() const noexcept { return _sensors; }
 
   auto sensors() const noexcept {
-    return _sensors | std::views::filter([](const auto& sensor_) {
-             return !std::holds_alternative<unsupported_sensor>(sensor_);
+    return _sensors | std::views::filter([](const auto& sen) {
+             return !std::holds_alternative<unsupported_sensor>(sen);
            });
   }
 
@@ -58,14 +58,13 @@ public:
            });
   }
 
-  auto all_sensors(const device& device_) const noexcept {
-    return get_sensors(device_, _sensors);
+  auto all_sensors(const device& dev) const noexcept {
+    return get_sensors(dev, _sensors);
   }
 
-  auto sensors(const device& device_) const noexcept {
-    return get_sensors(device_, _sensors) |
-           std::views::filter([](const auto& sensor_) {
-             return !std::holds_alternative<unsupported_sensor>(sensor_);
+  auto sensors(const device& dev) const noexcept {
+    return get_sensors(dev, _sensors) | std::views::filter([](const auto& sen) {
+             return !std::holds_alternative<unsupported_sensor>(sen);
            });
   }
 
@@ -86,13 +85,13 @@ using hub = basic_hub<tcp_socket, udp_socket>;
 template <typename tcp_socket_type, typename udp_socket_type>
 constexpr std::expected<basic_hub<tcp_socket_type, udp_socket_type>, error>
 initialize_basic_hub(
-    basic_client<tcp_socket_type, udp_socket_type> client_) noexcept {
-  const auto system_response = client_.request_system_info();
+    basic_client<tcp_socket_type, udp_socket_type> cli) noexcept {
+  const auto system_response = cli.request_system_info();
   if (!system_response) {
     return std::unexpected{system_response.error()};
   }
 
-  const auto count_response = client_.request_count_info();
+  const auto count_response = cli.request_count_info();
   if (!count_response) {
     return std::unexpected{count_response.error()};
   }
@@ -105,50 +104,50 @@ initialize_basic_hub(
 
   for (const auto id :
        std::views::iota(device_id(0), count_response->device_count)) {
-    auto device_ = client_.request_device(id);
+    auto dev = cli.request_device(id);
 
-    if (!device_) {
-      return std::unexpected{device_.error()};
+    if (!dev) {
+      return std::unexpected{dev.error()};
     }
 
-    if (get_device_id(*device_) != id) {
+    if (get_device_id(*dev) != id) {
       return std::unexpected{parse_error::invalid_device_message};
     }
 
-    devices.push_back(std::move(*device_));
+    devices.push_back(std::move(*dev));
   }
 
   for (const auto id :
        std::views::iota(sensor_id(0), count_response->sensor_count)) {
-    auto sensor_ = client_.request_sensor(id);
+    auto sen = cli.request_sensor(id);
 
-    if (!sensor_) {
-      return std::unexpected{sensor_.error()};
+    if (!sen) {
+      return std::unexpected{sen.error()};
     }
 
-    if (get_sensor_id(*sensor_) != id) {
+    if (get_sensor_id(*sen) != id) {
       return std::unexpected{parse_error::invalid_sensor_message};
     }
 
-    if (const auto dev_id = get_parent_device_id(*sensor_);
+    if (const auto dev_id = get_parent_device_id(*sen);
         dev_id.has_value() && *dev_id < devices.size()) {
       add_sensor_id(devices[*dev_id], id);
     }
 
-    sensors.push_back(std::move(*sensor_));
+    sensors.push_back(std::move(*sen));
   }
 
-  const auto sensor_values = client_.request_sensor_state();
+  const auto sensor_values = cli.request_sensor_state();
   if (!sensor_values) {
     return std::unexpected{sensor_values.error()};
   }
 
-  return basic_hub{std::move(client_), std::move(*system_response),
+  return basic_hub{std::move(cli), std::move(*system_response),
                    std::move(devices), std::move(sensors), *sensor_values};
 }
 
-inline std::expected<hub, error> initialize_hub(client client_) {
-  return initialize_basic_hub(std::move(client_));
+inline std::expected<hub, error> initialize_hub(client cli) {
+  return initialize_basic_hub(std::move(cli));
 }
 
 } // namespace spymarine

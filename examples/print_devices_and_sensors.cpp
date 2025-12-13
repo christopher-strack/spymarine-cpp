@@ -8,7 +8,7 @@
 namespace {
 
 constexpr std::string
-sensor_current_value_string(const spymarine::sensor& sensor_) {
+sensor_current_value_string(const spymarine::sensor& sen) {
   return std::visit(
       spymarine::overloaded{
           [](const spymarine::voltage_sensor& s) {
@@ -43,7 +43,7 @@ sensor_current_value_string(const spymarine::sensor& sensor_) {
             return std::format("Type {}, Raw Value: {}", s.raw_type,
                                s.raw_value);
           }},
-      sensor_);
+      sen);
 }
 
 } // namespace
@@ -70,13 +70,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   std::println("  Firmware Version: {}.{}", hub->system().fw_version.major,
                hub->system().fw_version.minor);
 
-  for (const spymarine::device& device_ : hub->all_devices()) {
-    std::println("Device #{}: {}", get_device_id(device_),
-                 get_device_name(device_).value_or("<unnamed>"));
+  for (const auto& dev : hub->all_devices()) {
+    std::println("Device #{}: {}", get_device_id(dev),
+                 get_device_name(dev).value_or("<unnamed>"));
 
-    for (const auto sensor : hub->all_sensors(device_)) {
-      std::println("  Sensor #{}: {}", get_sensor_id(sensor),
-                   sensor_current_value_string(sensor));
+    for (const auto& sen : hub->all_sensors(dev)) {
+      std::println("  Sensor #{}: {}", get_sensor_id(sen),
+                   sensor_current_value_string(sen));
     }
   }
 

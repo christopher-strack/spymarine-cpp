@@ -10,14 +10,14 @@
 namespace spymarine {
 
 TEST_CASE("initialize_hub") {
-  auto hub_ =
+  auto h =
       initialize_basic_hub(basic_client{mock_tcp_socket{}, mock_udp_socket{}});
-  REQUIRE(hub_.has_value());
+  REQUIRE(h.has_value());
 
   const auto parsed_devices = make_parsed_devices_with_sensors();
-  CHECK(hub_->system() == parsed_system_info);
-  CHECK_THAT(hub_->all_devices(), Catch::Matchers::RangeEquals(parsed_devices));
-  CHECK_THAT(hub_->all_sensors(),
+  CHECK(h->system() == parsed_system_info);
+  CHECK_THAT(h->all_devices(), Catch::Matchers::RangeEquals(parsed_devices));
+  CHECK_THAT(h->all_sensors(),
              Catch::Matchers::RangeEquals(parsed_sensors_with_value));
 }
 
