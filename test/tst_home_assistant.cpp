@@ -1,6 +1,6 @@
 #include "data.hpp"
 
-#include "spymarine/home_assistant2.hpp"
+#include "spymarine/home_assistant.hpp"
 
 #include <catch2/catch_all.hpp>
 #include <nlohmann/json.hpp>

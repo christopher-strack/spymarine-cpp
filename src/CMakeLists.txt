@@ -29,7 +29,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/tcp_socket.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/udp_socket.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/unit.hpp
-            $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:${PROJECT_SOURCE_DIR}/include/spymarine/home_assistant2.hpp>
+            $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:${PROJECT_SOURCE_DIR}/include/spymarine/home_assistant.hpp>
     PRIVATE
         error.cpp
         file_descriptor.cpp

@@ -1,6 +1,6 @@
 #include "spymarine/client.hpp"
 #include "spymarine/device.hpp"
-#include "spymarine/home_assistant2.hpp"
+#include "spymarine/home_assistant.hpp"
 #include "spymarine/hub.hpp"
 
 #include <print>
