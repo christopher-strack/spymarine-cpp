@@ -16,8 +16,9 @@ TEST_CASE("initialize_hub") {
 
   const auto parsed_devices2 = make_parsed_devices2_with_sensors();
   CHECK(hub_->system() == parsed_system_info);
-  CHECK_THAT(hub_->devices(), Catch::Matchers::RangeEquals(parsed_devices2));
-  CHECK_THAT(hub_->sensors(),
+  CHECK_THAT(hub_->all_devices(),
+             Catch::Matchers::RangeEquals(parsed_devices2));
+  CHECK_THAT(hub_->all_sensors(),
              Catch::Matchers::RangeEquals(parsed_sensors2_with_value));
 }
 

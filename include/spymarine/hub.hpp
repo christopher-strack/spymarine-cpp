@@ -33,7 +33,7 @@ public:
 
   const system_info& system() const noexcept { return _system_info; }
 
-  const std::vector<device2>& devices() const noexcept { return _devices; }
+  const std::vector<device2>& all_devices() const noexcept { return _devices; }
 
   auto supported_devices() const noexcept {
     return _devices | std::views::filter([](const auto& device_) {
@@ -41,7 +41,7 @@ public:
            });
   }
 
-  const std::vector<sensor2>& sensors() const noexcept { return _sensors; }
+  const std::vector<sensor2>& all_sensors() const noexcept { return _sensors; }
 
   auto sensors(const device2& device_) const noexcept {
     return get_sensors(device_, _sensors);

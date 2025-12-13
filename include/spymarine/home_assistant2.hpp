@@ -416,7 +416,7 @@ constexpr mqtt_message2 make_home_assistant_device_discovery_message(
       .topic = make_home_assistant_device_discovery_topic(
           device_, hub_.system().serial_number),
       .payload = to_json(make_home_assistant_device_discovery(
-          device_, hub_.sensors(), hub_.system())),
+          device_, hub_.all_sensors(), hub_.system())),
   };
 }
 
@@ -430,7 +430,7 @@ inline mqtt_message2 make_home_assistant_state_message(
       .topic =
           make_home_assistant_state_topic(device_, hub_.system().serial_number),
       .payload = to_json_object(make_home_assistant_device_sensor_states(
-          device_, hub_.sensors(), config)),
+          device_, hub_.all_sensors(), config)),
   };
 }
 
