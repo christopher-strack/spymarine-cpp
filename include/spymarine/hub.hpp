@@ -49,8 +49,15 @@ public:
            });
   }
 
-  auto sensors(const device2& device_) const noexcept {
+  auto all_sensors(const device2& device_) const noexcept {
     return get_sensors(device_, _sensors);
+  }
+
+  auto sensors(const device2& device_) const noexcept {
+    return get_sensors(device_, _sensors) |
+           std::views::filter([](const auto& sensor_) {
+             return !std::holds_alternative<unsupported_sensor2>(sensor_);
+           });
   }
 
 private:
