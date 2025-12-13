@@ -17,8 +17,16 @@ option(SPYMARINE_BUILD_TESTS "Build tests" OFF)
 option(SPYMARINE_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(SPYMARINE_BUILD_EXAMPLES "Build examples" OFF)
 option(SPYMARINE_ENABLE_ALL_WARNINGS "Enable almost all warnings" OFF)
-option(SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT "Enable Home Assistant support" ON)
-option(SPYMARINE_ENABLE_SANITIZERS "Enable Address and Undefined Behavior Sanitizers" OFF)
+option(
+    SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT
+    "Enable Home Assistant support"
+    ON
+)
+option(
+    SPYMARINE_ENABLE_SANITIZERS
+    "Enable Address and Undefined Behavior Sanitizers"
+    OFF
+)
 
 add_subdirectory(src)
 
@@ -27,7 +35,7 @@ if(SPYMARINE_BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
-if (SPYMARINE_BUILD_BENCHMARKS)
+if(SPYMARINE_BUILD_BENCHMARKS)
     add_subdirectory(benchmark)
 endif()
 
