@@ -12,12 +12,12 @@
 
 namespace spymarine {
 
-template <typename tcp_socket_type, typename udp_socket_type> class hub {
+template <typename tcp_socket_type, typename udp_socket_type> class basic_hub {
 public:
-  constexpr hub(client<tcp_socket_type, udp_socket_type> client_,
-                system_info system_info_, std::vector<device2> devices,
-                std::vector<sensor2> sensors,
-                message_values_view initial_sensor_values) noexcept
+  constexpr basic_hub(client<tcp_socket_type, udp_socket_type> client_,
+                      system_info system_info_, std::vector<device2> devices,
+                      std::vector<sensor2> sensors,
+                      message_values_view initial_sensor_values) noexcept
       : _client{std::move(client_)}, _system_info{std::move(system_info_)},
         _devices{std::move(devices)}, _sensors{std::move(sensors)} {
     update_sensor_values(_sensors, initial_sensor_values, _average_count);
@@ -56,11 +56,11 @@ private:
 };
 
 template <typename tcp_socket_type, typename udp_socket_type>
-hub(tcp_socket_type&&, udp_socket_type&&)
-    -> hub<tcp_socket_type, udp_socket_type>;
+basic_hub(tcp_socket_type&&, udp_socket_type&&)
+    -> basic_hub<tcp_socket_type, udp_socket_type>;
 
 template <typename tcp_socket_type, typename udp_socket_type>
-constexpr std::expected<hub<tcp_socket_type, udp_socket_type>, error>
+constexpr std::expected<basic_hub<tcp_socket_type, udp_socket_type>, error>
 initialize_hub_with_sockets(
     client<tcp_socket_type, udp_socket_type> client_) noexcept {
   const auto system_response = client_.request_system_info();
@@ -119,11 +119,11 @@ initialize_hub_with_sockets(
     return std::unexpected{sensor_values.error()};
   }
 
-  return hub{std::move(client_), std::move(*system_response),
-             std::move(devices), std::move(sensors), *sensor_values};
+  return basic_hub{std::move(client_), std::move(*system_response),
+                   std::move(devices), std::move(sensors), *sensor_values};
 }
 
-inline std::expected<hub<tcp_socket, udp_socket>, error>
+inline std::expected<basic_hub<tcp_socket, udp_socket>, error>
 initialize_hub(client<tcp_socket, udp_socket> client_) {
   return initialize_hub_with_sockets(std::move(client_));
 }

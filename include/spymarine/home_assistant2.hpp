@@ -410,7 +410,8 @@ make_home_assistant_device_sensor_states(
 
 template <typename tcp_socket_type, typename udp_socket_type>
 constexpr mqtt_message2 make_home_assistant_device_discovery_message(
-    const device2& device_, const hub<tcp_socket_type, udp_socket_type>& hub_) {
+    const device2& device_,
+    const basic_hub<tcp_socket_type, udp_socket_type>& hub_) {
   return mqtt_message2{
       .topic = make_home_assistant_device_discovery_topic(
           device_, hub_.system().serial_number),
@@ -421,7 +422,8 @@ constexpr mqtt_message2 make_home_assistant_device_discovery_message(
 
 template <typename tcp_socket_type, typename udp_socket_type>
 inline mqtt_message2 make_home_assistant_state_message(
-    const device2& device_, const hub<tcp_socket_type, udp_socket_type>& hub_,
+    const device2& device_,
+    const basic_hub<tcp_socket_type, udp_socket_type>& hub_,
     const home_assistant_state_config& config) {
 
   return mqtt_message2{
