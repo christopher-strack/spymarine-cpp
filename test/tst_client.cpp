@@ -70,7 +70,7 @@ TEST_CASE("client") {
   }
 
   SECTION("discover") {
-    auto ip = discover_with_socket<mock_udp_socket>(0);
+    auto ip = basic_discover<mock_udp_socket>(0);
     REQUIRE(ip.has_value());
   }
 
