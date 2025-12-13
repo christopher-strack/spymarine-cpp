@@ -33,10 +33,10 @@ public:
   // maximum amount of data a message can contain
   static constexpr auto buffer_size = 2048;
 
-  constexpr explicit basic_client(tcp_socket_type&& tcp_socket_,
-                                  udp_socket_type&& udp_socket_) noexcept
-      : _buffer(buffer_size, 0), _tcp_socket{std::move(tcp_socket_)},
-        _udp_socket{std::move(udp_socket_)} {}
+  constexpr explicit basic_client(tcp_socket_type&& tcp_sock,
+                                  udp_socket_type&& udp_sock) noexcept
+      : _buffer(buffer_size, 0), _tcp_socket{std::move(tcp_sock)},
+        _udp_socket{std::move(udp_sock)} {}
 
   constexpr std::expected<system_info, error> request_system_info() noexcept {
     return request_message(message_type::system_information, {})
@@ -170,25 +170,25 @@ constexpr static std::expected<basic_client<tcp_socket_type, udp_socket_type>,
 basic_connect(const uint32_t ip,
               const uint16_t udp_port = simarine_default_udp_port,
               const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
-  auto udp_socket_ = udp_socket_type::open();
-  if (!udp_socket_) {
-    return std::unexpected{udp_socket_.error()};
+  auto udp_sock = udp_socket_type::open();
+  if (!udp_sock) {
+    return std::unexpected{udp_sock.error()};
   }
 
-  auto tcp_socket_ = tcp_socket_type::open();
-  if (!tcp_socket_) {
-    return std::unexpected{tcp_socket_.error()};
+  auto tcp_sock = tcp_socket_type::open();
+  if (!tcp_sock) {
+    return std::unexpected{tcp_sock.error()};
   }
 
-  const auto connect_result = udp_socket_->bind(0, udp_port).and_then([&]() {
-    return tcp_socket_->connect(ip, tcp_port);
+  const auto connect_result = udp_sock->bind(0, udp_port).and_then([&]() {
+    return tcp_sock->connect(ip, tcp_port);
   });
 
   if (!connect_result) {
     return std::unexpected{connect_result.error()};
   }
 
-  return basic_client{std::move(*tcp_socket_), std::move(*udp_socket_)};
+  return basic_client{std::move(*tcp_sock), std::move(*udp_sock)};
 }
 
 inline std::expected<client, error>

@@ -151,7 +151,7 @@ constexpr std::string_view to_home_assistant_unit(const unit u) {
 }
 
 constexpr std::string_view
-get_short_device_type_name(const device& device_) noexcept {
+get_short_device_type_name(const device& dev) noexcept {
   return std::visit(overloaded{
                         [](const voltage_device&) { return "volt"; },
                         [](const current_device&) { return "cur"; },
@@ -162,7 +162,7 @@ get_short_device_type_name(const device& device_) noexcept {
                         [](const battery_device&) { return "batt"; },
                         [](const unsupported_device&) { return "unsupp"; },
                     },
-                    device_);
+                    dev);
 }
 
 constexpr home_assistant_origin make_home_assistant_origin() {
@@ -173,27 +173,26 @@ constexpr home_assistant_origin make_home_assistant_origin() {
   };
 }
 
-constexpr auto
-home_assistant_device_identifier(const auto& device_,
-                                 const system_info& system_info_) {
-  return std::format("simarine.{}.{}{}", system_info_.serial_number,
-                     get_short_device_type_name(device_), device_.id);
+constexpr auto home_assistant_device_identifier(const auto& dev,
+                                                const system_info& sys_info) {
+  return std::format("simarine.{}.{}{}", sys_info.serial_number,
+                     get_short_device_type_name(dev), dev.id);
 }
 
 constexpr home_assistant_device
-make_home_assistant_device(const auto& device_, const system_info& system_info_,
+make_home_assistant_device(const auto& dev, const system_info& sys_info,
                            std::string identifier) {
   return home_assistant_device{
       .identifiers = std::move(identifier),
-      .name = device_.name,
+      .name = dev.name,
       .manufacturer = "Simarine",
-      .serial_number = system_info_.serial_number,
-      .fw_version = system_info_.fw_version,
+      .serial_number = sys_info.serial_number,
+      .fw_version = sys_info.fw_version,
   };
 }
 
 constexpr std::vector<home_assistant_device_component>
-make_home_assistant_sensor_components(const sensor& sensor_,
+make_home_assistant_sensor_components(const sensor& sen,
                                       const std::string& device_identifier) {
   std::vector<home_assistant_device_component> components;
 
@@ -307,16 +306,16 @@ make_home_assistant_sensor_components(const sensor& sensor_,
           },
           [&](const unsupported_sensor&) {},
       },
-      sensor_);
+      sen);
 
   return components;
 }
 
 constexpr std::vector<home_assistant_device_component>
 make_home_assistant_device_sensor_components(
-    const device& device_, const sensor_range auto& sensors,
+    const device& dev, const sensor_range auto& sensors,
     const std::string& device_identifier) {
-  return get_sensors(device_, sensors) |
+  return get_sensors(dev, sensors) |
          std::views::transform([&](const auto& sen) {
            return make_home_assistant_sensor_components(sen, device_identifier);
          }) |
@@ -324,48 +323,45 @@ make_home_assistant_device_sensor_components(
 }
 
 constexpr std::string
-make_home_assistant_device_discovery_topic(const device& device_,
+make_home_assistant_device_discovery_topic(const device& dev,
                                            const uint32_t serial_number) {
   return std::format("homeassistant/device/simarine_{}_{}{}/config",
-                     serial_number, get_short_device_type_name(device_),
-                     get_device_id(device_));
+                     serial_number, get_short_device_type_name(dev),
+                     get_device_id(dev));
 }
 
-constexpr std::string make_home_assistant_state_topic(const device& device_,
+constexpr std::string make_home_assistant_state_topic(const device& dev,
                                                       uint32_t serial_number) {
   return std::format("simarine/{}/{}{}/state", serial_number,
-                     get_short_device_type_name(device_),
-                     get_device_id(device_));
+                     get_short_device_type_name(dev), get_device_id(dev));
 }
 
 constexpr home_assistant_device_discovery
-make_home_assistant_device_discovery(const device& device_,
+make_home_assistant_device_discovery(const device& dev,
                                      const sensor_range auto& sensors,
-                                     const system_info& system_info_) {
+                                     const system_info& sys_info) {
   return std::visit(
-      [&](const auto& dev) {
-        const auto ha_device_id =
-            home_assistant_device_identifier(dev, system_info_);
+      [&](const auto& d) {
+        const auto id = home_assistant_device_identifier(d, sys_info);
         return home_assistant_device_discovery{
-            .device =
-                make_home_assistant_device(dev, system_info_, ha_device_id),
+            .device = make_home_assistant_device(d, sys_info, id),
             .origin = make_home_assistant_origin(),
-            .components = make_home_assistant_device_sensor_components(
-                device_, sensors, ha_device_id),
-            .state_topic = make_home_assistant_state_topic(
-                dev, system_info_.serial_number),
+            .components =
+                make_home_assistant_device_sensor_components(d, sensors, id),
+            .state_topic =
+                make_home_assistant_state_topic(d, sys_info.serial_number),
         };
       },
-      device_);
+      dev);
 }
 
 inline std::unordered_map<std::string, std::string>
 make_home_assistant_device_sensor_states(
-    const device& device_, const sensor_range auto& sensors,
+    const device& dev, const sensor_range auto& sensors,
     const home_assistant_state_config& config) {
   std::unordered_map<std::string, std::string> entries;
 
-  for (const auto& sensor_ : get_sensors(device_, sensors)) {
+  for (const auto& sen : get_sensors(dev, sensors)) {
     std::visit(
         overloaded{
             [&](const voltage_sensor& s) {
@@ -401,7 +397,7 @@ make_home_assistant_device_sensor_states(
             },
             [&](const unsupported_sensor&) {},
         },
-        sensor_);
+        sen);
   };
 
   return entries;
@@ -409,27 +405,24 @@ make_home_assistant_device_sensor_states(
 
 template <typename tcp_socket_type, typename udp_socket_type>
 constexpr mqtt_message make_home_assistant_device_discovery_message(
-    const device& device_,
-    const basic_hub<tcp_socket_type, udp_socket_type>& hub_) {
+    const device& dev, const basic_hub<tcp_socket_type, udp_socket_type>& h) {
   return mqtt_message{
       .topic = make_home_assistant_device_discovery_topic(
-          device_, hub_.system().serial_number),
+          dev, h.system().serial_number),
       .payload = to_json(make_home_assistant_device_discovery(
-          device_, hub_.all_sensors(), hub_.system())),
+          dev, h.all_sensors(), h.system())),
   };
 }
 
 template <typename tcp_socket_type, typename udp_socket_type>
 inline mqtt_message make_home_assistant_state_message(
-    const device& device_,
-    const basic_hub<tcp_socket_type, udp_socket_type>& hub_,
+    const device& dev, const basic_hub<tcp_socket_type, udp_socket_type>& h,
     const home_assistant_state_config& config) {
 
   return mqtt_message{
-      .topic =
-          make_home_assistant_state_topic(device_, hub_.system().serial_number),
+      .topic = make_home_assistant_state_topic(dev, h.system().serial_number),
       .payload = to_json_object(make_home_assistant_device_sensor_states(
-          device_, hub_.all_sensors(), config)),
+          dev, h.all_sensors(), config)),
   };
 }
 

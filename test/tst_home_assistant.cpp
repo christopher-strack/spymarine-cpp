@@ -9,7 +9,7 @@ namespace spymarine {
 
 using namespace nlohmann;
 
-TEST_CASE("make_home_assistant_device_discovery2") {
+TEST_CASE("make_home_assistant_device_discovery") {
   const auto config = home_assistant_state_config{};
   const auto devices = make_parsed_devices_with_sensors();
 

@@ -172,17 +172,17 @@ concept sensor_range =
     std::ranges::random_access_range<T> && std::ranges::sized_range<T> &&
     std::same_as<std::ranges::range_value_t<T>, sensor>;
 
-constexpr sensor_id get_sensor_id(const sensor& sensor_) noexcept {
-  return std::visit([](const auto& s) { return s.id; }, sensor_);
+constexpr sensor_id get_sensor_id(const sensor& sen) noexcept {
+  return std::visit([](const auto& s) { return s.id; }, sen);
 }
 
-constexpr auto get_parent_device_id(const sensor& sensor_) noexcept {
-  return std::visit([&](auto& s) { return s.parent_device_id; }, sensor_);
+constexpr auto get_parent_device_id(const sensor& sen) noexcept {
+  return std::visit([&](auto& s) { return s.parent_device_id; }, sen);
 }
 
-constexpr void update_sensor(sensor& sensor_, const numeric_value1& value,
+constexpr void update_sensor(sensor& sen, const numeric_value1& value,
                              const size_t average_count) noexcept {
-  std::visit([&](auto& s) { s.update(value, average_count); }, sensor_);
+  std::visit([&](auto& s) { s.update(value, average_count); }, sen);
 }
 
 constexpr void update_sensor_values(sensor_range auto& sensors,
@@ -191,9 +191,9 @@ constexpr void update_sensor_values(sensor_range auto& sensors,
   for (const auto& value : values) {
     if (const auto num = std::get_if<numeric_value1>(&value);
         num != nullptr && num->id() < sensors.size()) {
-      auto& sensor_ = sensors[num->id()];
-      assert(get_sensor_id(sensor_) == num->id());
-      update_sensor(sensor_, *num, average_count);
+      auto& sen = sensors[num->id()];
+      assert(get_sensor_id(sen) == num->id());
+      update_sensor(sen, *num, average_count);
     }
   }
 }

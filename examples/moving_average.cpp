@@ -1,6 +1,4 @@
-#include "spymarine/client.hpp"
-#include "spymarine/hub.hpp"
-#include "spymarine/sensor.hpp"
+#include "spymarine/spymarine.hpp"
 
 #include <chrono>
 #include <print>
@@ -8,8 +6,10 @@
 namespace {
 
 void print_current_sensors(const spymarine::hub& hub) {
-  for (const auto& sensor_ : hub.sensors_by_type<spymarine::current_sensor>()) {
-    std::println("Sensor #{}: {} A", sensor_.id, sensor_.value.average_value);
+  for (const auto& current_sensor :
+       hub.sensors_by_type<spymarine::current_sensor>()) {
+    std::println("Sensor #{}: {} A", current_sensor.id,
+                 current_sensor.value.average_value);
   }
 }
 

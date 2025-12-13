@@ -120,23 +120,22 @@ using device = std::variant<voltage_device, current_device, temperature_device,
                             barometer_device, resistive_device, tank_device,
                             battery_device, unsupported_device>;
 
-constexpr device_id get_device_id(const device& device_) noexcept {
-  return std::visit([](const auto& dev) { return dev.id; }, device_);
+constexpr device_id get_device_id(const device& dev) noexcept {
+  return std::visit([](const auto& d) { return d.id; }, dev);
 }
 
 constexpr std::optional<std::string>
-get_device_name(const device& device_) noexcept {
-  return std::visit([](const auto& dev) { return dev.name; }, device_);
+get_device_name(const device& dev) noexcept {
+  return std::visit([](const auto& d) { return d.name; }, dev);
 }
 
-constexpr std::vector<sensor_id>
-get_sensor_ids(const device& device_) noexcept {
-  return std::visit([](const auto& dev) { return dev.sensor_ids; }, device_);
+constexpr std::vector<sensor_id> get_sensor_ids(const device& dev) noexcept {
+  return std::visit([](const auto& d) { return d.sensor_ids; }, dev);
 }
 
-constexpr auto get_sensors(const device& device_,
+constexpr auto get_sensors(const device& dev,
                            const sensor_range auto& sensors) {
-  return get_sensor_ids(device_) | std::views::filter([&](const auto id) {
+  return get_sensor_ids(dev) | std::views::filter([&](const auto id) {
            return id < std::ranges::size(sensors);
          }) |
          std::views::transform([&](const auto id) {
