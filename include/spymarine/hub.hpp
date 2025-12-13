@@ -49,6 +49,15 @@ public:
            });
   }
 
+  template <typename sensor_type> auto sensors_by_type() const noexcept {
+    return _sensors | std::views::filter([](const auto& s) {
+             return std::holds_alternative<sensor_type>(s);
+           }) |
+           std::views::transform([](const auto& s) -> const sensor_type& {
+             return std::get<sensor_type>(s);
+           });
+  }
+
   auto all_sensors(const device2& device_) const noexcept {
     return get_sensors(device_, _sensors);
   }
