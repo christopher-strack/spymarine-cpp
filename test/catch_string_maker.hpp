@@ -1,7 +1,7 @@
 #pragma once
 
 #include "spymarine/count_info.hpp"
-#include "spymarine/device2.hpp"
+#include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message_value.hpp"
 #include "spymarine/overloaded.hpp"

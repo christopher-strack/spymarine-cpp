@@ -1,6 +1,6 @@
 #pragma once
 
-#include "spymarine/device2.hpp"
+#include "spymarine/device.hpp"
 #include "spymarine/sensor2.hpp"
 #include "spymarine/system_info.hpp"
 

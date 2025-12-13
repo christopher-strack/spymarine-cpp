@@ -10,7 +10,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/client.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/crc.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/defaults.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/device2.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/device.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/file_descriptor.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/hub.hpp

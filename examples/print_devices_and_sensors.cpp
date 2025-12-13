@@ -1,5 +1,5 @@
 #include "spymarine/client.hpp"
-#include "spymarine/device2.hpp"
+#include "spymarine/device.hpp"
 #include "spymarine/hub.hpp"
 #include "spymarine/overloaded.hpp"
 

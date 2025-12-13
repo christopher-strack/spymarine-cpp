@@ -1,6 +1,6 @@
 #pragma once
 
-#include "spymarine/device2.hpp"
+#include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message_value.hpp"
 #include "spymarine/message_values_view.hpp"

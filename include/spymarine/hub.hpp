@@ -1,7 +1,7 @@
 #pragma once
 
 #include "spymarine/client.hpp"
-#include "spymarine/device2.hpp"
+#include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/parse_error.hpp"
 #include "spymarine/tcp_socket.hpp"

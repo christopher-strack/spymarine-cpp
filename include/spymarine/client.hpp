@@ -2,7 +2,7 @@
 
 #include "spymarine/crc.hpp"
 #include "spymarine/defaults.hpp"
-#include "spymarine/device2.hpp"
+#include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message.hpp"
 #include "spymarine/message_values_view.hpp"
