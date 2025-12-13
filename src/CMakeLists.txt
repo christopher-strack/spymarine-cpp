@@ -10,9 +10,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/client.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/crc.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/defaults.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/device.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/device2.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/device_ostream.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/file_descriptor.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/hub.hpp
@@ -21,30 +19,22 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_values_iterator.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_values_view.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/overloaded.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/parse_device.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_device2.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message_header.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message_type.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/rational.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/read_devices.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/sensor.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/sensor2.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/sensor_reader.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/tcp_socket.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/udp_socket.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/unit.hpp
-            $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:${PROJECT_SOURCE_DIR}/include/spymarine/home_assistant.hpp>
+            $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:${PROJECT_SOURCE_DIR}/include/spymarine/home_assistant2.hpp>
     PRIVATE
-        device_ostream.cpp
         error.cpp
         file_descriptor.cpp
-        read_devices.cpp
-        sensor_reader.cpp
         tcp_socket.cpp
         udp_socket.cpp
-        $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:home_assistant.cpp>
 )
 
 set_target_properties(spymarine PROPERTIES VERIFY_INTERFACE_HEADER_SETS ON)
