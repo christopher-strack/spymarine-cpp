@@ -30,7 +30,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     std::println("Discovery Topic: {}", discovery_msg.topic);
     std::println("Discovery Payload: {}", discovery_msg.payload);
 
-    const auto state_msg = make_home_assistant_state_message(device_, *hub);
+    const auto config = spymarine::home_assistant_state_config{};
+    const auto state_msg =
+        make_home_assistant_state_message(device_, *hub, config);
     std::println("State Topic: {}", state_msg.topic);
     std::println("State Payload: {}", state_msg.payload);
     std::println();

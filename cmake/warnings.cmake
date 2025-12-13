@@ -23,6 +23,14 @@ function(target_enable_warnings target_name)
                 -Wno-float-equal
                 -Werror
         )
+    elseif (ESP_PLATFORM)
+        target_compile_options(${target_name} PRIVATE
+            -Wall
+            -Wextra
+            -Wconversion
+            -Wshadow
+            -Werror
+        )
     else()
         target_compile_options(
             ${target_name}

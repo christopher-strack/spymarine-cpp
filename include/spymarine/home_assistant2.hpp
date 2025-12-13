@@ -22,6 +22,14 @@ struct mqtt_message2 {
   auto operator<=>(const mqtt_message2&) const = default;
 };
 
+struct home_assistant_state_config {
+  // Report the average value for current and voltage sensors instead of the
+  // instantaneous value. This is useful for Home Assistant integrations that
+  // do not support frequent updates, as it reflects changes between updates
+  // better.
+  bool use_average_value_for_current_and_voltage = false;
+};
+
 struct home_assistant_origin {
   std::string_view name;
   std::string_view sw_version;
@@ -40,6 +48,7 @@ struct home_assistant_device_component {
   std::string component_id;
   std::string_view platform;
   std::optional<std::string_view> device_class;
+  std::optional<std::string_view> name;
   std::string_view unit_of_measurement;
   std::string value_template;
   std::string unique_id;
@@ -93,10 +102,14 @@ to_json(const home_assistant_device_component& component) {
           ? std::format(R"("dev_cla":"{}",)", *component.device_class)
           : "";
 
+  const auto name_str =
+      component.name ? std::format(R"("name":"{}",)", *component.name) : "";
+
   return std::format(
-      R"({{"p":"{}",{}"unit_of_meas":"{}","val_tpl":"{}","uniq_id":"{}"}})",
-      component.platform, device_class_str, component.unit_of_measurement,
-      component.value_template, component.unique_id);
+      R"({{"p":"{}",{}{}"unit_of_meas":"{}","val_tpl":"{}","uniq_id":"{}"}})",
+      component.platform, device_class_str, name_str,
+      component.unit_of_measurement, component.value_template,
+      component.unique_id);
 }
 
 constexpr std::string
@@ -188,42 +201,26 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
       overloaded{
           [&](const voltage_sensor2& s) {
             const auto id = std::format("{}{}", "volt", s.id);
-            const auto avg_id = std::format("{}{}", "volt_avg", s.id);
             components.emplace_back(home_assistant_device_component{
                 .component_id = id,
                 .platform = "sensor",
                 .device_class = "voltage",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.value.unit),
                 .value_template = "{{ value_json.volt }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
             });
-            components.emplace_back(home_assistant_device_component{
-                .component_id = avg_id,
-                .platform = "sensor",
-                .device_class = "voltage",
-                .unit_of_measurement = to_home_assistant_unit(s.value.unit),
-                .value_template = "{{ value_json.volt_avg }}",
-                .unique_id = std::format("{}.{}", device_identifier, avg_id),
-            });
           },
           [&](const current_sensor2& s) {
             const auto id = std::format("{}{}", "cur", s.id);
-            const auto avg_id = std::format("{}{}", "cur_avg", s.id);
             components.emplace_back(home_assistant_device_component{
                 .component_id = id,
                 .platform = "sensor",
                 .device_class = "current",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.value.unit),
                 .value_template = "{{ value_json.cur }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
-            });
-            components.emplace_back(home_assistant_device_component{
-                .component_id = avg_id,
-                .platform = "sensor",
-                .device_class = "current",
-                .unit_of_measurement = to_home_assistant_unit(s.value.unit),
-                .value_template = "{{ value_json.cur_avg }}",
-                .unique_id = std::format("{}.{}", device_identifier, avg_id),
             });
           },
           [&](const temperature_sensor2& s) {
@@ -232,6 +229,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = id,
                 .platform = "sensor",
                 .device_class = "temperature",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.value.unit),
                 .value_template = "{{ value_json.temp }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
@@ -244,6 +242,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = id,
                 .platform = "sensor",
                 .device_class = "atmospheric_pressure",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.value.unit),
                 .value_template = "{{ value_json.baro }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
@@ -255,6 +254,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = id,
                 .platform = "sensor",
                 .device_class = std::nullopt,
+                .name = "Resistive Sensor",
                 .unit_of_measurement = to_home_assistant_unit(s.value.unit),
                 .value_template = "{{ value_json.res }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
@@ -267,6 +267,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = vol_id,
                 .platform = "sensor",
                 .device_class = "volume_storage",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.volume.unit),
                 .value_template = "{{ value_json.vol }}",
                 .unique_id = std::format("{}.{}", device_identifier, vol_id),
@@ -275,6 +276,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = lvl_id,
                 .platform = "sensor",
                 .device_class = std::nullopt,
+                .name = "Tank Level",
                 .unit_of_measurement = to_home_assistant_unit(s.level.unit),
                 .value_template = "{{ value_json.lvl }}",
                 .unique_id = std::format("{}.{}", device_identifier, lvl_id),
@@ -287,6 +289,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = batt_it,
                 .platform = "sensor",
                 .device_class = "battery",
+                .name = std::nullopt,
                 .unit_of_measurement = to_home_assistant_unit(s.charge.unit),
                 .value_template = "{{ value_json.batt }}",
                 .unique_id = std::format("{}.{}", device_identifier, batt_it),
@@ -295,6 +298,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .component_id = cap_it,
                 .platform = "sensor",
                 .device_class = std::nullopt,
+                .name = "Remaining Capacity",
                 .unit_of_measurement =
                     to_home_assistant_unit(s.remaining_capacity.unit),
                 .value_template = "{{ value_json.cap }}",
@@ -357,21 +361,25 @@ make_home_assistant_device_discovery(const device2& device_,
 }
 
 inline std::unordered_map<std::string, std::string>
-make_home_assistant_device_sensor_states(const device2& device_,
-                                         const sensor_range auto& sensors) {
+make_home_assistant_device_sensor_states(
+    const device2& device_, const sensor_range auto& sensors,
+    const home_assistant_state_config& config) {
   std::unordered_map<std::string, std::string> entries;
 
   for (const auto& sensor_ : get_sensors(device_, sensors)) {
     std::visit(
         overloaded{
             [&](const voltage_sensor2& s) {
-              entries.emplace("volt", s.value.current_value.to_string());
-              entries.emplace("volt_avg",
-                              std::to_string(s.value.average_value));
+              entries.emplace("volt",
+                              config.use_average_value_for_current_and_voltage
+                                  ? std::to_string(s.value.average_value)
+                                  : s.value.current_value.to_string());
             },
             [&](const current_sensor2& s) {
-              entries.emplace("cur", s.value.current_value.to_string());
-              entries.emplace("cur_avg", std::to_string(s.value.average_value));
+              entries.emplace("cur",
+                              config.use_average_value_for_current_and_voltage
+                                  ? std::to_string(s.value.average_value)
+                                  : s.value.current_value.to_string());
             },
             [&](const temperature_sensor2& s) {
               entries.emplace("temp", s.value.current_value.to_string());
@@ -413,13 +421,14 @@ constexpr mqtt_message2 make_home_assistant_device_discovery_message(
 
 template <typename tcp_socket_type, typename udp_socket_type>
 inline mqtt_message2 make_home_assistant_state_message(
-    const device2& device_, const hub<tcp_socket_type, udp_socket_type>& hub_) {
+    const device2& device_, const hub<tcp_socket_type, udp_socket_type>& hub_,
+    const home_assistant_state_config& config) {
 
   return mqtt_message2{
       .topic =
           make_home_assistant_state_topic(device_, hub_.system().serial_number),
-      .payload = to_json_object(
-          make_home_assistant_device_sensor_states(device_, hub_.sensors())),
+      .payload = to_json_object(make_home_assistant_device_sensor_states(
+          device_, hub_.sensors(), config)),
   };
 }
 
