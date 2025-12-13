@@ -35,7 +35,7 @@ public:
 
   const std::vector<device2>& all_devices() const noexcept { return _devices; }
 
-  auto supported_devices() const noexcept {
+  auto devices() const noexcept {
     return _devices | std::views::filter([](const auto& device_) {
              return !std::holds_alternative<unsupported_device2>(device_);
            });
