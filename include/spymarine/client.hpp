@@ -24,15 +24,19 @@
 #include <limits>
 #include <span>
 #include <utility>
+#include <vector>
 
 namespace spymarine {
 
 template <typename tcp_socket_type, typename udp_socket_type>
 class basic_client {
 public:
+  // maximum amount of data a message can contain
+  static constexpr auto buffer_size = 2048;
+
   constexpr explicit basic_client(tcp_socket_type&& tcp_socket_,
                                   udp_socket_type&& udp_socket_) noexcept
-      : _buffer{}, _tcp_socket{std::move(tcp_socket_)},
+      : _buffer(buffer_size, 0), _tcp_socket{std::move(tcp_socket_)},
         _udp_socket{std::move(udp_socket_)} {}
 
   constexpr std::expected<system_info, error> request_system_info() noexcept {
@@ -138,7 +142,7 @@ private:
         [](const auto bytes) { return parse_message(bytes); });
   }
 
-  static_buffer _buffer;
+  std::vector<uint8_t> _buffer;
   tcp_socket_type _tcp_socket;
   udp_socket_type _udp_socket;
 };
