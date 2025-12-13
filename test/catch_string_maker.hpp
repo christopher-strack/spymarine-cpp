@@ -172,8 +172,8 @@ struct StringMaker<spymarine::device_property<T, Denominator, Unit>> {
   }
 };
 
-template <> struct StringMaker<spymarine::voltage_device2> {
-  static std::string convert(const spymarine::voltage_device2& dev) {
+template <> struct StringMaker<spymarine::voltage_device> {
+  static std::string convert(const spymarine::voltage_device& dev) {
     return std::format(
         "voltage_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
         StringMaker<decltype(dev.name)>::convert(dev.name),
@@ -181,8 +181,8 @@ template <> struct StringMaker<spymarine::voltage_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::resistive_device2> {
-  static std::string convert(const spymarine::resistive_device2& dev) {
+template <> struct StringMaker<spymarine::resistive_device> {
+  static std::string convert(const spymarine::resistive_device& dev) {
     return std::format(
         "resistive_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
         StringMaker<decltype(dev.name)>::convert(dev.name),
@@ -190,8 +190,8 @@ template <> struct StringMaker<spymarine::resistive_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::barometer_device2> {
-  static std::string convert(const spymarine::barometer_device2& dev) {
+template <> struct StringMaker<spymarine::barometer_device> {
+  static std::string convert(const spymarine::barometer_device& dev) {
     return std::format(
         "barometer_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
         StringMaker<decltype(dev.name)>::convert(dev.name),
@@ -199,8 +199,8 @@ template <> struct StringMaker<spymarine::barometer_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::current_device2> {
-  static std::string convert(const spymarine::current_device2& dev) {
+template <> struct StringMaker<spymarine::current_device> {
+  static std::string convert(const spymarine::current_device& dev) {
     return std::format(
         "current_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
         StringMaker<decltype(dev.name)>::convert(dev.name),
@@ -208,8 +208,8 @@ template <> struct StringMaker<spymarine::current_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::temperature_device2> {
-  static std::string convert(const spymarine::temperature_device2& dev) {
+template <> struct StringMaker<spymarine::temperature_device> {
+  static std::string convert(const spymarine::temperature_device& dev) {
     return std::format(
         "temperature_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
         StringMaker<decltype(dev.name)>::convert(dev.name),
@@ -217,8 +217,8 @@ template <> struct StringMaker<spymarine::temperature_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::battery_device2> {
-  static std::string convert(const spymarine::battery_device2& dev) {
+template <> struct StringMaker<spymarine::battery_device> {
+  static std::string convert(const spymarine::battery_device& dev) {
     return std::format(
         "battery_device {{ id = {}, name = {}, type = {}, "
         "capacity = {}, sensor_ids = {} }}",
@@ -229,8 +229,8 @@ template <> struct StringMaker<spymarine::battery_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::tank_device2> {
-  static std::string convert(const spymarine::tank_device2& dev) {
+template <> struct StringMaker<spymarine::tank_device> {
+  static std::string convert(const spymarine::tank_device& dev) {
     return std::format(
         "tank_device_info {{ id = {}, name = {}, type = {}, capacity "
         "= {}, sensor_ids = {} }}",
@@ -241,8 +241,8 @@ template <> struct StringMaker<spymarine::tank_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::unsupported_device2> {
-  static std::string convert(const spymarine::unsupported_device2& dev) {
+template <> struct StringMaker<spymarine::unsupported_device> {
+  static std::string convert(const spymarine::unsupported_device& dev) {
     return std::format(
         "unsupported_device {{ id = {}, type = {}, name = {}, sensor_ids "
         "= {} }}",

@@ -151,16 +151,16 @@ constexpr std::string_view to_home_assistant_unit(const unit u) {
 }
 
 constexpr std::string_view
-get_short_device_type_name(const device2& device_) noexcept {
+get_short_device_type_name(const device& device_) noexcept {
   return std::visit(overloaded{
-                        [](const voltage_device2&) { return "volt"; },
-                        [](const current_device2&) { return "cur"; },
-                        [](const temperature_device2&) { return "temp"; },
-                        [](const barometer_device2&) { return "baro"; },
-                        [](const resistive_device2&) { return "res"; },
-                        [](const tank_device2&) { return "tank"; },
-                        [](const battery_device2&) { return "batt"; },
-                        [](const unsupported_device2&) { return "unsupp"; },
+                        [](const voltage_device&) { return "volt"; },
+                        [](const current_device&) { return "cur"; },
+                        [](const temperature_device&) { return "temp"; },
+                        [](const barometer_device&) { return "baro"; },
+                        [](const resistive_device&) { return "res"; },
+                        [](const tank_device&) { return "tank"; },
+                        [](const battery_device&) { return "batt"; },
+                        [](const unsupported_device&) { return "unsupp"; },
                     },
                     device_);
 }
@@ -314,7 +314,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
 
 constexpr std::vector<home_assistant_device_component>
 make_home_assistant_device_sensor_components(
-    const device2& device_, const sensor_range auto& sensors,
+    const device& device_, const sensor_range auto& sensors,
     const std::string& device_identifier) {
   return get_sensors(device_, sensors) |
          std::views::transform([&](const auto& sensor) {
@@ -325,14 +325,14 @@ make_home_assistant_device_sensor_components(
 }
 
 constexpr std::string
-make_home_assistant_device_discovery_topic(const device2& device_,
+make_home_assistant_device_discovery_topic(const device& device_,
                                            const uint32_t serial_number) {
   return std::format("homeassistant/device/simarine_{}_{}{}/config",
                      serial_number, get_short_device_type_name(device_),
                      get_device_id(device_));
 }
 
-constexpr std::string make_home_assistant_state_topic(const device2& device_,
+constexpr std::string make_home_assistant_state_topic(const device& device_,
                                                       uint32_t serial_number) {
   return std::format("simarine/{}/{}{}/state", serial_number,
                      get_short_device_type_name(device_),
@@ -340,7 +340,7 @@ constexpr std::string make_home_assistant_state_topic(const device2& device_,
 }
 
 constexpr home_assistant_device_discovery
-make_home_assistant_device_discovery(const device2& device_,
+make_home_assistant_device_discovery(const device& device_,
                                      const sensor_range auto& sensors,
                                      const system_info& system_info_) {
   return std::visit(
@@ -362,7 +362,7 @@ make_home_assistant_device_discovery(const device2& device_,
 
 inline std::unordered_map<std::string, std::string>
 make_home_assistant_device_sensor_states(
-    const device2& device_, const sensor_range auto& sensors,
+    const device& device_, const sensor_range auto& sensors,
     const home_assistant_state_config& config) {
   std::unordered_map<std::string, std::string> entries;
 
@@ -410,7 +410,7 @@ make_home_assistant_device_sensor_states(
 
 template <typename tcp_socket_type, typename udp_socket_type>
 constexpr mqtt_message2 make_home_assistant_device_discovery_message(
-    const device2& device_,
+    const device& device_,
     const basic_hub<tcp_socket_type, udp_socket_type>& hub_) {
   return mqtt_message2{
       .topic = make_home_assistant_device_discovery_topic(
@@ -422,7 +422,7 @@ constexpr mqtt_message2 make_home_assistant_device_discovery_message(
 
 template <typename tcp_socket_type, typename udp_socket_type>
 inline mqtt_message2 make_home_assistant_state_message(
-    const device2& device_,
+    const device& device_,
     const basic_hub<tcp_socket_type, udp_socket_type>& hub_,
     const home_assistant_state_config& config) {
 

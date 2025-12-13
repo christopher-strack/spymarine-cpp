@@ -40,7 +40,7 @@ constexpr battery_type to_battery_type(const numeric_value3 type) noexcept {
   return battery_type::unknown;
 }
 
-constexpr std::expected<device2, error>
+constexpr std::expected<device, error>
 parse_device2(const message_values_view values) noexcept {
   const auto id_value = values.find<numeric_value1>(0);
   const auto type_value = values.find<numeric_value3>(1);
@@ -56,17 +56,17 @@ parse_device2(const message_values_view values) noexcept {
 
   switch (type) {
   case 1:
-    return device2{voltage_device2{.id = id, .name = std::move(name)}};
+    return device{voltage_device{.id = id, .name = std::move(name)}};
   case 2:
-    return current_device2{.id = id, .name = std::move(name)};
+    return current_device{.id = id, .name = std::move(name)};
   case 3:
-    return temperature_device2{.id = id, .name = std::move(name)};
+    return temperature_device{.id = id, .name = std::move(name)};
   case 5:
-    return barometer_device2{.id = id, .name = std::move(name)};
+    return barometer_device{.id = id, .name = std::move(name)};
   case 6:
-    return resistive_device2{.id = id, .name = std::move(name)};
+    return resistive_device{.id = id, .name = std::move(name)};
   case 8:
-    return tank_device2{
+    return tank_device{
         .id = id,
         .name = std::move(name),
         .type = values.find<numeric_value3>(6).transform(to_fluid_type),
@@ -74,7 +74,7 @@ parse_device2(const message_values_view values) noexcept {
             [](const auto& v) { return tank_capacity{v.high_int16()}; }),
     };
   case 9:
-    return battery_device2{
+    return battery_device{
         .id = id,
         .name = std::move(name),
         .type = values.find<numeric_value3>(8).transform(to_battery_type),
@@ -83,7 +83,7 @@ parse_device2(const message_values_view values) noexcept {
     };
   }
 
-  return unsupported_device2{
+  return unsupported_device{
       .id = id,
       .raw_type = static_cast<uint32_t>(type),
       .name = std::move(name),

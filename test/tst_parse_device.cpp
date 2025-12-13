@@ -15,7 +15,7 @@ TEST_CASE("parse_device2") {
         parse_message(raw_barometer_device_response).value();
 
     CHECK(parse_device2(msg.values()) ==
-          device2{barometer_device2{.id = 5, .name = "Barometer"}});
+          device{barometer_device{.id = 5, .name = "Barometer"}});
   }
 
   SECTION("voltage_device") {
@@ -23,7 +23,7 @@ TEST_CASE("parse_device2") {
         parse_message(raw_st107_voltage_device_1_response).value();
 
     CHECK(parse_device2(msg.values()) ==
-          device2{voltage_device2{.id = 10, .name = "ST107 [5596] 1"}});
+          device{voltage_device{.id = 10, .name = "ST107 [5596] 1"}});
   }
 
   SECTION("resistive_device") {
@@ -31,7 +31,7 @@ TEST_CASE("parse_device2") {
         parse_message(raw_st107_resistive_device_1_response).value();
 
     CHECK(parse_device2(msg.values()) ==
-          device2{resistive_device2{.id = 13, .name = "ST107 [5596] 1"}});
+          device{resistive_device{.id = 13, .name = "ST107 [5596] 1"}});
   }
 
   SECTION("current_device") {
@@ -39,7 +39,7 @@ TEST_CASE("parse_device2") {
         parse_message(raw_sc303_current_device_response).value();
 
     CHECK(parse_device2(msg.values()) ==
-          device2{current_device2{.id = 18, .name = "SC303 [5499]"}});
+          device{current_device{.id = 18, .name = "SC303 [5499]"}});
   }
 
   SECTION("battery_device") {
@@ -47,7 +47,7 @@ TEST_CASE("parse_device2") {
         parse_message(raw_battery_device_1_response).value();
 
     CHECK(parse_device2(msg.values()) ==
-          device2{battery_device2{
+          device{battery_device{
               .id = 24,
               .name = "Bulltron",
               .type = battery_type::lifepo4,
@@ -60,14 +60,14 @@ TEST_CASE("parse_device2") {
         parse_message(raw_temperature_device_1_response).value();
 
     CHECK(parse_device2(msg.values()) ==
-          device2{temperature_device2{.id = 25, .name = "Batterie"}});
+          device{temperature_device{.id = 25, .name = "Batterie"}});
   }
 
   SECTION("tank_device") {
     static constexpr auto msg =
         parse_message(raw_tank_device_1_response).value();
 
-    CHECK(parse_device2(msg.values()) == device2{tank_device2{
+    CHECK(parse_device2(msg.values()) == device{tank_device{
                                              .id = 26,
                                              .name = "Frischwasser",
                                              .type = fluid_type::fresh_water,
@@ -80,7 +80,7 @@ TEST_CASE("parse_device2") {
         parse_message(raw_unknown_device_1_response).value();
 
     CHECK(parse_device2(msg.values()) ==
-          device2{unsupported_device2{
+          device{unsupported_device{
               .id = 0, .raw_type = 10, .name = std::nullopt}});
   }
 }

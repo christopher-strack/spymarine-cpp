@@ -48,14 +48,13 @@ public:
         .and_then(parse_count_info);
   }
 
-  constexpr std::expected<device2, error>
-  request_device(device_id id) noexcept {
+  constexpr std::expected<device, error> request_device(device_id id) noexcept {
     const auto data = std::to_array<uint8_t>(
         {0x00, 0x01, 0x00, 0x00, 0x00, id, 0xff, 0x01, 0x03, 0x00, 0x00, 0x00,
          0x00, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff});
 
     return request_message(message_type::device_information, data)
-        .and_then([](const message& message) -> std::expected<device2, error> {
+        .and_then([](const message& message) -> std::expected<device, error> {
           if (message.type() == message_type::device_information) {
             return parse_device2(message.values());
           } else {

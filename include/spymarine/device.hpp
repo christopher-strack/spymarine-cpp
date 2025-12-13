@@ -26,44 +26,44 @@ template <typename T, size_t Denominator, unit Unit> struct device_property {
   auto operator<=>(const device_property&) const = default;
 };
 
-struct voltage_device2 {
+struct voltage_device {
   device_id id;
   std::optional<std::string> name;
   std::vector<sensor_id> sensor_ids = {};
 
-  bool operator==(const voltage_device2&) const = default;
+  bool operator==(const voltage_device&) const = default;
 };
 
-struct current_device2 {
+struct current_device {
   device_id id;
   std::optional<std::string> name;
   std::vector<sensor_id> sensor_ids = {};
 
-  bool operator==(const current_device2&) const = default;
+  bool operator==(const current_device&) const = default;
 };
 
-struct temperature_device2 {
+struct temperature_device {
   device_id id;
   std::optional<std::string> name;
   std::vector<sensor_id> sensor_ids = {};
 
-  bool operator==(const temperature_device2&) const = default;
+  bool operator==(const temperature_device&) const = default;
 };
 
-struct barometer_device2 {
+struct barometer_device {
   device_id id;
   std::optional<std::string> name;
   std::vector<sensor_id> sensor_ids = {};
 
-  bool operator==(const barometer_device2&) const = default;
+  bool operator==(const barometer_device&) const = default;
 };
 
-struct resistive_device2 {
+struct resistive_device {
   device_id id;
   std::optional<std::string> name;
   std::vector<sensor_id> sensor_ids = {};
 
-  bool operator==(const resistive_device2&) const = default;
+  bool operator==(const resistive_device&) const = default;
 };
 
 enum class fluid_type {
@@ -75,14 +75,14 @@ enum class fluid_type {
 
 using tank_capacity = device_property<int16_t, 10, unit::liters>;
 
-struct tank_device2 {
+struct tank_device {
   device_id id;
   std::optional<std::string> name;
   std::optional<fluid_type> type;
   std::optional<tank_capacity> capacity;
   std::vector<sensor_id> sensor_ids = {};
 
-  bool operator==(const tank_device2&) const = default;
+  bool operator==(const tank_device&) const = default;
 };
 
 enum class battery_type {
@@ -97,45 +97,44 @@ enum class battery_type {
 
 using battery_capacity = device_property<int16_t, 100, unit::amp_hours>;
 
-struct battery_device2 {
+struct battery_device {
   device_id id;
   std::optional<std::string> name;
   std::optional<battery_type> type;
   std::optional<battery_capacity> capacity;
   std::vector<sensor_id> sensor_ids = {};
 
-  bool operator==(const battery_device2&) const = default;
+  bool operator==(const battery_device&) const = default;
 };
 
-struct unsupported_device2 {
+struct unsupported_device {
   device_id id;
   uint32_t raw_type;
   std::optional<std::string> name;
   std::vector<sensor_id> sensor_ids = {};
 
-  bool operator==(const unsupported_device2&) const = default;
+  bool operator==(const unsupported_device&) const = default;
 };
 
-using device2 =
-    std::variant<voltage_device2, current_device2, temperature_device2,
-                 barometer_device2, resistive_device2, tank_device2,
-                 battery_device2, unsupported_device2>;
+using device = std::variant<voltage_device, current_device, temperature_device,
+                            barometer_device, resistive_device, tank_device,
+                            battery_device, unsupported_device>;
 
-constexpr device_id get_device_id(const device2& device_) noexcept {
+constexpr device_id get_device_id(const device& device_) noexcept {
   return std::visit([](const auto& dev) { return dev.id; }, device_);
 }
 
 constexpr std::optional<std::string>
-get_device_name(const device2& device_) noexcept {
+get_device_name(const device& device_) noexcept {
   return std::visit([](const auto& dev) { return dev.name; }, device_);
 }
 
 constexpr std::vector<sensor_id>
-get_sensor_ids(const device2& device_) noexcept {
+get_sensor_ids(const device& device_) noexcept {
   return std::visit([](const auto& dev) { return dev.sensor_ids; }, device_);
 }
 
-constexpr auto get_sensors(const device2& device_,
+constexpr auto get_sensors(const device& device_,
                            const sensor_range auto& sensors) {
   return get_sensor_ids(device_) | std::views::filter([&](const auto id) {
            return id < std::ranges::size(sensors);
@@ -147,7 +146,7 @@ constexpr auto get_sensors(const device2& device_,
          });
 }
 
-constexpr void add_sensor_id(device2& device_, sensor_id id) noexcept {
+constexpr void add_sensor_id(device& device_, sensor_id id) noexcept {
   std::visit([id](auto& dev) { dev.sensor_ids.push_back(id); }, device_);
 }
 
