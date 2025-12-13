@@ -1,11 +1,11 @@
 #pragma once
 
 #include "spymarine/count_info.hpp"
-#include "spymarine/device2.hpp"
+#include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message_value.hpp"
 #include "spymarine/overloaded.hpp"
-#include "spymarine/sensor2.hpp"
+#include "spymarine/sensor.hpp"
 #include "spymarine/system_info.hpp"
 
 #include <catch2/catch_all.hpp>
@@ -172,8 +172,8 @@ struct StringMaker<spymarine::device_property<T, Denominator, Unit>> {
   }
 };
 
-template <> struct StringMaker<spymarine::voltage_device2> {
-  static std::string convert(const spymarine::voltage_device2& dev) {
+template <> struct StringMaker<spymarine::voltage_device> {
+  static std::string convert(const spymarine::voltage_device& dev) {
     return std::format(
         "voltage_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
         StringMaker<decltype(dev.name)>::convert(dev.name),
@@ -181,8 +181,8 @@ template <> struct StringMaker<spymarine::voltage_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::resistive_device2> {
-  static std::string convert(const spymarine::resistive_device2& dev) {
+template <> struct StringMaker<spymarine::resistive_device> {
+  static std::string convert(const spymarine::resistive_device& dev) {
     return std::format(
         "resistive_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
         StringMaker<decltype(dev.name)>::convert(dev.name),
@@ -190,8 +190,8 @@ template <> struct StringMaker<spymarine::resistive_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::barometer_device2> {
-  static std::string convert(const spymarine::barometer_device2& dev) {
+template <> struct StringMaker<spymarine::barometer_device> {
+  static std::string convert(const spymarine::barometer_device& dev) {
     return std::format(
         "barometer_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
         StringMaker<decltype(dev.name)>::convert(dev.name),
@@ -199,8 +199,8 @@ template <> struct StringMaker<spymarine::barometer_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::current_device2> {
-  static std::string convert(const spymarine::current_device2& dev) {
+template <> struct StringMaker<spymarine::current_device> {
+  static std::string convert(const spymarine::current_device& dev) {
     return std::format(
         "current_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
         StringMaker<decltype(dev.name)>::convert(dev.name),
@@ -208,8 +208,8 @@ template <> struct StringMaker<spymarine::current_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::temperature_device2> {
-  static std::string convert(const spymarine::temperature_device2& dev) {
+template <> struct StringMaker<spymarine::temperature_device> {
+  static std::string convert(const spymarine::temperature_device& dev) {
     return std::format(
         "temperature_device {{ id = {}, name = {}, sensor_ids = {} }}", dev.id,
         StringMaker<decltype(dev.name)>::convert(dev.name),
@@ -217,8 +217,8 @@ template <> struct StringMaker<spymarine::temperature_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::battery_device2> {
-  static std::string convert(const spymarine::battery_device2& dev) {
+template <> struct StringMaker<spymarine::battery_device> {
+  static std::string convert(const spymarine::battery_device& dev) {
     return std::format(
         "battery_device {{ id = {}, name = {}, type = {}, "
         "capacity = {}, sensor_ids = {} }}",
@@ -229,8 +229,8 @@ template <> struct StringMaker<spymarine::battery_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::tank_device2> {
-  static std::string convert(const spymarine::tank_device2& dev) {
+template <> struct StringMaker<spymarine::tank_device> {
+  static std::string convert(const spymarine::tank_device& dev) {
     return std::format(
         "tank_device_info {{ id = {}, name = {}, type = {}, capacity "
         "= {}, sensor_ids = {} }}",
@@ -241,8 +241,8 @@ template <> struct StringMaker<spymarine::tank_device2> {
   }
 };
 
-template <> struct StringMaker<spymarine::unsupported_device2> {
-  static std::string convert(const spymarine::unsupported_device2& dev) {
+template <> struct StringMaker<spymarine::unsupported_device> {
+  static std::string convert(const spymarine::unsupported_device& dev) {
     return std::format(
         "unsupported_device {{ id = {}, type = {}, name = {}, sensor_ids "
         "= {} }}",
@@ -253,9 +253,9 @@ template <> struct StringMaker<spymarine::unsupported_device2> {
 };
 
 template <typename T, size_t Denominator, spymarine::unit Unit>
-struct StringMaker<spymarine::sensor_value2<T, Denominator, Unit>> {
+struct StringMaker<spymarine::sensor_value<T, Denominator, Unit>> {
   static std::string
-  convert(const spymarine::sensor_value2<T, Denominator, Unit>& r) {
+  convert(const spymarine::sensor_value<T, Denominator, Unit>& r) {
     return std::format(
         "sensor_value {{ current = {} {}, average = {} {} }}",
         StringMaker<decltype(r.current_value)>::convert(r.current_value),
@@ -264,8 +264,8 @@ struct StringMaker<spymarine::sensor_value2<T, Denominator, Unit>> {
   }
 };
 
-template <> struct StringMaker<spymarine::voltage_sensor2> {
-  static std::string convert(const spymarine::voltage_sensor2& s) {
+template <> struct StringMaker<spymarine::voltage_sensor> {
+  static std::string convert(const spymarine::voltage_sensor& s) {
     return std::format(
         "voltage_sensor {{ id = {}, parent_device_id = {}, value = {} }}", s.id,
         StringMaker<decltype(s.parent_device_id)>::convert(s.parent_device_id),
@@ -273,8 +273,8 @@ template <> struct StringMaker<spymarine::voltage_sensor2> {
   }
 };
 
-template <> struct StringMaker<spymarine::current_sensor2> {
-  static std::string convert(const spymarine::current_sensor2& s) {
+template <> struct StringMaker<spymarine::current_sensor> {
+  static std::string convert(const spymarine::current_sensor& s) {
     return std::format(
         "current_sensor {{ id = {}, parent_device_id = {}, value = {} }}", s.id,
         StringMaker<decltype(s.parent_device_id)>::convert(s.parent_device_id),
@@ -282,8 +282,8 @@ template <> struct StringMaker<spymarine::current_sensor2> {
   }
 };
 
-template <> struct StringMaker<spymarine::temperature_sensor2> {
-  static std::string convert(const spymarine::temperature_sensor2& s) {
+template <> struct StringMaker<spymarine::temperature_sensor> {
+  static std::string convert(const spymarine::temperature_sensor& s) {
     return std::format(
         "temperature_sensor {{ id = {}, parent_device_id = {}, value = {} }}",
         s.id,
@@ -292,8 +292,8 @@ template <> struct StringMaker<spymarine::temperature_sensor2> {
   }
 };
 
-template <> struct StringMaker<spymarine::barometer_sensor2> {
-  static std::string convert(const spymarine::barometer_sensor2& s) {
+template <> struct StringMaker<spymarine::barometer_sensor> {
+  static std::string convert(const spymarine::barometer_sensor& s) {
     return std::format(
         "barometer_sensor {{ id = {}, parent_device_id = {}, value = {} }}",
         s.id,
@@ -302,8 +302,8 @@ template <> struct StringMaker<spymarine::barometer_sensor2> {
   }
 };
 
-template <> struct StringMaker<spymarine::resistive_sensor2> {
-  static std::string convert(const spymarine::resistive_sensor2& s) {
+template <> struct StringMaker<spymarine::resistive_sensor> {
+  static std::string convert(const spymarine::resistive_sensor& s) {
     return std::format(
         "resistive_sensor {{ id = {}, parent_device_id = {}, value = {} }}",
         s.id,
@@ -312,8 +312,8 @@ template <> struct StringMaker<spymarine::resistive_sensor2> {
   }
 };
 
-template <> struct StringMaker<spymarine::tank_sensor2> {
-  static std::string convert(const spymarine::tank_sensor2& s) {
+template <> struct StringMaker<spymarine::tank_sensor> {
+  static std::string convert(const spymarine::tank_sensor& s) {
     return std::format(
         "tank_sensor {{ id = {}, parent_device_id = {}, volume = {}, level = "
         "{} }}",
@@ -324,8 +324,8 @@ template <> struct StringMaker<spymarine::tank_sensor2> {
   }
 };
 
-template <> struct StringMaker<spymarine::battery_sensor2> {
-  static std::string convert(const spymarine::battery_sensor2& s) {
+template <> struct StringMaker<spymarine::battery_sensor> {
+  static std::string convert(const spymarine::battery_sensor& s) {
     return std::format(
         "battery_charge_sensor {{ id = {}, parent_device_id = "
         "{}, charge = {}, remaining_capacity = {} }}",
@@ -337,8 +337,8 @@ template <> struct StringMaker<spymarine::battery_sensor2> {
   }
 };
 
-template <> struct StringMaker<spymarine::unsupported_sensor2> {
-  static std::string convert(const spymarine::unsupported_sensor2& s) {
+template <> struct StringMaker<spymarine::unsupported_sensor> {
+  static std::string convert(const spymarine::unsupported_sensor& s) {
     return std::format(
         "unsupported_sensor {{ id = {}, parent_device_id = {}, "
         "raw_type = {}, raw_value = {} }}",

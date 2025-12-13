@@ -14,12 +14,11 @@ TEST_CASE("initialize_hub") {
       initialize_basic_hub(basic_client{mock_tcp_socket{}, mock_udp_socket{}});
   REQUIRE(hub_.has_value());
 
-  const auto parsed_devices2 = make_parsed_devices2_with_sensors();
+  const auto parsed_devices = make_parsed_devices_with_sensors();
   CHECK(hub_->system() == parsed_system_info);
-  CHECK_THAT(hub_->all_devices(),
-             Catch::Matchers::RangeEquals(parsed_devices2));
+  CHECK_THAT(hub_->all_devices(), Catch::Matchers::RangeEquals(parsed_devices));
   CHECK_THAT(hub_->all_sensors(),
-             Catch::Matchers::RangeEquals(parsed_sensors2_with_value));
+             Catch::Matchers::RangeEquals(parsed_sensors_with_value));
 }
 
 } // namespace spymarine

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "spymarine/client.hpp"
-#include "spymarine/device2.hpp"
+#include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/parse_error.hpp"
 #include "spymarine/tcp_socket.hpp"
@@ -15,8 +15,8 @@ namespace spymarine {
 template <typename tcp_socket_type, typename udp_socket_type> class basic_hub {
 public:
   constexpr basic_hub(basic_client<tcp_socket_type, udp_socket_type> client_,
-                      system_info system_info_, std::vector<device2> devices,
-                      std::vector<sensor2> sensors,
+                      system_info system_info_, std::vector<device> devices,
+                      std::vector<sensor> sensors,
                       message_values_view initial_sensor_values) noexcept
       : _client{std::move(client_)}, _system_info{std::move(system_info_)},
         _devices{std::move(devices)}, _sensors{std::move(sensors)} {
@@ -33,19 +33,19 @@ public:
 
   const system_info& system() const noexcept { return _system_info; }
 
-  const std::vector<device2>& all_devices() const noexcept { return _devices; }
+  const std::vector<device>& all_devices() const noexcept { return _devices; }
 
   auto devices() const noexcept {
     return _devices | std::views::filter([](const auto& device_) {
-             return !std::holds_alternative<unsupported_device2>(device_);
+             return !std::holds_alternative<unsupported_device>(device_);
            });
   }
 
-  const std::vector<sensor2>& all_sensors() const noexcept { return _sensors; }
+  const std::vector<sensor>& all_sensors() const noexcept { return _sensors; }
 
   auto sensors() const noexcept {
     return _sensors | std::views::filter([](const auto& sensor_) {
-             return !std::holds_alternative<unsupported_sensor2>(sensor_);
+             return !std::holds_alternative<unsupported_sensor>(sensor_);
            });
   }
 
@@ -58,22 +58,22 @@ public:
            });
   }
 
-  auto all_sensors(const device2& device_) const noexcept {
+  auto all_sensors(const device& device_) const noexcept {
     return get_sensors(device_, _sensors);
   }
 
-  auto sensors(const device2& device_) const noexcept {
+  auto sensors(const device& device_) const noexcept {
     return get_sensors(device_, _sensors) |
            std::views::filter([](const auto& sensor_) {
-             return !std::holds_alternative<unsupported_sensor2>(sensor_);
+             return !std::holds_alternative<unsupported_sensor>(sensor_);
            });
   }
 
 private:
   basic_client<tcp_socket_type, udp_socket_type> _client;
   system_info _system_info;
-  std::vector<device2> _devices;
-  std::vector<sensor2> _sensors;
+  std::vector<device> _devices;
+  std::vector<sensor> _sensors;
   size_t _average_count{};
 };
 
@@ -97,8 +97,8 @@ initialize_basic_hub(
     return std::unexpected{count_response.error()};
   }
 
-  std::vector<device2> devices;
-  std::vector<sensor2> sensors;
+  std::vector<device> devices;
+  std::vector<sensor> sensors;
 
   devices.reserve(count_response->device_count);
   sensors.reserve(count_response->sensor_count);

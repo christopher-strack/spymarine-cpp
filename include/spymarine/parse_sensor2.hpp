@@ -3,13 +3,13 @@
 #include "spymarine/error.hpp"
 #include "spymarine/message_value.hpp"
 #include "spymarine/message_values_view.hpp"
-#include "spymarine/sensor2.hpp"
+#include "spymarine/sensor.hpp"
 
 #include <expected>
 
 namespace spymarine {
 
-constexpr std::expected<sensor2, error>
+constexpr std::expected<sensor, error>
 parse_sensor2(const message_values_view values) noexcept {
   const auto id_value = values.find<numeric_value1>(1);
   const auto type_value = values.find<numeric_value1>(2);
@@ -26,26 +26,26 @@ parse_sensor2(const message_values_view values) noexcept {
 
   switch (type_value->uint8()) {
   case 1:
-    return voltage_sensor2{.id = id, .parent_device_id = parent_device_id};
+    return voltage_sensor{.id = id, .parent_device_id = parent_device_id};
   case 2:
-    return current_sensor2{.id = id, .parent_device_id = parent_device_id};
+    return current_sensor{.id = id, .parent_device_id = parent_device_id};
   case 4:
-    return temperature_sensor2{.id = id, .parent_device_id = parent_device_id};
+    return temperature_sensor{.id = id, .parent_device_id = parent_device_id};
   case 5:
     return device_local_id == 0
-               ? sensor2{barometer_trend_sensor2{
+               ? sensor{barometer_trend_sensor{
                      .id = id, .parent_device_id = parent_device_id}}
-               : sensor2{barometer_sensor2{
-                     .id = id, .parent_device_id = parent_device_id}};
+               : sensor{barometer_sensor{.id = id,
+                                         .parent_device_id = parent_device_id}};
   case 7:
-    return resistive_sensor2{.id = id, .parent_device_id = parent_device_id};
+    return resistive_sensor{.id = id, .parent_device_id = parent_device_id};
   case 8:
-    return tank_sensor2{.id = id, .parent_device_id = parent_device_id};
+    return tank_sensor{.id = id, .parent_device_id = parent_device_id};
   case 11:
-    return battery_sensor2{.id = id, .parent_device_id = parent_device_id};
+    return battery_sensor{.id = id, .parent_device_id = parent_device_id};
   };
 
-  return unsupported_sensor2{
+  return unsupported_sensor{
       .id = id,
       .parent_device_id = parent_device_id,
       .raw_type = type_value->uint8(),

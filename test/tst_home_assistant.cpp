@@ -1,345 +1,456 @@
-#include "spymarine/device.hpp"
+#include "data.hpp"
+
 #include "spymarine/home_assistant.hpp"
 
 #include <catch2/catch_all.hpp>
 #include <nlohmann/json.hpp>
 
 namespace spymarine {
-namespace {
-auto origin_object() {
-  return nlohmann::json::object({
-      {"name", "spymarine"},
-      {"sw", SPYMARINE_PROJECT_VERSION},
-      {"url", "https://github.com/christopher-strack/spymarine-cpp"},
-  });
-}
-} // namespace
 
-TEST_CASE("make_home_assistant_device_discovery") {
-  SECTION("pico_internal_device") {
-    const auto d = pico_internal_device{0, 12.1f};
-    const auto discovery_message =
-        make_home_assistant_device_discovery_message(d);
+using namespace nlohmann;
 
-    CHECK(discovery_message.topic ==
-          "homeassistant/device/simarine_pico_internal_0/config");
-
-    const auto discovery_json =
-        nlohmann::json::parse(discovery_message.payload);
-    CHECK(discovery_json["dev"] == nlohmann::json::object({
-                                       {"ids", "simarine_pico_internal_0"},
-                                       {"name", "Pico internal"},
-                                       {"mf", "Simarine"},
-                                   }));
-    CHECK(discovery_json["o"] == origin_object());
-    CHECK(discovery_json["cmps"] ==
-          nlohmann::json::object({
-              {"pico_internal_0",
-               nlohmann::json::object({
-                   {"p", "sensor"},
-                   {"device_class", "voltage"},
-                   {"unit_of_measurement", "V"},
-                   {"value_template", "{{ value_json.value }}"},
-                   {"unique_id", "pico_internal_0"},
-               })},
-          }));
-    CHECK(discovery_json["state_topic"] == "simarine_pico_internal_0/state");
-    CHECK(discovery_json["qos"] == 1);
-
-    const auto state_message = make_home_assistant_state_message(d);
-
-    const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic ==
-          discovery_json["state_topic"].get<std::string>());
-    CHECK(state_json == nlohmann::json::object({{"value", 12.1}}));
-  }
+TEST_CASE("make_home_assistant_device_discovery2") {
+  const auto config = home_assistant_state_config{};
+  const auto devices = make_parsed_devices_with_sensors();
 
   SECTION("voltage_device") {
-    const auto d = voltage_device{"Some Voltage", 3, 12.8f};
-    const auto discovery_message =
-        make_home_assistant_device_discovery_message(d);
+    const auto dev = devices[6];
+    const auto discovery = make_home_assistant_device_discovery(
+        dev, parsed_sensors_with_value, parsed_system_info);
 
-    CHECK(discovery_message.topic ==
-          "homeassistant/device/simarine_voltage_3/config");
+    const auto expected_discovery_json = json::object({
+        {
+            "dev",
+            {
+                {"ids", "simarine.2245968710.volt6"},
+                {"name", "PICO INTERNAL"},
+                {"mf", "Simarine"},
+                {"sn", "2245968710"},
+                {"sw", "1.17"},
+            },
+        },
+        {
+            "o",
+            {
+                {"name", "spymarine"},
+                {"sw", SPYMARINE_PROJECT_VERSION},
+                {"url", "https://github.com/christopher-strack/spymarine-cpp"},
+            },
+        },
+        {
+            "cmps",
+            {
+                {
+                    "volt5",
+                    {
+                        {"p", "sensor"},
+                        {"dev_cla", "voltage"},
+                        {"unit_of_meas", "V"},
+                        {"val_tpl", "{{ value_json.volt }}"},
+                        {"uniq_id", "simarine.2245968710.volt6.volt5"},
+                    },
+                },
+            },
+        },
+        {"stat_t", "simarine/2245968710/volt6/state"},
+        {"qos", 1},
+    });
+    CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
-    const auto discovery_json =
-        nlohmann::json::parse(discovery_message.payload);
-    CHECK(discovery_json["dev"] == nlohmann::json::object({
-                                       {"ids", "simarine_voltage_3"},
-                                       {"name", "Some Voltage"},
-                                       {"mf", "Simarine"},
-                                   }));
-    CHECK(discovery_json["o"] == origin_object());
-    CHECK(discovery_json["cmps"] ==
-          nlohmann::json::object({
-              {"voltage_3", nlohmann::json::object({
-                                {"p", "sensor"},
-                                {"device_class", "voltage"},
-                                {"unit_of_measurement", "V"},
-                                {"value_template", "{{ value_json.value }}"},
-                                {"unique_id", "voltage_3"},
-                            })},
-          }));
-    CHECK(discovery_json["state_topic"] == "simarine_voltage_3/state");
-    CHECK(discovery_json["qos"] == 1);
+    const auto states = make_home_assistant_device_sensor_states(
+        dev, parsed_sensors_with_value, config);
 
-    const auto state_message = make_home_assistant_state_message(d);
-
-    const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic ==
-          discovery_json["state_topic"].get<std::string>());
-    CHECK(state_json == nlohmann::json::object({{"value", 12.8}}));
-  }
-
-  SECTION("current_device") {
-    const auto d = current_device{"Some Current", 28, 1.1f};
-    const auto discovery_message =
-        make_home_assistant_device_discovery_message(d);
-
-    CHECK(discovery_message.topic ==
-          "homeassistant/device/simarine_current_28/config");
-
-    const auto discovery_json =
-        nlohmann::json::parse(discovery_message.payload);
-    CHECK(discovery_json["dev"] == nlohmann::json::object({
-                                       {"ids", "simarine_current_28"},
-                                       {"name", "Some Current"},
-                                       {"mf", "Simarine"},
-                                   }));
-    CHECK(discovery_json["o"] == origin_object());
-    CHECK(discovery_json["cmps"] ==
-          nlohmann::json::object({
-              {"current_28", nlohmann::json::object({
-                                 {"p", "sensor"},
-                                 {"device_class", "current"},
-                                 {"unit_of_measurement", "A"},
-                                 {"value_template", "{{ value_json.value }}"},
-                                 {"unique_id", "current_28"},
-                             })},
-          }));
-    CHECK(discovery_json["state_topic"] == "simarine_current_28/state");
-    CHECK(discovery_json["qos"] == 1);
-
-    const auto state_message = make_home_assistant_state_message(d);
-
-    const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic ==
-          discovery_json["state_topic"].get<std::string>());
-    CHECK(state_json == nlohmann::json::object({{"value", 1.1}}));
-  }
-
-  SECTION("temperature_device") {
-    const auto d = temperature_device{"Test Temperature", 7, 21.4f};
-    const auto discovery_message =
-        make_home_assistant_device_discovery_message(d);
-
-    CHECK(discovery_message.topic ==
-          "homeassistant/device/simarine_temperature_7/config");
-
-    const auto discovery_json =
-        nlohmann::json::parse(discovery_message.payload);
-    CHECK(discovery_json["dev"] == nlohmann::json::object({
-                                       {"ids", "simarine_temperature_7"},
-                                       {"name", "Test Temperature"},
-                                       {"mf", "Simarine"},
-                                   }));
-    CHECK(discovery_json["o"] == origin_object());
-    CHECK(
-        discovery_json["cmps"] ==
-        nlohmann::json::object({
-            {"temperature_7", nlohmann::json::object({
-                                  {"p", "sensor"},
-                                  {"device_class", "temperature"},
-                                  {"unit_of_measurement", "°C"},
-                                  {"value_template", "{{ value_json.value }}"},
-                                  {"unique_id", "temperature_7"},
-                              })},
-        }));
-    CHECK(discovery_json["state_topic"] == "simarine_temperature_7/state");
-    CHECK(discovery_json["qos"] == 1);
-
-    const auto state_message = make_home_assistant_state_message(d);
-
-    const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic ==
-          discovery_json["state_topic"].get<std::string>());
-    CHECK(state_json == nlohmann::json::object({{"value", 21.4}}));
+    const auto expected_states_json = json::object({{"volt", 13.26}});
+    CHECK(json::parse(to_json_object(states)) == expected_states_json);
   }
 
   SECTION("barometer_device") {
-    const auto d = barometer_device{"Barometer", 14, 1134.5f};
-    const auto discovery_message =
-        make_home_assistant_device_discovery_message(d);
+    const auto dev = devices[5];
+    const auto discovery = make_home_assistant_device_discovery(
+        dev, parsed_sensors_with_value, parsed_system_info);
 
-    CHECK(discovery_message.topic ==
-          "homeassistant/device/simarine_barometer_14/config");
+    const auto expected_discovery_json = json::object({
+        {
+            "dev",
+            {
+                {"ids", "simarine.2245968710.baro5"},
+                {"name", "Barometer"},
+                {"mf", "Simarine"},
+                {"sn", "2245968710"},
+                {"sw", "1.17"},
+            },
+        },
+        {
+            "o",
+            {
+                {"name", "spymarine"},
+                {"sw", SPYMARINE_PROJECT_VERSION},
+                {"url", "https://github.com/christopher-strack/spymarine-cpp"},
+            },
+        },
+        {
+            "cmps",
+            {
+                {
+                    "baro3",
+                    {
+                        {"p", "sensor"},
+                        {"dev_cla", "atmospheric_pressure"},
+                        {"unit_of_meas", "mbar"},
+                        {"val_tpl", "{{ value_json.baro }}"},
+                        {"uniq_id", "simarine.2245968710.baro5.baro3"},
+                    },
+                },
+            },
+        },
+        {"stat_t", "simarine/2245968710/baro5/state"},
+        {"qos", 1},
+    });
+    CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
-    const auto discovery_json =
-        nlohmann::json::parse(discovery_message.payload);
-    CHECK(discovery_json["dev"] == nlohmann::json::object({
-                                       {"ids", "simarine_barometer_14"},
-                                       {"name", "Barometer"},
-                                       {"mf", "Simarine"},
-                                   }));
-    CHECK(discovery_json["o"] == origin_object());
-    CHECK(discovery_json["cmps"] ==
-          nlohmann::json::object({
-              {"barometer_14", nlohmann::json::object({
-                                   {"p", "sensor"},
-                                   {"device_class", "atmospheric_pressure"},
-                                   {"unit_of_measurement", "mbar"},
-                                   {"value_template", "{{ value_json.value }}"},
-                                   {"unique_id", "barometer_14"},
-                               })},
-          }));
-    CHECK(discovery_json["state_topic"] == "simarine_barometer_14/state");
-    CHECK(discovery_json["qos"] == 1);
+    const auto states = make_home_assistant_device_sensor_states(
+        dev, parsed_sensors_with_value, config);
 
-    const auto state_message = make_home_assistant_state_message(d);
-
-    const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic ==
-          discovery_json["state_topic"].get<std::string>());
-    CHECK(state_json == nlohmann::json::object({{"value", 1134.5}}));
+    const auto expected_states_json = json::object({{"baro", 979.83}});
+    CHECK(json::parse(to_json_object(states)) == expected_states_json);
   }
 
   SECTION("resistive_device") {
-    const auto d = resistive_device{"Some Resistive Device", 17, 88.5f};
-    const auto discovery_message =
-        make_home_assistant_device_discovery_message(d);
+    const auto dev = devices[13];
+    const auto discovery = make_home_assistant_device_discovery(
+        dev, parsed_sensors_with_value, parsed_system_info);
 
-    CHECK(discovery_message.topic ==
-          "homeassistant/device/simarine_resistive_17/config");
+    const auto expected_discovery_json = json::object({
+        {
+            "dev",
+            {
+                {"ids", "simarine.2245968710.res13"},
+                {"name", "ST107 [5596] 1"},
+                {"mf", "Simarine"},
+                {"sn", "2245968710"},
+                {"sw", "1.17"},
+            },
+        },
+        {
+            "o",
+            {
+                {"name", "spymarine"},
+                {"sw", SPYMARINE_PROJECT_VERSION},
+                {"url", "https://github.com/christopher-strack/spymarine-cpp"},
+            },
+        },
+        {
+            "cmps",
+            {
+                {
+                    "res14",
+                    {
+                        {"p", "sensor"},
+                        {"unit_of_meas", "Ω"},
+                        {"name", "Resistive Sensor"},
+                        {"val_tpl", "{{ value_json.res }}"},
+                        {"uniq_id", "simarine.2245968710.res13.res14"},
+                    },
+                },
+            },
+        },
+        {"stat_t", "simarine/2245968710/res13/state"},
+        {"qos", 1},
+    });
+    CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
-    const auto discovery_json =
-        nlohmann::json::parse(discovery_message.payload);
-    CHECK(discovery_json["dev"] == nlohmann::json::object({
-                                       {"ids", "simarine_resistive_17"},
-                                       {"name", "Some Resistive Device"},
-                                       {"mf", "Simarine"},
-                                   }));
-    CHECK(discovery_json["o"] == origin_object());
-    CHECK(discovery_json["cmps"] ==
-          nlohmann::json::object({
-              {"resistive_17", nlohmann::json::object({
-                                   {"p", "sensor"},
-                                   {"device_class", "None"},
-                                   {"unit_of_measurement", "ohm"},
-                                   {"value_template", "{{ value_json.value }}"},
-                                   {"unique_id", "resistive_17"},
-                               })},
-          }));
-    CHECK(discovery_json["state_topic"] == "simarine_resistive_17/state");
-    CHECK(discovery_json["qos"] == 1);
+    const auto states = make_home_assistant_device_sensor_states(
+        dev, parsed_sensors_with_value, config);
 
-    const auto state_message = make_home_assistant_state_message(d);
-
-    const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic ==
-          discovery_json["state_topic"].get<std::string>());
-    CHECK(state_json == nlohmann::json::object({{"value", 88.5}}));
+    const auto expected_states_json = json::object({{"res", 19121}});
+    CHECK(json::parse(to_json_object(states)) == expected_states_json);
   }
 
-  SECTION("tank_device") {
-    const auto d = tank_device{
-        "Some Tank", fluid_type::fresh_water, 100, 13, 34.5f, 20.1f};
-    const auto discovery_message =
-        make_home_assistant_device_discovery_message(d);
+  SECTION("current_device") {
+    const auto dev = devices[18];
+    const auto discovery = make_home_assistant_device_discovery(
+        dev, parsed_sensors_with_value, parsed_system_info);
 
-    CHECK(discovery_message.topic ==
-          "homeassistant/device/simarine_tank_13/config");
+    const auto expected_discovery_json = json::object({
+        {
+            "dev",
+            {
+                {"ids", "simarine.2245968710.cur18"},
+                {"name", "SC303 [5499]"},
+                {"mf", "Simarine"},
+                {"sn", "2245968710"},
+                {"sw", "1.17"},
+            },
+        },
+        {
+            "o",
+            {
+                {"name", "spymarine"},
+                {"sw", SPYMARINE_PROJECT_VERSION},
+                {"url", "https://github.com/christopher-strack/spymarine-cpp"},
+            },
+        },
+        {
+            "cmps",
+            {
+                {
+                    "cur19",
+                    {
+                        {"p", "sensor"},
+                        {"dev_cla", "current"},
+                        {"unit_of_meas", "A"},
+                        {"val_tpl", "{{ value_json.cur }}"},
+                        {"uniq_id", "simarine.2245968710.cur18.cur19"},
+                    },
+                },
+            },
+        },
+        {"stat_t", "simarine/2245968710/cur18/state"},
+        {"qos", 1},
+    });
+    CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
-    const auto discovery_json =
-        nlohmann::json::parse(discovery_message.payload);
-    CHECK(discovery_json["dev"] == nlohmann::json::object({
-                                       {"ids", "simarine_tank_13"},
-                                       {"name", "Some Tank"},
-                                       {"mf", "Simarine"},
-                                   }));
-    CHECK(discovery_json["o"] == origin_object());
-    CHECK(discovery_json["cmps"] ==
-          nlohmann::json::object({
-              {"level_13", nlohmann::json::object({
-                               {"p", "sensor"},
-                               {"unit_of_measurement", "%"},
-                               {"value_template", "{{ value_json.level }}"},
-                               {"unique_id", "level_13"},
-                           })},
-              {"volume_13", nlohmann::json::object({
-                                {"p", "sensor"},
-                                {"device_class", "volume"},
-                                {"unit_of_measurement", "L"},
-                                {"value_template", "{{ value_json.volume }}"},
-                                {"unique_id", "volume_13"},
-                            })},
-          }));
-    CHECK(discovery_json["state_topic"] == "simarine_tank_13/state");
-    CHECK(discovery_json["qos"] == 1);
+    const auto states = make_home_assistant_device_sensor_states(
+        dev, parsed_sensors_with_value, config);
 
-    const auto state_message = make_home_assistant_state_message(d);
+    const auto expected_states_json = json::object({{"cur", -1.23}});
+    CHECK(json::parse(to_json_object(states)) == expected_states_json);
+  }
 
-    const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic ==
-          discovery_json["state_topic"].get<std::string>());
-    CHECK(state_json ==
-          nlohmann::json::object({{"volume", 34.5}, {"level", 20.1}}));
+  SECTION("temperature_device") {
+    const auto dev = devices[29];
+    const auto discovery = make_home_assistant_device_discovery(
+        dev, parsed_sensors_with_value, parsed_system_info);
+
+    const auto expected_discovery_json = json::object({
+        {
+            "dev",
+            {
+                {"ids", "simarine.2245968710.temp29"},
+                {"name", "Innen"},
+                {"mf", "Simarine"},
+                {"sn", "2245968710"},
+                {"sw", "1.17"},
+            },
+        },
+        {
+            "o",
+            {
+                {"name", "spymarine"},
+                {"sw", SPYMARINE_PROJECT_VERSION},
+                {"url", "https://github.com/christopher-strack/spymarine-cpp"},
+            },
+        },
+        {
+            "cmps",
+            {
+                {
+                    "temp39",
+                    {
+                        {"p", "sensor"},
+                        {"dev_cla", "temperature"},
+                        {"unit_of_meas", "°C"},
+                        {"val_tpl", "{{ value_json.temp }}"},
+                        {"uniq_id", "simarine.2245968710.temp29.temp39"},
+                    },
+                },
+            },
+        },
+        {"stat_t", "simarine/2245968710/temp29/state"},
+        {"qos", 1},
+    });
+    CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
+
+    const auto states = make_home_assistant_device_sensor_states(
+        dev, parsed_sensors_with_value, config);
+
+    const auto expected_states_json = json::object({{"temp", 10.7}});
+    CHECK(json::parse(to_json_object(states)) == expected_states_json);
   }
 
   SECTION("battery_device") {
-    const auto d = battery_device{
-        "Some Battery", battery_type::lifepo4, 320, 8, 89.3f, 293.1f, 5.7f,
-        13.1f};
-    const auto discovery_message =
-        make_home_assistant_device_discovery_message(d);
+    const auto dev = devices[24];
+    const auto discovery = make_home_assistant_device_discovery(
+        dev, parsed_sensors_with_value, parsed_system_info);
 
-    CHECK(discovery_message.topic ==
-          "homeassistant/device/simarine_battery_8/config");
+    const auto expected_discovery_json = json::object({
+        {
+            "dev",
+            {
+                {"ids", "simarine.2245968710.batt24"},
+                {"name", "Bulltron"},
+                {"mf", "Simarine"},
+                {"sn", "2245968710"},
+                {"sw", "1.17"},
+            },
+        },
+        {
+            "o",
+            {
+                {"name", "spymarine"},
+                {"sw", SPYMARINE_PROJECT_VERSION},
+                {"url", "https://github.com/christopher-strack/spymarine-cpp"},
+            },
+        },
+        {
+            "cmps",
+            {
+                {
+                    "batt26",
+                    {
+                        {"p", "sensor"},
+                        {"dev_cla", "battery"},
+                        {"unit_of_meas", "%"},
+                        {"val_tpl", "{{ value_json.batt }}"},
+                        {"uniq_id", "simarine.2245968710.batt24.batt26"},
+                    },
+                },
+                {
+                    "cap26",
+                    {
+                        {"p", "sensor"},
+                        {"name", "Remaining Capacity"},
+                        {"unit_of_meas", "Ah"},
+                        {"val_tpl", "{{ value_json.cap }}"},
+                        {"uniq_id", "simarine.2245968710.batt24.cap26"},
+                    },
+                },
+                {
+                    "cur27",
+                    {
+                        {"p", "sensor"},
+                        {"dev_cla", "current"},
+                        {"unit_of_meas", "A"},
+                        {"val_tpl", "{{ value_json.cur }}"},
+                        {"uniq_id", "simarine.2245968710.batt24.cur27"},
+                    },
+                },
+                {
+                    "volt28",
+                    {
+                        {"p", "sensor"},
+                        {"dev_cla", "voltage"},
+                        {"unit_of_meas", "V"},
+                        {"val_tpl", "{{ value_json.volt }}"},
+                        {"uniq_id", "simarine.2245968710.batt24.volt28"},
+                    },
+                },
+            },
+        },
+        {"stat_t", "simarine/2245968710/batt24/state"},
+        {"qos", 1},
+    });
+    CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
-    const auto discovery_json =
-        nlohmann::json::parse(discovery_message.payload);
-    CHECK(discovery_json["dev"] == nlohmann::json::object({
-                                       {"ids", "simarine_battery_8"},
-                                       {"name", "Some Battery"},
-                                       {"mf", "Simarine"},
-                                   }));
-    CHECK(discovery_json["o"] == origin_object());
-    CHECK(discovery_json["cmps"] ==
-          nlohmann::json::object({
-              {"battery_8", nlohmann::json::object({
-                                {"p", "sensor"},
-                                {"device_class", "battery"},
-                                {"unit_of_measurement", "%"},
-                                {"value_template", "{{ value_json.battery }}"},
-                                {"unique_id", "battery_8"},
-                            })},
-              {"current_9", nlohmann::json::object({
-                                {"p", "sensor"},
-                                {"device_class", "current"},
-                                {"unit_of_measurement", "A"},
-                                {"value_template", "{{ value_json.current }}"},
-                                {"unique_id", "current_9"},
-                            })},
-              {"voltage_10", nlohmann::json::object({
-                                 {"p", "sensor"},
-                                 {"device_class", "voltage"},
-                                 {"unit_of_measurement", "V"},
-                                 {"value_template", "{{ value_json.voltage }}"},
-                                 {"unique_id", "voltage_10"},
-                             })},
-          }));
-    CHECK(discovery_json["state_topic"] == "simarine_battery_8/state");
-    CHECK(discovery_json["qos"] == 1);
+    const auto states = make_home_assistant_device_sensor_states(
+        dev, parsed_sensors_with_value, config);
 
-    const auto state_message = make_home_assistant_state_message(d);
+    const auto expected_states_json = json::object({
+        {"batt", 87.9},
+        {"cap", 263.7},
+        {"cur", -1.23},
+        {"volt", 13.314},
+    });
+    CHECK(json::parse(to_json_object(states)) == expected_states_json);
+  }
 
-    const auto state_json = nlohmann::json::parse(state_message.payload);
-    CHECK(state_message.topic ==
-          discovery_json["state_topic"].get<std::string>());
-    CHECK(state_json == nlohmann::json::object({
-                            {"battery", 89.3},
-                            {"current", 5.7},
-                            {"voltage", 13.1},
-                        }));
+  SECTION("tank_device") {
+    const auto dev = devices[28];
+    const auto discovery = make_home_assistant_device_discovery(
+        dev, parsed_sensors_with_value, parsed_system_info);
+
+    const auto expected_discovery_json = json::object({
+        {
+            "dev",
+            {
+                {"ids", "simarine.2245968710.tank28"},
+                {"name", "Abwasser"},
+                {"mf", "Simarine"},
+                {"sn", "2245968710"},
+                {"sw", "1.17"},
+            },
+        },
+        {
+            "o",
+            {
+                {"name", "spymarine"},
+                {"sw", SPYMARINE_PROJECT_VERSION},
+                {"url", "https://github.com/christopher-strack/spymarine-cpp"},
+            },
+        },
+        {
+            "cmps",
+            {
+                {
+                    "vol38",
+                    {
+                        {"p", "sensor"},
+                        {"dev_cla", "volume_storage"},
+                        {"unit_of_meas", "L"},
+                        {"val_tpl", "{{ value_json.vol }}"},
+                        {"uniq_id", "simarine.2245968710.tank28.vol38"},
+                    },
+                },
+                {
+                    "lvl38",
+                    {
+                        {"p", "sensor"},
+                        {"name", "Tank Level"},
+                        {"unit_of_meas", "%"},
+                        {"val_tpl", "{{ value_json.lvl }}"},
+                        {"uniq_id", "simarine.2245968710.tank28.lvl38"},
+                    },
+                },
+            },
+        },
+        {"stat_t", "simarine/2245968710/tank28/state"},
+        {"qos", 1},
+    });
+    CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
+
+    const auto states = make_home_assistant_device_sensor_states(
+        dev, parsed_sensors_with_value, config);
+
+    const auto expected_states_json = json::object({
+        {"lvl", 5.2},
+        {"vol", 3.7},
+    });
+    CHECK(json::parse(to_json_object(states)) == expected_states_json);
+  }
+
+  SECTION("unsupported_device") {
+    const auto dev = devices[1];
+    const auto discovery = make_home_assistant_device_discovery(
+        dev, parsed_sensors_with_value, parsed_system_info);
+
+    const auto expected_discovery_json = json::object({
+        {
+            "dev",
+            {
+                {"ids", "simarine.2245968710.unsupp1"},
+                {"name", json::value_t::null},
+                {"mf", "Simarine"},
+                {"sn", "2245968710"},
+                {"sw", "1.17"},
+            },
+        },
+        {
+            "o",
+            {
+                {"name", "spymarine"},
+                {"sw", SPYMARINE_PROJECT_VERSION},
+                {"url", "https://github.com/christopher-strack/spymarine-cpp"},
+            },
+        },
+        {"cmps", json::object()},
+        {"stat_t", "simarine/2245968710/unsupp1/state"},
+        {"qos", 1},
+    });
+    CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
+
+    const auto states = make_home_assistant_device_sensor_states(
+        dev, parsed_sensors_with_value, config);
+    CHECK(json::parse(to_json_object(states)) == json::object());
   }
 }
 

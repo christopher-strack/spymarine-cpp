@@ -1,6 +1,6 @@
 #include "spymarine/client.hpp"
-#include "spymarine/device2.hpp"
-#include "spymarine/home_assistant2.hpp"
+#include "spymarine/device.hpp"
+#include "spymarine/home_assistant.hpp"
 #include "spymarine/hub.hpp"
 
 #include <print>
@@ -22,7 +22,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   }
   std::println("done");
 
-  for (const spymarine::device2& device_ : hub->devices()) {
+  for (const spymarine::device& device_ : hub->devices()) {
     std::println("Device #{}", spymarine::get_device_id(device_));
 
     const auto discovery_msg =

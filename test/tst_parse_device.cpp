@@ -2,7 +2,6 @@
 #include "raw_data/devices.hpp"
 
 #include "spymarine/device.hpp"
-#include "spymarine/device_ostream.hpp" // IWYU pragma: keep
 #include "spymarine/parse_device.hpp"
 #include "spymarine/parse_message.hpp"
 
@@ -10,86 +9,79 @@
 
 namespace spymarine {
 
-TEST_CASE("parse_device") {
-  SECTION("unknown_device") {
-    static constexpr auto msg =
-        parse_message(raw_unknown_device_1_response).value();
-
-    STATIC_CHECK(parse_device(msg.values(), 0) ==
-                 parsed_device{unknown_device{}});
-  }
-
-  SECTION("null_device") {
-    static constexpr auto msg =
-        parse_message(raw_null_device_1_response).value();
-
-    STATIC_CHECK(parse_device(msg.values(), 0) == parsed_device{null_device{}});
-  }
-
+TEST_CASE("parse_device2") {
   SECTION("barometer_device") {
     static constexpr auto msg =
         parse_message(raw_barometer_device_response).value();
 
-    STATIC_CHECK(parse_device(msg.values(), 0) ==
-                 parsed_device{barometer_device{"Barometer", 0}});
-  }
-
-  SECTION("pico_internal_device") {
-    static constexpr auto msg =
-        parse_message(raw_pico_internal_device_response).value();
-
-    STATIC_CHECK(parse_device(msg.values(), 0) ==
-                 parsed_device{pico_internal_device{0}});
+    CHECK(parse_device2(msg.values()) ==
+          device{barometer_device{.id = 5, .name = "Barometer"}});
   }
 
   SECTION("voltage_device") {
     static constexpr auto msg =
         parse_message(raw_st107_voltage_device_1_response).value();
 
-    STATIC_CHECK(parse_device(msg.values(), 0) ==
-                 parsed_device{voltage_device{"ST107 [5596] 1", 0}});
+    CHECK(parse_device2(msg.values()) ==
+          device{voltage_device{.id = 10, .name = "ST107 [5596] 1"}});
   }
 
   SECTION("resistive_device") {
     static constexpr auto msg =
         parse_message(raw_st107_resistive_device_1_response).value();
 
-    STATIC_CHECK(parse_device(msg.values(), 0) ==
-                 parsed_device{resistive_device{"ST107 [5596] 1", 0}});
+    CHECK(parse_device2(msg.values()) ==
+          device{resistive_device{.id = 13, .name = "ST107 [5596] 1"}});
   }
 
   SECTION("current_device") {
     static constexpr auto msg =
         parse_message(raw_sc303_current_device_response).value();
 
-    STATIC_CHECK(parse_device(msg.values(), 0) ==
-                 parsed_device{current_device{"SC303 [5499]", 0}});
+    CHECK(parse_device2(msg.values()) ==
+          device{current_device{.id = 18, .name = "SC303 [5499]"}});
   }
 
   SECTION("battery_device") {
     static constexpr auto msg =
         parse_message(raw_battery_device_1_response).value();
 
-    STATIC_CHECK(parse_device(msg.values(), 0) ==
-                 parsed_device{battery_device{"Bulltron", battery_type::lifepo4,
-                                              300, 0}});
+    CHECK(parse_device2(msg.values()) ==
+          device{battery_device{
+              .id = 24,
+              .name = "Bulltron",
+              .type = battery_type::lifepo4,
+              .capacity = battery_capacity{300'00},
+          }});
   }
 
   SECTION("temperature_device") {
     static constexpr auto msg =
         parse_message(raw_temperature_device_1_response).value();
 
-    STATIC_CHECK(parse_device(msg.values(), 0) ==
-                 parsed_device{temperature_device{"Batterie", 0}});
+    CHECK(parse_device2(msg.values()) ==
+          device{temperature_device{.id = 25, .name = "Batterie"}});
   }
 
   SECTION("tank_device") {
     static constexpr auto msg =
         parse_message(raw_tank_device_1_response).value();
 
-    STATIC_CHECK(parse_device(msg.values(), 0) ==
-                 parsed_device{tank_device{"Frischwasser",
-                                           fluid_type::fresh_water, 100, 0}});
+    CHECK(parse_device2(msg.values()) == device{tank_device{
+                                             .id = 26,
+                                             .name = "Frischwasser",
+                                             .type = fluid_type::fresh_water,
+                                             .capacity = tank_capacity{100'0},
+                                         }});
+  }
+
+  SECTION("unsupported_device_info") {
+    static constexpr auto msg =
+        parse_message(raw_unknown_device_1_response).value();
+
+    CHECK(parse_device2(msg.values()) ==
+          device{unsupported_device{
+              .id = 0, .raw_type = 10, .name = std::nullopt}});
   }
 }
 

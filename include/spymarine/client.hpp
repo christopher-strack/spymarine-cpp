@@ -1,18 +1,17 @@
 #pragma once
 
-#include "spymarine/buffer.hpp"
 #include "spymarine/crc.hpp"
 #include "spymarine/defaults.hpp"
-#include "spymarine/device2.hpp"
+#include "spymarine/device.hpp"
 #include "spymarine/error.hpp"
 #include "spymarine/message.hpp"
 #include "spymarine/message_values_view.hpp"
 #include "spymarine/parse_count_info.hpp"
-#include "spymarine/parse_device2.hpp"
+#include "spymarine/parse_device.hpp"
 #include "spymarine/parse_message.hpp"
 #include "spymarine/parse_sensor2.hpp"
 #include "spymarine/parse_system_info.hpp"
-#include "spymarine/sensor2.hpp"
+#include "spymarine/sensor.hpp"
 #include "spymarine/tcp_socket.hpp"
 #include "spymarine/udp_socket.hpp"
 
@@ -49,14 +48,13 @@ public:
         .and_then(parse_count_info);
   }
 
-  constexpr std::expected<device2, error>
-  request_device(device_id id) noexcept {
+  constexpr std::expected<device, error> request_device(device_id id) noexcept {
     const auto data = std::to_array<uint8_t>(
         {0x00, 0x01, 0x00, 0x00, 0x00, id, 0xff, 0x01, 0x03, 0x00, 0x00, 0x00,
          0x00, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff});
 
     return request_message(message_type::device_information, data)
-        .and_then([](const message& message) -> std::expected<device2, error> {
+        .and_then([](const message& message) -> std::expected<device, error> {
           if (message.type() == message_type::device_information) {
             return parse_device2(message.values());
           } else {
@@ -65,14 +63,13 @@ public:
         });
   }
 
-  constexpr std::expected<sensor2, error>
-  request_sensor(sensor_id id) noexcept {
+  constexpr std::expected<sensor, error> request_sensor(sensor_id id) noexcept {
     const auto data =
         std::to_array<uint8_t>({0x01, 0x01, 0x00, 0x00, 0x00, id, 0xff, 0x02,
                                 0x01, 0x00, 0x00, 0x00, 0x00, 0xff});
 
     return request_message(message_type::sensor_information, data)
-        .and_then([](const message& message) -> std::expected<sensor2, error> {
+        .and_then([](const message& message) -> std::expected<sensor, error> {
           if (message.type() == message_type::sensor_information) {
             return parse_sensor2(message.values());
           } else {

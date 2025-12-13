@@ -1,181 +1,153 @@
 #pragma once
 
-#include "spymarine/device2.hpp"
-#include "spymarine/overloaded.hpp"
+#include "spymarine/id.hpp"
+#include "spymarine/rational.hpp"
 #include "spymarine/sensor.hpp"
+#include "spymarine/unit.hpp"
 
+#include <cassert>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace spymarine {
 
-struct pico_internal_device {
-  static constexpr std::string_view name = "Pico internal";
+template <typename T, size_t Denominator, unit Unit> struct device_property {
+  static constexpr auto unit = Unit;
 
-  sensor device_sensor;
+  using value_type = rational<T, Denominator>;
 
-  explicit constexpr pico_internal_device(uint8_t state_start_index,
-                                          float sensor_value = 0.0f) noexcept
-      : device_sensor{sensor_type::voltage, state_start_index, sensor_value} {}
+  constexpr explicit device_property(T numerator) noexcept : value{numerator} {}
 
-  constexpr auto
-  operator<=>(const pico_internal_device&) const noexcept = default;
+  rational<T, Denominator> value;
+
+  auto operator<=>(const device_property&) const = default;
 };
 
 struct voltage_device {
-  std::string name;
+  device_id id;
+  std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-  sensor device_sensor;
-
-  constexpr voltage_device(std::string name_, uint8_t state_start_index,
-                           float sensor_value = 0.0f) noexcept
-      : name{std::move(name_)},
-        device_sensor{sensor_type::voltage, state_start_index, sensor_value} {}
-
-  constexpr auto operator<=>(const voltage_device&) const noexcept = default;
+  bool operator==(const voltage_device&) const = default;
 };
 
 struct current_device {
-  std::string name;
+  device_id id;
+  std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-  sensor device_sensor;
-
-  constexpr current_device(std::string name_, uint8_t state_start_index,
-                           float sensor_value = 0.0f) noexcept
-      : name{std::move(name_)},
-        device_sensor{sensor_type::current, state_start_index, sensor_value} {}
-
-  constexpr auto operator<=>(const current_device&) const noexcept = default;
+  bool operator==(const current_device&) const = default;
 };
 
 struct temperature_device {
-  std::string name;
+  device_id id;
+  std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-  sensor device_sensor;
-
-  constexpr temperature_device(std::string name_, uint8_t state_start_index,
-                               float sensor_value = 0.0f) noexcept
-      : name{std::move(name_)}, device_sensor{sensor_type::temperature,
-                                              state_start_index, sensor_value} {
-  }
-
-  constexpr auto
-  operator<=>(const temperature_device&) const noexcept = default;
+  bool operator==(const temperature_device&) const = default;
 };
 
 struct barometer_device {
-  std::string name;
+  device_id id;
+  std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-  sensor device_sensor;
-
-  constexpr barometer_device(std::string name_, uint8_t state_start_index,
-                             float sensor_value = 0.0f) noexcept
-      : name{std::move(name_)},
-        device_sensor{sensor_type::pressure, state_start_index, sensor_value} {}
-
-  constexpr auto operator<=>(const barometer_device&) const noexcept = default;
+  bool operator==(const barometer_device&) const = default;
 };
 
 struct resistive_device {
-  std::string name;
+  device_id id;
+  std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-  sensor device_sensor;
-
-  constexpr resistive_device(std::string name_, uint8_t state_start_index,
-                             float sensor_value = 0.0f) noexcept
-      : name{std::move(name_)},
-        device_sensor{sensor_type::resistive, state_start_index, sensor_value} {
-  }
-
-  constexpr auto operator<=>(const resistive_device&) const noexcept = default;
+  bool operator==(const resistive_device&) const = default;
 };
+
+enum class fluid_type {
+  fresh_water,
+  fuel,
+  waste_water,
+  unknown,
+};
+
+using tank_capacity = device_property<int16_t, 10, unit::liters>;
 
 struct tank_device {
-  std::string name;
-  fluid_type type;
-  float capacity;
+  device_id id;
+  std::optional<std::string> name;
+  std::optional<fluid_type> type;
+  std::optional<tank_capacity> capacity;
+  std::vector<sensor_id> sensor_ids = {};
 
-  sensor volume_sensor;
-  sensor level_sensor;
-
-  constexpr tank_device(std::string name_, fluid_type type_, float capacity_,
-                        uint8_t state_start_index, float volume = 0.0f,
-                        float level = 0.0f) noexcept
-      : name{std::move(name_)}, type{type_}, capacity{capacity_},
-        volume_sensor{sensor_type::volume, state_start_index, volume},
-        level_sensor{sensor_type::level, state_start_index, level} {}
-
-  constexpr auto operator<=>(const tank_device&) const noexcept = default;
+  bool operator==(const tank_device&) const = default;
 };
+
+enum class battery_type {
+  wet_low_maintenance,
+  wet_maintenance_free,
+  agm,
+  deep_cycle,
+  gel,
+  lifepo4,
+  unknown,
+};
+
+using battery_capacity = device_property<int16_t, 100, unit::amp_hours>;
 
 struct battery_device {
-  std::string name;
-  battery_type type;
-  float capacity;
+  device_id id;
+  std::optional<std::string> name;
+  std::optional<battery_type> type;
+  std::optional<battery_capacity> capacity;
+  std::vector<sensor_id> sensor_ids = {};
 
-  sensor charge_sensor;
-  sensor remaining_capacity_sensor;
-  sensor current_sensor;
-  sensor voltage_sensor;
-
-  constexpr battery_device(std::string name_, battery_type type_,
-                           float capacity_, uint8_t state_start_index,
-                           float charge = 0.0f, float remaining_capacity = 0.0f,
-                           float current = 0.0f, float voltage = 0.0f) noexcept
-      : name{std::move(name_)}, type{type_}, capacity{capacity_},
-        charge_sensor{sensor_type::charge, state_start_index, charge},
-        remaining_capacity_sensor{sensor_type::capacity, state_start_index,
-                                  remaining_capacity},
-        current_sensor{sensor_type::current, uint8_t(state_start_index + 1),
-                       current},
-        voltage_sensor{sensor_type::voltage, uint8_t(state_start_index + 2),
-                       voltage} {}
-
-  constexpr auto operator<=>(const battery_device&) const noexcept = default;
+  bool operator==(const battery_device&) const = default;
 };
 
-using device =
-    std::variant<pico_internal_device, voltage_device, current_device,
-                 temperature_device, barometer_device, resistive_device,
-                 tank_device, battery_device>;
+struct unsupported_device {
+  device_id id;
+  uint32_t raw_type;
+  std::optional<std::string> name;
+  std::vector<sensor_id> sensor_ids = {};
 
-constexpr std::string_view device_type(const device& d) noexcept {
-  return std::visit(
-      overloaded{
-          [](const pico_internal_device&) constexpr noexcept {
-            return "pico_internal";
-          },
-          [](const battery_device&) constexpr noexcept { return "battery"; },
-          [](const tank_device&) constexpr noexcept { return "tank"; },
-          [](const temperature_device&) constexpr noexcept {
-            return "temperature";
-          },
-          [](const voltage_device&) constexpr noexcept { return "voltage"; },
-          [](const current_device&) constexpr noexcept { return "current"; },
-          [](const barometer_device&) constexpr noexcept {
-            return "barometer";
-          },
-          [](const resistive_device&) constexpr noexcept {
-            return "resistive";
-          },
-      },
-      d);
+  bool operator==(const unsupported_device&) const = default;
+};
+
+using device = std::variant<voltage_device, current_device, temperature_device,
+                            barometer_device, resistive_device, tank_device,
+                            battery_device, unsupported_device>;
+
+constexpr device_id get_device_id(const device& device_) noexcept {
+  return std::visit([](const auto& dev) { return dev.id; }, device_);
 }
 
-constexpr uint8_t device_state_index(const device& d_) noexcept {
-  return std::visit(overloaded{
-                        [](const battery_device& d) constexpr noexcept {
-                          return d.charge_sensor.state_index;
-                        },
-                        [](const tank_device& d) constexpr noexcept {
-                          return d.volume_sensor.state_index;
-                        },
-                        [](const auto& d) constexpr noexcept {
-                          return d.device_sensor.state_index;
-                        },
-                    },
-                    d_);
+constexpr std::optional<std::string>
+get_device_name(const device& device_) noexcept {
+  return std::visit([](const auto& dev) { return dev.name; }, device_);
+}
+
+constexpr std::vector<sensor_id>
+get_sensor_ids(const device& device_) noexcept {
+  return std::visit([](const auto& dev) { return dev.sensor_ids; }, device_);
+}
+
+constexpr auto get_sensors(const device& device_,
+                           const sensor_range auto& sensors) {
+  return get_sensor_ids(device_) | std::views::filter([&](const auto id) {
+           return id < std::ranges::size(sensors);
+         }) |
+         std::views::transform([&](const auto id) {
+           const auto& sen = sensors[id];
+           assert(get_sensor_id(sen) == id);
+           return sen;
+         });
+}
+
+constexpr void add_sensor_id(device& dev, sensor_id id) noexcept {
+  std::visit([id](auto& d) { d.sensor_ids.push_back(id); }, dev);
 }
 
 } // namespace spymarine
