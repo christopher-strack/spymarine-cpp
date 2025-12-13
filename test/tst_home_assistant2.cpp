@@ -10,6 +10,7 @@ namespace spymarine {
 using namespace nlohmann;
 
 TEST_CASE("make_home_assistant_device_discovery2") {
+  const auto config = home_assistant_state_config{};
   const auto devices = make_parsed_devices2_with_sensors();
 
   SECTION("voltage_device") {
@@ -49,16 +50,6 @@ TEST_CASE("make_home_assistant_device_discovery2") {
                         {"uniq_id", "simarine.2245968710.volt6.volt5"},
                     },
                 },
-                {
-                    "volt_avg5",
-                    {
-                        {"p", "sensor"},
-                        {"dev_cla", "voltage"},
-                        {"unit_of_meas", "V"},
-                        {"val_tpl", "{{ value_json.volt_avg }}"},
-                        {"uniq_id", "simarine.2245968710.volt6.volt_avg5"},
-                    },
-                },
             },
         },
         {"stat_t", "simarine/2245968710/volt6/state"},
@@ -67,10 +58,9 @@ TEST_CASE("make_home_assistant_device_discovery2") {
     CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
     const auto states = make_home_assistant_device_sensor_states(
-        dev, parsed_sensors2_with_value);
+        dev, parsed_sensors2_with_value, config);
 
-    const auto expected_states_json =
-        json::object({{"volt", 13.26}, {"volt_avg", 13.26}});
+    const auto expected_states_json = json::object({{"volt", 13.26}});
     CHECK(json::parse(to_json_object(states)) == expected_states_json);
   }
 
@@ -119,7 +109,7 @@ TEST_CASE("make_home_assistant_device_discovery2") {
     CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
     const auto states = make_home_assistant_device_sensor_states(
-        dev, parsed_sensors2_with_value);
+        dev, parsed_sensors2_with_value, config);
 
     const auto expected_states_json = json::object({{"baro", 979.83}});
     CHECK(json::parse(to_json_object(states)) == expected_states_json);
@@ -169,7 +159,7 @@ TEST_CASE("make_home_assistant_device_discovery2") {
     CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
     const auto states = make_home_assistant_device_sensor_states(
-        dev, parsed_sensors2_with_value);
+        dev, parsed_sensors2_with_value, config);
 
     const auto expected_states_json = json::object({{"res", 19121}});
     CHECK(json::parse(to_json_object(states)) == expected_states_json);
@@ -212,16 +202,6 @@ TEST_CASE("make_home_assistant_device_discovery2") {
                         {"uniq_id", "simarine.2245968710.cur18.cur19"},
                     },
                 },
-                {
-                    "cur_avg19",
-                    {
-                        {"p", "sensor"},
-                        {"dev_cla", "current"},
-                        {"unit_of_meas", "A"},
-                        {"val_tpl", "{{ value_json.cur_avg }}"},
-                        {"uniq_id", "simarine.2245968710.cur18.cur_avg19"},
-                    },
-                },
             },
         },
         {"stat_t", "simarine/2245968710/cur18/state"},
@@ -230,10 +210,9 @@ TEST_CASE("make_home_assistant_device_discovery2") {
     CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
     const auto states = make_home_assistant_device_sensor_states(
-        dev, parsed_sensors2_with_value);
+        dev, parsed_sensors2_with_value, config);
 
-    const auto expected_states_json =
-        json::object({{"cur", -1.23}, {"cur_avg", -1.23}});
+    const auto expected_states_json = json::object({{"cur", -1.23}});
     CHECK(json::parse(to_json_object(states)) == expected_states_json);
   }
 
@@ -282,7 +261,7 @@ TEST_CASE("make_home_assistant_device_discovery2") {
     CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
     const auto states = make_home_assistant_device_sensor_states(
-        dev, parsed_sensors2_with_value);
+        dev, parsed_sensors2_with_value, config);
 
     const auto expected_states_json = json::object({{"temp", 10.7}});
     CHECK(json::parse(to_json_object(states)) == expected_states_json);
@@ -345,16 +324,6 @@ TEST_CASE("make_home_assistant_device_discovery2") {
                     },
                 },
                 {
-                    "cur_avg27",
-                    {
-                        {"p", "sensor"},
-                        {"dev_cla", "current"},
-                        {"unit_of_meas", "A"},
-                        {"val_tpl", "{{ value_json.cur_avg }}"},
-                        {"uniq_id", "simarine.2245968710.batt24.cur_avg27"},
-                    },
-                },
-                {
                     "volt28",
                     {
                         {"p", "sensor"},
@@ -362,16 +331,6 @@ TEST_CASE("make_home_assistant_device_discovery2") {
                         {"unit_of_meas", "V"},
                         {"val_tpl", "{{ value_json.volt }}"},
                         {"uniq_id", "simarine.2245968710.batt24.volt28"},
-                    },
-                },
-                {
-                    "volt_avg28",
-                    {
-                        {"p", "sensor"},
-                        {"dev_cla", "voltage"},
-                        {"unit_of_meas", "V"},
-                        {"val_tpl", "{{ value_json.volt_avg }}"},
-                        {"uniq_id", "simarine.2245968710.batt24.volt_avg28"},
                     },
                 },
             },
@@ -382,15 +341,13 @@ TEST_CASE("make_home_assistant_device_discovery2") {
     CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
     const auto states = make_home_assistant_device_sensor_states(
-        dev, parsed_sensors2_with_value);
+        dev, parsed_sensors2_with_value, config);
 
     const auto expected_states_json = json::object({
         {"batt", 87.9},
         {"cap", 263.7},
         {"cur", -1.23},
-        {"cur_avg", -1.23},
         {"volt", 13.314},
-        {"volt_avg", 13.314},
     });
     CHECK(json::parse(to_json_object(states)) == expected_states_json);
   }
@@ -449,7 +406,7 @@ TEST_CASE("make_home_assistant_device_discovery2") {
     CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
     const auto states = make_home_assistant_device_sensor_states(
-        dev, parsed_sensors2_with_value);
+        dev, parsed_sensors2_with_value, config);
 
     const auto expected_states_json = json::object({
         {"lvl", 5.2},
@@ -489,7 +446,7 @@ TEST_CASE("make_home_assistant_device_discovery2") {
     CHECK(json::parse(to_json(discovery)) == expected_discovery_json);
 
     const auto states = make_home_assistant_device_sensor_states(
-        dev, parsed_sensors2_with_value);
+        dev, parsed_sensors2_with_value, config);
     CHECK(json::parse(to_json_object(states)) == json::object());
   }
 }

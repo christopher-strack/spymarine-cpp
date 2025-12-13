@@ -22,6 +22,14 @@ struct mqtt_message2 {
   auto operator<=>(const mqtt_message2&) const = default;
 };
 
+struct home_assistant_state_config {
+  // Report the average value for current and voltage sensors instead of the
+  // instantaneous value. This is useful for Home Assistant integrations that
+  // do not support frequent updates, as it reflects changes between updates
+  // better.
+  bool use_average_value_for_current_and_voltage = false;
+};
+
 struct home_assistant_origin {
   std::string_view name;
   std::string_view sw_version;
@@ -188,7 +196,6 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
       overloaded{
           [&](const voltage_sensor2& s) {
             const auto id = std::format("{}{}", "volt", s.id);
-            const auto avg_id = std::format("{}{}", "volt_avg", s.id);
             components.emplace_back(home_assistant_device_component{
                 .component_id = id,
                 .platform = "sensor",
@@ -197,18 +204,9 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .value_template = "{{ value_json.volt }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
             });
-            components.emplace_back(home_assistant_device_component{
-                .component_id = avg_id,
-                .platform = "sensor",
-                .device_class = "voltage",
-                .unit_of_measurement = to_home_assistant_unit(s.value.unit),
-                .value_template = "{{ value_json.volt_avg }}",
-                .unique_id = std::format("{}.{}", device_identifier, avg_id),
-            });
           },
           [&](const current_sensor2& s) {
             const auto id = std::format("{}{}", "cur", s.id);
-            const auto avg_id = std::format("{}{}", "cur_avg", s.id);
             components.emplace_back(home_assistant_device_component{
                 .component_id = id,
                 .platform = "sensor",
@@ -216,14 +214,6 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .unit_of_measurement = to_home_assistant_unit(s.value.unit),
                 .value_template = "{{ value_json.cur }}",
                 .unique_id = std::format("{}.{}", device_identifier, id),
-            });
-            components.emplace_back(home_assistant_device_component{
-                .component_id = avg_id,
-                .platform = "sensor",
-                .device_class = "current",
-                .unit_of_measurement = to_home_assistant_unit(s.value.unit),
-                .value_template = "{{ value_json.cur_avg }}",
-                .unique_id = std::format("{}.{}", device_identifier, avg_id),
             });
           },
           [&](const temperature_sensor2& s) {
@@ -357,21 +347,25 @@ make_home_assistant_device_discovery(const device2& device_,
 }
 
 inline std::unordered_map<std::string, std::string>
-make_home_assistant_device_sensor_states(const device2& device_,
-                                         const sensor_range auto& sensors) {
+make_home_assistant_device_sensor_states(
+    const device2& device_, const sensor_range auto& sensors,
+    const home_assistant_state_config& config) {
   std::unordered_map<std::string, std::string> entries;
 
   for (const auto& sensor_ : get_sensors(device_, sensors)) {
     std::visit(
         overloaded{
             [&](const voltage_sensor2& s) {
-              entries.emplace("volt", s.value.current_value.to_string());
-              entries.emplace("volt_avg",
-                              std::to_string(s.value.average_value));
+              entries.emplace("volt",
+                              config.use_average_value_for_current_and_voltage
+                                  ? std::to_string(s.value.average_value)
+                                  : s.value.current_value.to_string());
             },
             [&](const current_sensor2& s) {
-              entries.emplace("cur", s.value.current_value.to_string());
-              entries.emplace("cur_avg", std::to_string(s.value.average_value));
+              entries.emplace("cur",
+                              config.use_average_value_for_current_and_voltage
+                                  ? std::to_string(s.value.average_value)
+                                  : s.value.current_value.to_string());
             },
             [&](const temperature_sensor2& s) {
               entries.emplace("temp", s.value.current_value.to_string());
@@ -413,13 +407,14 @@ constexpr mqtt_message2 make_home_assistant_device_discovery_message(
 
 template <typename tcp_socket_type, typename udp_socket_type>
 inline mqtt_message2 make_home_assistant_state_message(
-    const device2& device_, const hub<tcp_socket_type, udp_socket_type>& hub_) {
+    const device2& device_, const hub<tcp_socket_type, udp_socket_type>& hub_,
+    const home_assistant_state_config& config) {
 
   return mqtt_message2{
       .topic =
           make_home_assistant_state_topic(device_, hub_.system().serial_number),
-      .payload = to_json_object(
-          make_home_assistant_device_sensor_states(device_, hub_.sensors())),
+      .payload = to_json_object(make_home_assistant_device_sensor_states(
+          device_, hub_.sensors(), config)),
   };
 }
 
