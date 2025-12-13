@@ -317,9 +317,8 @@ make_home_assistant_device_sensor_components(
     const device& device_, const sensor_range auto& sensors,
     const std::string& device_identifier) {
   return get_sensors(device_, sensors) |
-         std::views::transform([&](const auto& sensor) {
-           return make_home_assistant_sensor_components(sensor,
-                                                        device_identifier);
+         std::views::transform([&](const auto& sen) {
+           return make_home_assistant_sensor_components(sen, device_identifier);
          }) |
          std::views::join | std::ranges::to<std::vector>();
 }

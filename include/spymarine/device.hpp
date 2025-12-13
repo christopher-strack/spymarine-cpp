@@ -140,14 +140,14 @@ constexpr auto get_sensors(const device& device_,
            return id < std::ranges::size(sensors);
          }) |
          std::views::transform([&](const auto id) {
-           const auto& sensor = sensors[id];
-           assert(get_sensor_id(sensor) == id);
-           return sensor;
+           const auto& sen = sensors[id];
+           assert(get_sensor_id(sen) == id);
+           return sen;
          });
 }
 
-constexpr void add_sensor_id(device& device_, sensor_id id) noexcept {
-  std::visit([id](auto& dev) { dev.sensor_ids.push_back(id); }, device_);
+constexpr void add_sensor_id(device& dev, sensor_id id) noexcept {
+  std::visit([id](auto& d) { d.sensor_ids.push_back(id); }, dev);
 }
 
 } // namespace spymarine
