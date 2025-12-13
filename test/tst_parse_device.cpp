@@ -9,7 +9,7 @@
 
 namespace spymarine {
 
-TEST_CASE("parse_device2") {
+TEST_CASE("parse_device") {
   SECTION("barometer_device") {
     static constexpr auto msg =
         parse_message(raw_barometer_device_response).value();
