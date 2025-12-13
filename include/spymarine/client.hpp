@@ -166,7 +166,7 @@ discover(uint16_t port = simarine_default_udp_port) {
 template <typename tcp_socket_type, typename udp_socket_type>
 constexpr static std::expected<basic_client<tcp_socket_type, udp_socket_type>,
                                error>
-connect_with_sockets(
+basic_connect(
     const uint32_t ip, const uint16_t udp_port = simarine_default_udp_port,
     const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
   auto udp_socket_ = udp_socket_type::open();
@@ -193,7 +193,7 @@ connect_with_sockets(
 inline std::expected<client, error>
 connect(const uint32_t ip, const uint16_t udp_port = simarine_default_udp_port,
         const uint16_t tcp_port = simarine_default_tcp_port) noexcept {
-  return connect_with_sockets<tcp_socket, udp_socket>(ip, udp_port, tcp_port);
+  return basic_connect<tcp_socket, udp_socket>(ip, udp_port, tcp_port);
 }
 
 } // namespace spymarine

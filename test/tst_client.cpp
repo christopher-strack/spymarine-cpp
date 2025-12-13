@@ -75,7 +75,7 @@ TEST_CASE("client") {
   }
 
   SECTION("connect") {
-    auto client_ = connect_with_sockets<mock_tcp_socket, mock_udp_socket>(0);
+    auto client_ = basic_connect<mock_tcp_socket, mock_udp_socket>(0);
     REQUIRE(client_.has_value());
   }
 }
