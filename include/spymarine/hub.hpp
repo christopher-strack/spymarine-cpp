@@ -16,7 +16,7 @@ template <typename tcp_socket_type, typename udp_socket_type> class basic_hub {
 public:
   constexpr basic_hub(basic_client<tcp_socket_type, udp_socket_type> client_,
                       system_info system_info_, std::vector<device> devices,
-                      std::vector<sensor2> sensors,
+                      std::vector<sensor> sensors,
                       message_values_view initial_sensor_values) noexcept
       : _client{std::move(client_)}, _system_info{std::move(system_info_)},
         _devices{std::move(devices)}, _sensors{std::move(sensors)} {
@@ -41,11 +41,11 @@ public:
            });
   }
 
-  const std::vector<sensor2>& all_sensors() const noexcept { return _sensors; }
+  const std::vector<sensor>& all_sensors() const noexcept { return _sensors; }
 
   auto sensors() const noexcept {
     return _sensors | std::views::filter([](const auto& sensor_) {
-             return !std::holds_alternative<unsupported_sensor2>(sensor_);
+             return !std::holds_alternative<unsupported_sensor>(sensor_);
            });
   }
 
@@ -65,7 +65,7 @@ public:
   auto sensors(const device& device_) const noexcept {
     return get_sensors(device_, _sensors) |
            std::views::filter([](const auto& sensor_) {
-             return !std::holds_alternative<unsupported_sensor2>(sensor_);
+             return !std::holds_alternative<unsupported_sensor>(sensor_);
            });
   }
 
@@ -73,7 +73,7 @@ private:
   basic_client<tcp_socket_type, udp_socket_type> _client;
   system_info _system_info;
   std::vector<device> _devices;
-  std::vector<sensor2> _sensors;
+  std::vector<sensor> _sensors;
   size_t _average_count{};
 };
 
@@ -98,7 +98,7 @@ initialize_basic_hub(
   }
 
   std::vector<device> devices;
-  std::vector<sensor2> sensors;
+  std::vector<sensor> sensors;
 
   devices.reserve(count_response->device_count);
   sensors.reserve(count_response->sensor_count);

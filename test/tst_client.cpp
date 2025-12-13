@@ -50,7 +50,7 @@ TEST_CASE("client") {
   SECTION("request_sensor") {
     STATIC_CHECK(
         basic_client{mock_tcp_socket{}, mock_udp_socket{}}.request_sensor(0) ==
-        parsed_sensors2[0]);
+        parsed_sensors[0]);
   }
 
   SECTION("request_sensor fails if socket fails") {
@@ -62,11 +62,11 @@ TEST_CASE("client") {
   SECTION("request_sensor integration") {
     basic_client cli{mock_tcp_socket{}, mock_udp_socket{}};
     const auto sensors =
-        std::views::iota(sensor_id(0), sensor_id(parsed_sensors2.size())) |
+        std::views::iota(sensor_id(0), sensor_id(parsed_sensors.size())) |
         std::views::transform(
             [&](const sensor_id id) { return cli.request_sensor(id); });
 
-    CHECK_THAT(sensors, Catch::Matchers::RangeEquals(parsed_sensors2));
+    CHECK_THAT(sensors, Catch::Matchers::RangeEquals(parsed_sensors));
   }
 
   SECTION("discover") {

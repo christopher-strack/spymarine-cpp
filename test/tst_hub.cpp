@@ -18,7 +18,7 @@ TEST_CASE("initialize_hub") {
   CHECK(hub_->system() == parsed_system_info);
   CHECK_THAT(hub_->all_devices(), Catch::Matchers::RangeEquals(parsed_devices));
   CHECK_THAT(hub_->all_sensors(),
-             Catch::Matchers::RangeEquals(parsed_sensors2_with_value));
+             Catch::Matchers::RangeEquals(parsed_sensors_with_value));
 }
 
 } // namespace spymarine

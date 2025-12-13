@@ -193,13 +193,13 @@ make_home_assistant_device(const auto& device_, const system_info& system_info_,
 }
 
 constexpr std::vector<home_assistant_device_component>
-make_home_assistant_sensor_components(const sensor2& sensor_,
+make_home_assistant_sensor_components(const sensor& sensor_,
                                       const std::string& device_identifier) {
   std::vector<home_assistant_device_component> components;
 
   std::visit(
       overloaded{
-          [&](const voltage_sensor2& s) {
+          [&](const voltage_sensor& s) {
             const auto id = std::format("{}{}", "volt", s.id);
             components.emplace_back(home_assistant_device_component{
                 .component_id = id,
@@ -211,7 +211,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .unique_id = std::format("{}.{}", device_identifier, id),
             });
           },
-          [&](const current_sensor2& s) {
+          [&](const current_sensor& s) {
             const auto id = std::format("{}{}", "cur", s.id);
             components.emplace_back(home_assistant_device_component{
                 .component_id = id,
@@ -223,7 +223,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .unique_id = std::format("{}.{}", device_identifier, id),
             });
           },
-          [&](const temperature_sensor2& s) {
+          [&](const temperature_sensor& s) {
             const auto id = std::format("{}{}", "temp", s.id);
             components.emplace_back(home_assistant_device_component{
                 .component_id = id,
@@ -235,8 +235,8 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .unique_id = std::format("{}.{}", device_identifier, id),
             });
           },
-          [&](const barometer_trend_sensor2&) {},
-          [&](const barometer_sensor2& s) {
+          [&](const barometer_trend_sensor&) {},
+          [&](const barometer_sensor& s) {
             const auto id = std::format("{}{}", "baro", s.id);
             components.emplace_back(home_assistant_device_component{
                 .component_id = id,
@@ -248,7 +248,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .unique_id = std::format("{}.{}", device_identifier, id),
             });
           },
-          [&](const resistive_sensor2& s) {
+          [&](const resistive_sensor& s) {
             const auto id = std::format("{}{}", "res", s.id);
             components.emplace_back(home_assistant_device_component{
                 .component_id = id,
@@ -260,7 +260,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .unique_id = std::format("{}.{}", device_identifier, id),
             });
           },
-          [&](const tank_sensor2& s) {
+          [&](const tank_sensor& s) {
             const auto vol_id = std::format("{}{}", "vol", s.id);
             const auto lvl_id = std::format("{}{}", "lvl", s.id);
             components.emplace_back(home_assistant_device_component{
@@ -282,7 +282,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .unique_id = std::format("{}.{}", device_identifier, lvl_id),
             });
           },
-          [&](const battery_sensor2& s) {
+          [&](const battery_sensor& s) {
             const auto batt_it = std::format("{}{}", "batt", s.id);
             const auto cap_it = std::format("{}{}", "cap", s.id);
             components.emplace_back(home_assistant_device_component{
@@ -305,7 +305,7 @@ make_home_assistant_sensor_components(const sensor2& sensor_,
                 .unique_id = std::format("{}.{}", device_identifier, cap_it),
             });
           },
-          [&](const unsupported_sensor2&) {},
+          [&](const unsupported_sensor&) {},
       },
       sensor_);
 
@@ -369,38 +369,38 @@ make_home_assistant_device_sensor_states(
   for (const auto& sensor_ : get_sensors(device_, sensors)) {
     std::visit(
         overloaded{
-            [&](const voltage_sensor2& s) {
+            [&](const voltage_sensor& s) {
               entries.emplace("volt",
                               config.use_average_value_for_current_and_voltage
                                   ? std::to_string(s.value.average_value)
                                   : s.value.current_value.to_string());
             },
-            [&](const current_sensor2& s) {
+            [&](const current_sensor& s) {
               entries.emplace("cur",
                               config.use_average_value_for_current_and_voltage
                                   ? std::to_string(s.value.average_value)
                                   : s.value.current_value.to_string());
             },
-            [&](const temperature_sensor2& s) {
+            [&](const temperature_sensor& s) {
               entries.emplace("temp", s.value.current_value.to_string());
             },
-            [&](const barometer_trend_sensor2&) {},
-            [&](const barometer_sensor2& s) {
+            [&](const barometer_trend_sensor&) {},
+            [&](const barometer_sensor& s) {
               entries.emplace("baro", s.value.current_value.to_string());
             },
-            [&](const resistive_sensor2& s) {
+            [&](const resistive_sensor& s) {
               entries.emplace("res", s.value.current_value.to_string());
             },
-            [&](const tank_sensor2& s) {
+            [&](const tank_sensor& s) {
               entries.emplace("vol", s.volume.current_value.to_string());
               entries.emplace("lvl", s.level.current_value.to_string());
             },
-            [&](const battery_sensor2& s) {
+            [&](const battery_sensor& s) {
               entries.emplace("batt", s.charge.current_value.to_string());
               entries.emplace("cap",
                               s.remaining_capacity.current_value.to_string());
             },
-            [&](const unsupported_sensor2&) {},
+            [&](const unsupported_sensor&) {},
         },
         sensor_);
   };

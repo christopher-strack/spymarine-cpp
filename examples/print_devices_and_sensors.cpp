@@ -8,38 +8,38 @@
 namespace {
 
 constexpr std::string
-sensor_current_value_string(const spymarine::sensor2& sensor_) {
+sensor_current_value_string(const spymarine::sensor& sensor_) {
   return std::visit(
       spymarine::overloaded{
-          [](const spymarine::voltage_sensor2& s) {
+          [](const spymarine::voltage_sensor& s) {
             return std::format("{} V", s.value.current_value.to_string());
           },
-          [](const spymarine::current_sensor2& s) {
+          [](const spymarine::current_sensor& s) {
             return std::format("{} A", s.value.current_value.to_string());
           },
-          [](const spymarine::temperature_sensor2& s) {
+          [](const spymarine::temperature_sensor& s) {
             return std::format("{} °C", s.value.current_value.to_string());
           },
-          [](const spymarine::barometer_sensor2& s) {
+          [](const spymarine::barometer_sensor& s) {
             return std::format("{} mbar", s.value.current_value.to_string());
           },
-          [](const spymarine::barometer_trend_sensor2& s) {
+          [](const spymarine::barometer_trend_sensor& s) {
             return std::format("{} mbar/h", s.value.current_value.to_string());
           },
-          [](const spymarine::resistive_sensor2& s) {
+          [](const spymarine::resistive_sensor& s) {
             return std::format("{} Ω", s.value.current_value.to_string());
           },
-          [](const spymarine::tank_sensor2& s) {
+          [](const spymarine::tank_sensor& s) {
             return std::format("Volume: {} L, Level: {} %",
                                s.volume.current_value.to_string(),
                                s.level.current_value.to_string());
           },
-          [](const spymarine::battery_sensor2& s) {
+          [](const spymarine::battery_sensor& s) {
             return std::format("Charge: {} %, Remaining Capacity: {} Ah",
                                s.charge.current_value.to_string(),
                                s.remaining_capacity.current_value.to_string());
           },
-          [](const spymarine::unsupported_sensor2& s) {
+          [](const spymarine::unsupported_sensor& s) {
             return std::format("Type {}, Raw Value: {}", s.raw_type,
                                s.raw_value);
           }},

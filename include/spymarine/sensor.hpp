@@ -12,15 +12,15 @@
 
 namespace spymarine {
 
-template <typename T, size_t Denominator, unit Unit> struct sensor_value2 {
+template <typename T, size_t Denominator, unit Unit> struct sensor_value {
   static constexpr auto unit = Unit;
 
   rational<T, Denominator> current_value{};
   float average_value{};
 
-  sensor_value2() = default;
+  sensor_value() = default;
 
-  constexpr sensor_value2(T raw_value) noexcept
+  constexpr sensor_value(T raw_value) noexcept
       : current_value{rational<T, Denominator>{raw_value}},
         average_value{current_value.to_float()} {}
 
@@ -31,91 +31,91 @@ template <typename T, size_t Denominator, unit Unit> struct sensor_value2 {
         float(average_count + 1);
   }
 
-  auto operator<=>(const sensor_value2&) const = default;
+  auto operator<=>(const sensor_value&) const = default;
 };
 
-struct voltage_sensor2 {
+struct voltage_sensor {
   sensor_id id;
   std::optional<device_id> parent_device_id;
-  sensor_value2<int16_t, 1000, unit::volts> value{};
+  sensor_value<int16_t, 1000, unit::volts> value{};
 
   constexpr void update(const numeric_value1& numeric,
                         const size_t average_count) noexcept {
     value.update(numeric.high_int16(), average_count);
   }
 
-  auto operator<=>(const voltage_sensor2&) const = default;
+  auto operator<=>(const voltage_sensor&) const = default;
 };
 
-struct current_sensor2 {
+struct current_sensor {
   sensor_id id;
   std::optional<device_id> parent_device_id;
-  sensor_value2<int16_t, 100, unit::amps> value{};
+  sensor_value<int16_t, 100, unit::amps> value{};
 
   constexpr void update(const numeric_value1& numeric,
                         const size_t average_count) noexcept {
     value.update(numeric.high_int16(), average_count);
   }
 
-  auto operator<=>(const current_sensor2&) const = default;
+  auto operator<=>(const current_sensor&) const = default;
 };
 
-struct temperature_sensor2 {
+struct temperature_sensor {
   sensor_id id;
   std::optional<device_id> parent_device_id;
-  sensor_value2<int16_t, 10, unit::celsius> value{};
+  sensor_value<int16_t, 10, unit::celsius> value{};
 
   constexpr void update(const numeric_value1& numeric,
                         const size_t average_count) noexcept {
     value.update(numeric.high_int16(), average_count);
   }
 
-  auto operator<=>(const temperature_sensor2&) const = default;
+  auto operator<=>(const temperature_sensor&) const = default;
 };
 
-struct barometer_sensor2 {
+struct barometer_sensor {
   sensor_id id;
   std::optional<device_id> parent_device_id;
-  sensor_value2<int32_t, 100, unit::millibar> value{};
+  sensor_value<int32_t, 100, unit::millibar> value{};
 
   constexpr void update(const numeric_value1& numeric,
                         const size_t average_count) noexcept {
     value.update(numeric.int32(), average_count);
   }
 
-  auto operator<=>(const barometer_sensor2&) const = default;
+  auto operator<=>(const barometer_sensor&) const = default;
 };
 
-struct barometer_trend_sensor2 {
+struct barometer_trend_sensor {
   sensor_id id;
   std::optional<device_id> parent_device_id;
-  sensor_value2<int32_t, 100, unit::millibars_per_hour> value{};
+  sensor_value<int32_t, 100, unit::millibars_per_hour> value{};
 
   constexpr void update(const numeric_value1& numeric,
                         const size_t average_count) noexcept {
     value.update(numeric.int32(), average_count);
   }
 
-  auto operator<=>(const barometer_trend_sensor2&) const = default;
+  auto operator<=>(const barometer_trend_sensor&) const = default;
 };
 
-struct resistive_sensor2 {
+struct resistive_sensor {
   sensor_id id;
   std::optional<device_id> parent_device_id;
-  sensor_value2<int16_t, 1, unit::ohms> value{};
+  sensor_value<int16_t, 1, unit::ohms> value{};
 
   constexpr void update(const numeric_value1& numeric,
                         const size_t average_count) noexcept {
     value.update(numeric.high_int16(), average_count);
   }
 
-  auto operator<=>(const resistive_sensor2&) const = default;
+  auto operator<=>(const resistive_sensor&) const = default;
 };
 
-using tank_volume = sensor_value2<int16_t, 10, unit::liters>;
-using tank_level = sensor_value2<int16_t, 10, unit::percent>;
+using tank_volume = sensor_value<int16_t, 10, unit::liters>;
+using tank_level = sensor_value<int16_t, 10, unit::percent>;
 
-struct tank_sensor2 {
+struct tank_sensor {
   sensor_id id;
   std::optional<device_id> parent_device_id;
   tank_volume volume{};
@@ -127,13 +127,13 @@ struct tank_sensor2 {
     level.update(numeric.low_int16(), average_count);
   }
 
-  auto operator<=>(const tank_sensor2&) const = default;
+  auto operator<=>(const tank_sensor&) const = default;
 };
 
-using battery_charge = sensor_value2<int16_t, 160, unit::percent>;
-using battery_remaining_capacity = sensor_value2<int16_t, 100, unit::amp_hours>;
+using battery_charge = sensor_value<int16_t, 160, unit::percent>;
+using battery_remaining_capacity = sensor_value<int16_t, 100, unit::amp_hours>;
 
-struct battery_sensor2 {
+struct battery_sensor {
   sensor_id id;
   std::optional<device_id> parent_device_id;
   battery_charge charge{};
@@ -145,10 +145,10 @@ struct battery_sensor2 {
     remaining_capacity.update(numeric.high_int16(), average_count);
   }
 
-  auto operator<=>(const battery_sensor2&) const = default;
+  auto operator<=>(const battery_sensor&) const = default;
 };
 
-struct unsupported_sensor2 {
+struct unsupported_sensor {
   sensor_id id;
   std::optional<device_id> parent_device_id;
   uint8_t raw_type;
@@ -159,28 +159,28 @@ struct unsupported_sensor2 {
     raw_value = numeric.uint32();
   }
 
-  auto operator<=>(const unsupported_sensor2&) const = default;
+  auto operator<=>(const unsupported_sensor&) const = default;
 };
 
-using sensor2 =
-    std::variant<voltage_sensor2, current_sensor2, temperature_sensor2,
-                 barometer_sensor2, barometer_trend_sensor2, resistive_sensor2,
-                 tank_sensor2, battery_sensor2, unsupported_sensor2>;
+using sensor =
+    std::variant<voltage_sensor, current_sensor, temperature_sensor,
+                 barometer_sensor, barometer_trend_sensor, resistive_sensor,
+                 tank_sensor, battery_sensor, unsupported_sensor>;
 
 template <typename T>
 concept sensor_range =
     std::ranges::random_access_range<T> && std::ranges::sized_range<T> &&
-    std::same_as<std::ranges::range_value_t<T>, sensor2>;
+    std::same_as<std::ranges::range_value_t<T>, sensor>;
 
-constexpr sensor_id get_sensor_id(const sensor2& sensor_) noexcept {
+constexpr sensor_id get_sensor_id(const sensor& sensor_) noexcept {
   return std::visit([](const auto& s) { return s.id; }, sensor_);
 }
 
-constexpr auto get_parent_device_id(const sensor2& sensor_) noexcept {
+constexpr auto get_parent_device_id(const sensor& sensor_) noexcept {
   return std::visit([&](auto& s) { return s.parent_device_id; }, sensor_);
 }
 
-constexpr void update_sensor(sensor2& sensor_, const numeric_value1& value,
+constexpr void update_sensor(sensor& sensor_, const numeric_value1& value,
                              const size_t average_count) noexcept {
   std::visit([&](auto& s) { s.update(value, average_count); }, sensor_);
 }

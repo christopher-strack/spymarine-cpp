@@ -63,14 +63,13 @@ public:
         });
   }
 
-  constexpr std::expected<sensor2, error>
-  request_sensor(sensor_id id) noexcept {
+  constexpr std::expected<sensor, error> request_sensor(sensor_id id) noexcept {
     const auto data =
         std::to_array<uint8_t>({0x01, 0x01, 0x00, 0x00, 0x00, id, 0xff, 0x02,
                                 0x01, 0x00, 0x00, 0x00, 0x00, 0xff});
 
     return request_message(message_type::sensor_information, data)
-        .and_then([](const message& message) -> std::expected<sensor2, error> {
+        .and_then([](const message& message) -> std::expected<sensor, error> {
           if (message.type() == message_type::sensor_information) {
             return parse_sensor2(message.values());
           } else {
