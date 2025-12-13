@@ -59,6 +59,8 @@ template <typename tcp_socket_type, typename udp_socket_type>
 basic_hub(tcp_socket_type&&, udp_socket_type&&)
     -> basic_hub<tcp_socket_type, udp_socket_type>;
 
+using hub = basic_hub<tcp_socket, udp_socket>;
+
 template <typename tcp_socket_type, typename udp_socket_type>
 constexpr std::expected<basic_hub<tcp_socket_type, udp_socket_type>, error>
 initialize_hub_with_sockets(
