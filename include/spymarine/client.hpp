@@ -7,7 +7,7 @@
 #include "spymarine/message.hpp"
 #include "spymarine/message_values_view.hpp"
 #include "spymarine/parse_count_info.hpp"
-#include "spymarine/parse_device2.hpp"
+#include "spymarine/parse_device.hpp"
 #include "spymarine/parse_message.hpp"
 #include "spymarine/parse_sensor2.hpp"
 #include "spymarine/parse_system_info.hpp"

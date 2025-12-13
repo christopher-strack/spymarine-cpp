@@ -36,7 +36,7 @@ target_sources(
         tst_hub.cpp
         tst_message_values_view.cpp
         tst_message_value.cpp
-        tst_parse_device2.cpp
+        tst_parse_device.cpp
         tst_parse_message.cpp
         $<$<BOOL:${SPYMARINE_ENABLE_HOME_ASSISTANT_SUPPORT}>:tst_home_assistant2.cpp>
 )

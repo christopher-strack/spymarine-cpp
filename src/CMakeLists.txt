@@ -19,7 +19,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_values_iterator.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/message_values_view.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/overloaded.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/parse_device2.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/parse_device.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_error.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message_header.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message_type.hpp

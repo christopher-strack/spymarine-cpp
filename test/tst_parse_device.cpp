@@ -2,7 +2,7 @@
 #include "raw_data/devices.hpp"
 
 #include "spymarine/device.hpp"
-#include "spymarine/parse_device2.hpp"
+#include "spymarine/parse_device.hpp"
 #include "spymarine/parse_message.hpp"
 
 #include <catch2/catch_all.hpp>
