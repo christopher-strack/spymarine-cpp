@@ -25,7 +25,7 @@ target_sources(
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message_type.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/parse_message.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/rational.hpp
-            ${PROJECT_SOURCE_DIR}/include/spymarine/sensor2.hpp
+            ${PROJECT_SOURCE_DIR}/include/spymarine/sensor.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/tcp_socket.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/udp_socket.hpp
             ${PROJECT_SOURCE_DIR}/include/spymarine/unit.hpp

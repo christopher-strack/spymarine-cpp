@@ -3,7 +3,7 @@
 #include "spymarine/device.hpp"
 #include "spymarine/hub.hpp"
 #include "spymarine/overloaded.hpp"
-#include "spymarine/sensor2.hpp"
+#include "spymarine/sensor.hpp"
 #include "spymarine/system_info.hpp"
 #include "spymarine/unit.hpp"
 

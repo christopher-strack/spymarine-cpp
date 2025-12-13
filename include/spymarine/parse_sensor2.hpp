@@ -3,7 +3,7 @@
 #include "spymarine/error.hpp"
 #include "spymarine/message_value.hpp"
 #include "spymarine/message_values_view.hpp"
-#include "spymarine/sensor2.hpp"
+#include "spymarine/sensor.hpp"
 
 #include <expected>
 

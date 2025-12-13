@@ -3,7 +3,7 @@
 #include "test_sockets.hpp"
 
 #include "spymarine/client.hpp"
-#include "spymarine/sensor2.hpp"
+#include "spymarine/sensor.hpp"
 
 #include <catch2/catch_all.hpp>
 

@@ -11,7 +11,7 @@
 #include "spymarine/parse_message.hpp"
 #include "spymarine/parse_sensor2.hpp"
 #include "spymarine/parse_system_info.hpp"
-#include "spymarine/sensor2.hpp"
+#include "spymarine/sensor.hpp"
 #include "spymarine/tcp_socket.hpp"
 #include "spymarine/udp_socket.hpp"
 

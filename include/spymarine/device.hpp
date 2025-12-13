@@ -2,7 +2,7 @@
 
 #include "spymarine/id.hpp"
 #include "spymarine/rational.hpp"
-#include "spymarine/sensor2.hpp"
+#include "spymarine/sensor.hpp"
 #include "spymarine/unit.hpp"
 
 #include <cassert>

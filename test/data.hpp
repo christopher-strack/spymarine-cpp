@@ -1,7 +1,7 @@
 #pragma once
 
 #include "spymarine/device.hpp"
-#include "spymarine/sensor2.hpp"
+#include "spymarine/sensor.hpp"
 #include "spymarine/system_info.hpp"
 
 namespace spymarine {
