@@ -125,8 +125,7 @@ initialize_basic_hub(
                    std::move(devices), std::move(sensors), *sensor_values};
 }
 
-inline std::expected<basic_hub<tcp_socket, udp_socket>, error>
-initialize_hub(basic_client<tcp_socket, udp_socket> client_) {
+inline std::expected<hub, error> initialize_hub(client client_) {
   return initialize_basic_hub(std::move(client_));
 }
 
