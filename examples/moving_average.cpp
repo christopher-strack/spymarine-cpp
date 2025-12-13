@@ -1,6 +1,4 @@
-#include "spymarine/client.hpp"
-#include "spymarine/hub.hpp"
-#include "spymarine/sensor.hpp"
+#include "spymarine/spymarine.hpp"
 
 #include <chrono>
 #include <print>
