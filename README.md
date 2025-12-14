@@ -33,9 +33,8 @@ See the examples directory on how to use the library:
 
 ## Known Issues
 
-- Only tested by my own personal Simarine setup
-- Non-ASCII characters in device names will not be represented correctly and replaced with a
-  placeholder. A non-standard encoding seems to be used.
+Non-ASCII characters in device names will not be represented correctly and replaced with a
+placeholder. A non-standard encoding seems to be used.
 
 ## Contributing
 
@@ -45,9 +44,6 @@ Contributions are welcome! Please open an issue or submit a pull request on GitH
 
 See https://github.com/christopher-strack/esp-simarine-home-assistant for an
 example usage
-
-See https://github.com/christopher-strack/spymarine for a Python
-version of the library.
 
 ## Author
 
